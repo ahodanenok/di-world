@@ -9,7 +9,7 @@ public class RegistrationTest {
     public static class A { }
 
     @Test
-    public void shouldRegisterComponentAfterFlush() {
+    public void shouldRegisterContainerAfterFlush() {
         ContainerConfiguration config = ContainerConfiguration.ofClass(A.class);
 
         World w = new World();
@@ -23,7 +23,7 @@ public class RegistrationTest {
     }
 
     @Test
-    public void shouldCreateComponentWithTypeFromConfiguration() {
+    public void shouldRegisterContainerWithTypeFromConfiguration() {
         ContainerConfiguration config = ContainerConfiguration.ofClass(A.class);
 
         World w = new World();
@@ -35,7 +35,7 @@ public class RegistrationTest {
 
 
     @Test
-    public void shouldCreateComponentWithNamesFromConfiguration() {
+    public void shouldRegisterContainerWithNamesFromConfiguration() {
         ContainerConfiguration config = ContainerConfiguration.ofClass(A.class).withNames("a", "b", "a", "c");
 
         World w = new World();
@@ -43,5 +43,17 @@ public class RegistrationTest {
         w.getQueue().flush();
 
         assertThat(w.iterator().next().getNames()).containsOnly("a", "b", "c");
+    }
+
+    @Test
+    public void shouldThrowErrorIfContainerWithTheSameNameAlreadyRegistered() {
+        ContainerConfiguration configA1 = ContainerConfiguration.ofClass(A.class).withNames("a1", "a");
+        ContainerConfiguration configA2 = ContainerConfiguration.ofClass(A.class).withNames("a2", "a");
+
+        World w = new World();
+        w.getQueue().add(configA1);
+        w.getQueue().add(configA2);
+
+        assertThatThrownBy(() -> w.getQueue().flush()).isInstanceOf(IllegalStateException.class).hasMessage("a");
     }
 }
