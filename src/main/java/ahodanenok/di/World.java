@@ -50,9 +50,11 @@ public class World implements Iterable<Container<?>> {
         if (containers.size() == 1) {
             // todo: supress unchecked
             return (T) containers.get(0).getObject();
-        } else {
+        } else if (containers.size() > 1){
             // todo: exception+message
             throw new IllegalStateException("multiple");
+        } else {
+            throw new IllegalStateException("not found");
         }
     }
 

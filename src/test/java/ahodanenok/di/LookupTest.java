@@ -50,6 +50,17 @@ public class LookupTest {
     }
 
     @Test
+    public void shouldThrowErrorIfNoneMatched() {
+        World w = new World();
+        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().flush();
+
+        assertThatThrownBy(() -> w.find(ObjectRequest.byType(B.class)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("not found");
+    }
+
+    @Test
     public void shouldThrowErrorIfMultipleMatchedWhenOneRequested() {
         World w = new World();
         w.getQueue().add(ContainerConfiguration.ofClass(A.class));
