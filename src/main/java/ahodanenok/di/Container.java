@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.scope.Scope;
+
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -13,12 +15,14 @@ public class Container<T> {
     private World world;
     private Class<T> type;
     private Set<String> names;
+    private Scope<T> scope;
 
     // todo: unmodifiable names
-    public Container(World world, Class<T> type, Set<String> names) {
+    public Container(World world, Class<T> type, Set<String> names, Scope<T> scope) {
         this.world = world;
         this.type = type;
         this.names = names;
+        this.scope = scope;
     }
 
     public Class<T> getType() {
@@ -29,7 +33,11 @@ public class Container<T> {
         return names;
     }
 
-    public Object getObject() {
+    public T getObject() {
+        return scope.getObject(this::doGetObject);
+    }
+
+    private T doGetObject() {
         // todo: scope
         Constructor<?> constructor = getConstructor();
 
@@ -43,7 +51,8 @@ public class Container<T> {
 
         try {
             // todo: make class and constructor accessible
-            return constructor.newInstance(args);
+            // todo: suppress warning
+            return (T) constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             // todo: handle exceptions
             throw new IllegalStateException(e);

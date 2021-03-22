@@ -37,10 +37,10 @@ public class World implements Iterable<Container<?>> {
         containers.add(container);
     }
 
-    private Container buildContainer(ContainerConfiguration config) {
+    private Container<?> buildContainer(ContainerConfiguration<Object> config) {
         // todo: configuration class per container type (class, factory method, instance)
         // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
-        Container<?> container = new Container<>(this, config.getType(), config.getNames());
+        Container<?> container = new Container<>(this, config.getType(), config.getNames(), config.getScope());
 
         return container;
     }
