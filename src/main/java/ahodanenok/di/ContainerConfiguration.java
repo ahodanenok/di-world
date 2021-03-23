@@ -3,10 +3,8 @@ package ahodanenok.di;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class ContainerConfiguration<T> {
 
@@ -18,6 +16,9 @@ public class ContainerConfiguration<T> {
     private Class<T> type;
     private Set<String> names = new HashSet<>();
     private Scope<T> scope = AlwaysNewScope.getInstance();
+
+    private List<Class<?>> interceptors;
+    private Map<String, List<Method>> declaredInterceptors;
 
     public ContainerConfiguration(Class<T> type) {
         this.type = type;
@@ -44,5 +45,35 @@ public class ContainerConfiguration<T> {
 
     public Scope<T> getScope() {
         return scope;
+    }
+
+    public ContainerConfiguration<T> interceptedBy(Class<?>... interceptorClasses) {
+        if (interceptorClasses.length == 0) {
+            return this;
+        }
+
+        if (interceptors == null) {
+            interceptors = new ArrayList<>();
+        }
+
+        interceptors.addAll(Arrays.asList(interceptorClasses));
+        return this;
+    }
+
+    public List<Class<?>> getInterceptors() {
+        return interceptors;
+    }
+
+    public ContainerConfiguration<T> declareInterceptor(Method method, String type) {
+        if (declaredInterceptors == null) {
+            declaredInterceptors = new HashMap<>();
+        }
+
+        declaredInterceptors.computeIfAbsent(type, __ -> new ArrayList<>()).add(method);
+        return this;
+    }
+
+    public Map<String, List<Method>> getDeclaredInterceptors() {
+        return declaredInterceptors;
     }
 }

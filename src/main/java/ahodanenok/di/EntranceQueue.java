@@ -6,14 +6,14 @@ import java.util.function.Consumer;
 
 public class EntranceQueue {
 
-    private final Consumer<List<ContainerConfiguration>> gate;
-    private List<ContainerConfiguration> configs;
+    private final Consumer<List<ContainerConfiguration<?>>> gate;
+    private List<ContainerConfiguration<?>> configs;
 
-    public EntranceQueue(Consumer<List<ContainerConfiguration>> gate) {
+    public EntranceQueue(Consumer<List<ContainerConfiguration<?>>> gate) {
         this.gate = gate;
     }
 
-    public void add(ContainerConfiguration config) {
+    public void add(ContainerConfiguration<?> config) {
         if (configs == null) {
             configs = new ArrayList<>();
         }
@@ -22,7 +22,7 @@ public class EntranceQueue {
     }
 
     public void flush() {
-        List<ContainerConfiguration> inQueue = configs;
+        List<ContainerConfiguration<?>> inQueue = configs;
         configs = null;
         gate.accept(inQueue);
     }

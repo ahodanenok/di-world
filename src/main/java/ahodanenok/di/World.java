@@ -1,9 +1,10 @@
 package ahodanenok.di;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import ahodanenok.di.interceptor.InterceptorChain;
+import ahodanenok.di.interceptor.InterceptorRequest;
+
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class World implements Iterable<Container<?>> {
@@ -14,14 +15,22 @@ public class World implements Iterable<Container<?>> {
 
     private List<Container<?>> containers = new ArrayList<>();
     private EntranceQueue queue = new EntranceQueue(this::register);
+    private Map<String, List<Method>> interceptors = new HashMap<>();
 
     public EntranceQueue getQueue() {
         return queue;
     }
 
-    private void register(List<ContainerConfiguration> configs) {
-        for (ContainerConfiguration config : configs) {
+    private void register(List<ContainerConfiguration<?>> configs) {
+        for (ContainerConfiguration<?> config : configs) {
             register(buildContainer(config));
+
+            // todo: validate interceptors
+            if (config.getDeclaredInterceptors() != null) {
+                for (Map.Entry<String, List<Method>> entry : config.getDeclaredInterceptors().entrySet()) {
+                    interceptors.computeIfAbsent(entry.getKey(), __ -> new ArrayList<>()).addAll(entry.getValue());
+                }
+            }
         }
     }
 
@@ -37,10 +46,10 @@ public class World implements Iterable<Container<?>> {
         containers.add(container);
     }
 
-    private Container<?> buildContainer(ContainerConfiguration<Object> config) {
+    private <T> Container<T> buildContainer(ContainerConfiguration<T> config) {
         // todo: configuration class per container type (class, factory method, instance)
         // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
-        Container<?> container = new Container<>(this, config.getType(), config.getNames(), config.getScope());
+        Container<T> container = new Container<>(this, config.getType(), config.getNames(), config.getScope());
 
         return container;
     }
@@ -89,6 +98,11 @@ public class World implements Iterable<Container<?>> {
 
         // todo: pick by request
         return containers;
+    }
+
+    public InterceptorChain getInterceptorChain(InterceptorRequest request) {
+        // todo: handle request criteria
+        return new InterceptorChain(interceptors.getOrDefault(request.getType(), Collections.emptyList()));
     }
 
     @Override
