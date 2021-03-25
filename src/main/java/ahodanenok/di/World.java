@@ -1,8 +1,10 @@
 package ahodanenok.di;
 
+import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 
+import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +17,7 @@ public class World implements Iterable<Container<?>> {
 
     private List<Container<?>> containers = new ArrayList<>();
     private EntranceQueue queue = new EntranceQueue(this::register);
-    private Map<String, List<Method>> interceptors = new HashMap<>();
+    private Map<String, List<Interceptor>> interceptors = new HashMap<>();
 
     public EntranceQueue getQueue() {
         return queue;
@@ -23,12 +25,16 @@ public class World implements Iterable<Container<?>> {
 
     private void register(List<ContainerConfiguration<?>> configs) {
         for (ContainerConfiguration<?> config : configs) {
-            register(buildContainer(config));
+            Container<?> container = buildContainer(config);
+            register(container);
 
             // todo: validate interceptors
             if (config.getDeclaredInterceptors() != null) {
                 for (Map.Entry<String, List<Method>> entry : config.getDeclaredInterceptors().entrySet()) {
-                    interceptors.computeIfAbsent(entry.getKey(), __ -> new ArrayList<>()).addAll(entry.getValue());
+                    interceptors.computeIfAbsent(entry.getKey(), __ -> new ArrayList<>()).addAll(
+                            entry.getValue().stream()
+                                    .map(m -> new InterceptorInvoke(container, m))
+                                    .collect(Collectors.toList()));
                 }
             }
         }
@@ -102,7 +108,31 @@ public class World implements Iterable<Container<?>> {
 
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
         // todo: handle request criteria
-        return new InterceptorChain(interceptors.getOrDefault(request.getType(), Collections.emptyList()));
+        List<Interceptor> methods = interceptors.getOrDefault(request.getType(), Collections.emptyList());
+
+        return new InterceptorChain(methods);
+    }
+
+    /**
+     * Invokes given interceptor method on the object returned by container
+     */
+    private static class InterceptorInvoke implements Interceptor {
+
+        private final Container<?> container;
+        private final Method method;
+
+        public InterceptorInvoke(Container<?> container, Method method) {
+            this.container = container;
+            this.method = method;
+        }
+
+        @Override
+        public Object execute(InvocationContext context) throws Exception {
+            // todo: create method for invoking methods
+            // todo: support interceptor methods with zero parameters
+            Object instance = container.getObject();
+            return method.invoke(instance, context);
+        }
     }
 
     @Override
