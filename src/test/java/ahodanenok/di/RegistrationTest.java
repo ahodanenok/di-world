@@ -30,7 +30,7 @@ public class RegistrationTest {
         w.getQueue().add(config);
         w.getQueue().flush();
 
-        assertThat(w.iterator().next().getType()).isEqualTo(A.class);
+        assertThat(w.iterator().next().getObjectClass()).isEqualTo(A.class);
     }
 
 

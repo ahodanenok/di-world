@@ -13,19 +13,20 @@ public class ContainerConfiguration<T> {
         return new ContainerConfiguration<T>(clazz);
     }
 
-    private Class<T> type;
+    private Class<T> objectClass;
     private Set<String> names = new HashSet<>();
     private Scope<T> scope = AlwaysNewScope.getInstance();
 
+    private boolean interceptor;
     private List<Class<?>> interceptors;
     private Map<String, List<Method>> declaredInterceptors;
 
-    public ContainerConfiguration(Class<T> type) {
-        this.type = type;
+    public ContainerConfiguration(Class<T> clazz) {
+        this.objectClass = clazz;
     }
 
-    public Class<T> getType() {
-        return type;
+    public Class<T> getObjectClass() {
+        return objectClass;
     }
 
     public ContainerConfiguration<T> withNames(String... names) {
@@ -61,7 +62,7 @@ public class ContainerConfiguration<T> {
     }
 
     public List<Class<?>> getInterceptors() {
-        return interceptors;
+        return interceptors != null ? interceptors : Collections.emptyList();
     }
 
     public ContainerConfiguration<T> declareInterceptor(Method method, String type) {
@@ -74,6 +75,15 @@ public class ContainerConfiguration<T> {
     }
 
     public Map<String, List<Method>> getDeclaredInterceptors() {
-        return declaredInterceptors;
+        return declaredInterceptors != null ? declaredInterceptors : Collections.emptyMap();
+    }
+
+    public ContainerConfiguration<T> interceptor() {
+        this.interceptor = true;
+        return this;
+    }
+
+    public boolean isInterceptor() {
+        return interceptor;
     }
 }

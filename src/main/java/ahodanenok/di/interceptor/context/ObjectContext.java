@@ -6,20 +6,17 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
-public class ConstructorContext implements InvocationContext {
+public class ObjectContext implements InvocationContext {
 
-    private Object target;
-    private Constructor<?> constructor;
-    private Object[] parameters;
+    private Object object;
 
-    public ConstructorContext(Constructor<?> constructor) {
-        this.constructor = constructor;
-        this.parameters = new Object[constructor.getParameterCount()];
+    public ObjectContext(Object object) {
+        this.object = object;
     }
 
     @Override
     public Object getTarget() {
-        return target;
+        return object;
     }
 
     @Override
@@ -34,18 +31,17 @@ public class ConstructorContext implements InvocationContext {
 
     @Override
     public Constructor<?> getConstructor() {
-        return constructor;
+        return null;
     }
 
     @Override
     public Object[] getParameters() {
-        return parameters;
+        return new Object[0];
     }
 
     @Override
     public void setParameters(Object[] params) {
-        // todo: check params are valid
-        this.parameters = params;
+        // no-op
     }
 
     @Override
@@ -55,14 +51,6 @@ public class ConstructorContext implements InvocationContext {
 
     @Override
     public Object proceed() throws Exception {
-        if (target != null) {
-            return target;
-        }
-
-        // todo: accessible
-        constructor.setAccessible(true);
-
-        target = constructor.newInstance(parameters);
-        return target;
+        return null;
     }
 }

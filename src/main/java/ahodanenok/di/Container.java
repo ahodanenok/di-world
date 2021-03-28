@@ -1,11 +1,14 @@
 package ahodanenok.di;
 
+import ahodanenok.di.interceptor.InterceptorChain;
+import ahodanenok.di.interceptor.InterceptorRequest;
+import ahodanenok.di.interceptor.context.ConstructorContext;
 import ahodanenok.di.scope.Scope;
 
 import javax.inject.Inject;
+import javax.interceptor.AroundConstruct;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -13,20 +16,24 @@ import java.util.Set;
 public class Container<T> {
 
     private World world;
-    private Class<T> type;
+    private Class<T> objectClass;
     private Set<String> names;
     private Scope<T> scope;
+    private boolean interceptor;
+    private List<Class<?>> interceptedBy;
 
     // todo: unmodifiable names
-    public Container(World world, Class<T> type, Set<String> names, Scope<T> scope) {
+    public Container(World world, Class<T> objectClass, Set<String> names, Scope<T> scope, boolean interceptor, List<Class<?>> interceptedBy) {
         this.world = world;
-        this.type = type;
+        this.objectClass = objectClass;
         this.names = names;
         this.scope = scope;
+        this.interceptor = interceptor;
+        this.interceptedBy = interceptedBy;
     }
 
-    public Class<T> getType() {
-        return type;
+    public Class<T> getObjectClass() {
+        return objectClass;
     }
 
     public Set<String> getNames() {
@@ -46,14 +53,23 @@ public class Container<T> {
             args[i] = resolveArgument(constructor, i);
         }
 
+        ConstructorContext context = new ConstructorContext(constructor);
+        context.setParameters(args);
+
         // todo: intercept around construct
         // todo: intercept post construct
 
         try {
-            // todo: make class and constructor accessible
             // todo: suppress warning
-            return (T) constructor.newInstance(args);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            if (!interceptor) {
+                InterceptorChain aroundConstructChain = world.getInterceptorChain(
+                        InterceptorRequest.ofType(AroundConstruct.class.getName()).withClasses(interceptedBy));
+
+                return (T) aroundConstructChain.invoke(context);
+            } else {
+                return (T) context.proceed();
+            }
+        } catch (Exception e) {
             // todo: handle exceptions
             throw new IllegalStateException(e);
         }
@@ -63,7 +79,7 @@ public class Container<T> {
         // todo: additional rules for selecting constructors from class
 
         List<Constructor<?>> matched = new ArrayList<>();
-        for (Constructor<?> c : type.getDeclaredConstructors()) {
+        for (Constructor<?> c : objectClass.getDeclaredConstructors()) {
             // todo: only @Inject is used to mark injectable constructors?
             if (c.getDeclaredAnnotation(Inject.class) != null) {
                 matched.add(c);
@@ -73,7 +89,7 @@ public class Container<T> {
         if (matched.isEmpty()) {
             try {
                 // todo: any public? no-arg is fallback?
-                matched.add(type.getDeclaredConstructor());
+                matched.add(objectClass.getDeclaredConstructor());
             } catch (NoSuchMethodException e) {
                 // todo: exception
                 e.printStackTrace();

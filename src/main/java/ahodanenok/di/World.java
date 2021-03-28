@@ -17,7 +17,7 @@ public class World implements Iterable<Container<?>> {
 
     private List<Container<?>> containers = new ArrayList<>();
     private EntranceQueue queue = new EntranceQueue(this::register);
-    private Map<String, List<Interceptor>> interceptors = new HashMap<>();
+    private Map<String, List<InterceptorInvoke>> interceptors = new HashMap<>();
 
     public EntranceQueue getQueue() {
         return queue;
@@ -55,7 +55,14 @@ public class World implements Iterable<Container<?>> {
     private <T> Container<T> buildContainer(ContainerConfiguration<T> config) {
         // todo: configuration class per container type (class, factory method, instance)
         // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
-        Container<T> container = new Container<>(this, config.getType(), config.getNames(), config.getScope());
+        Container<T> container = new Container<>(
+                this,
+                config.getObjectClass(),
+                config.getNames(),
+                config.getScope(),
+                config.isInterceptor(),
+                config.getInterceptors()
+        );
 
         return container;
     }
@@ -86,7 +93,7 @@ public class World implements Iterable<Container<?>> {
                 continue;
             }
 
-            if (request.getType() != null && !request.getType().isAssignableFrom(c.getType())) {
+            if (request.getType() != null && !request.getType().isAssignableFrom(c.getObjectClass())) {
                 continue;
             }
 
@@ -107,10 +114,38 @@ public class World implements Iterable<Container<?>> {
     }
 
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
-        // todo: handle request criteria
-        List<Interceptor> methods = interceptors.getOrDefault(request.getType(), Collections.emptyList());
+        // todo: bindings
 
-        return new InterceptorChain(methods);
+        List<InterceptorInvoke> typeInterceptors = interceptors.getOrDefault(request.getType(), Collections.emptyList());
+
+        List<Class<?>> interceptorClasses = request.getClasses();
+        Map<Interceptor, Integer> byClasses = new HashMap<>();
+
+        List<Interceptor> matchedByDefault = new ArrayList<>();
+
+        for (InterceptorInvoke interceptor : typeInterceptors) {
+            if (!request.getClasses().isEmpty()) {
+                for (int i = 0; i < interceptorClasses.size(); i++) {
+                    Class<?> clazz = request.getClasses().get(i);
+                    if (interceptor.getInterceptorClass().isAssignableFrom(clazz)) {
+                        byClasses.put(interceptor, i);
+                        break;
+                    }
+                }
+            } else if (request.isMatchAll()) {
+                matchedByDefault.add(interceptor);
+            }
+        }
+
+        List<Interceptor> result = new ArrayList<>();
+        result.addAll(byClasses.entrySet()
+                .stream()
+                .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList()));
+        result.addAll(matchedByDefault);
+
+        return new InterceptorChain(result);
     }
 
     /**
@@ -124,6 +159,10 @@ public class World implements Iterable<Container<?>> {
         public InterceptorInvoke(Container<?> container, Method method) {
             this.container = container;
             this.method = method;
+        }
+
+        public Class<?> getInterceptorClass() {
+            return container.getObjectClass();
         }
 
         @Override
