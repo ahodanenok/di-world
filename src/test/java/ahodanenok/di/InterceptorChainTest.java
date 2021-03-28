@@ -2,7 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
-import ahodanenok.di.interceptor.context.ConstructorContext;
+import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import org.junit.jupiter.api.Test;
 
 import javax.interceptor.InvocationContext;
@@ -27,7 +27,7 @@ public class InterceptorChainTest {
 
     @Test
     public void shouldProceedThroughEmptyChain() throws Exception {
-        InvocationContext ctx = new ConstructorContext(A.class.getDeclaredConstructor());
+        InvocationContext ctx = new ConstructorInvocationContext(A.class.getDeclaredConstructor());
         assertThat(new InterceptorChain().invoke(ctx)).isNotNull().isExactlyInstanceOf(A.class);
     }
 
@@ -36,7 +36,7 @@ public class InterceptorChainTest {
         Interceptor interceptor = InvocationContext::proceed;
         InterceptorChain chain = new InterceptorChain(Collections.singletonList(interceptor));
 
-        Object result = chain.invoke(new ConstructorContext(A.class.getDeclaredConstructor()));
+        Object result = chain.invoke(new ConstructorInvocationContext(A.class.getDeclaredConstructor()));
         assertThat(result).isNotNull().isExactlyInstanceOf(A.class);
     }
 
@@ -45,14 +45,14 @@ public class InterceptorChainTest {
         Interceptor interceptor = InvocationContext::proceed;
         InterceptorChain chain = new InterceptorChain(Arrays.asList(interceptor, interceptor, interceptor));
 
-        Object result = chain.invoke(new ConstructorContext(A.class.getDeclaredConstructor()));
+        Object result = chain.invoke(new ConstructorInvocationContext(A.class.getDeclaredConstructor()));
         assertThat(result).isNotNull().isExactlyInstanceOf(A.class);
     }
 
     @Test
     public void shouldNotProceedThroughInterceptorsIfProceedIsNotCalledAndReturnResultFromInterceptor() throws Exception {
         boolean[] called = new boolean[2];
-        ConstructorContext ctx = new ConstructorContext(A.class.getDeclaredConstructor());
+        ConstructorInvocationContext ctx = new ConstructorInvocationContext(A.class.getDeclaredConstructor());
 
         Interceptor interceptor_1 = c -> {
             called[0] = true;
@@ -74,7 +74,7 @@ public class InterceptorChainTest {
     @Test
     public void shouldNotProceedThroughInterceptorsIfExceptionIsThrownInInterceptor() throws Exception {
         boolean[] called = new boolean[2];
-        ConstructorContext ctx = new ConstructorContext(A.class.getDeclaredConstructor());
+        ConstructorInvocationContext ctx = new ConstructorInvocationContext(A.class.getDeclaredConstructor());
 
         Interceptor interceptor_1 = c -> {
             called[0] = true;

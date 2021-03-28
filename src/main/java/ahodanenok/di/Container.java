@@ -2,7 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
-import ahodanenok.di.interceptor.context.ConstructorContext;
+import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import ahodanenok.di.scope.Scope;
 
 import javax.inject.Inject;
@@ -53,7 +53,7 @@ public class Container<T> {
             args[i] = resolveArgument(constructor, i);
         }
 
-        ConstructorContext context = new ConstructorContext(constructor);
+        ConstructorInvocationContext context = new ConstructorInvocationContext(constructor);
         context.setParameters(args);
 
         // todo: intercept around construct

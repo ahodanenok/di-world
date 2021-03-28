@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * InvocationContext for a lifecycle interceptors
+ * InvocationContext for lifecycle interceptors
  * when there is no lifecycle method declared on the target class.
  *
  * Proceed is a no-op operation and null is returned.

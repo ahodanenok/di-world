@@ -3,16 +3,23 @@ package ahodanenok.di.interceptor.context;
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-public class ConstructorContext implements InvocationContext {
+/**
+ * Invocation context for AroundConstruct interceptors.
+ *
+ * Before the first interceptor is invoked, constructor arguments
+ * have been already resolved and are available via {@link #getParameters} method.
+ */
+public class ConstructorInvocationContext implements InvocationContext {
 
     private Object target;
-    private Constructor<?> constructor;
+    private final Constructor<?> constructor;
     private Object[] parameters;
+    private Map<String, Object> contextData;
 
-    public ConstructorContext(Constructor<?> constructor) {
+    public ConstructorInvocationContext(Constructor<?> constructor) {
         this.constructor = constructor;
         this.parameters = new Object[constructor.getParameterCount()];
     }
@@ -50,7 +57,11 @@ public class ConstructorContext implements InvocationContext {
 
     @Override
     public Map<String, Object> getContextData() {
-        return Collections.emptyMap();
+        if (contextData == null) {
+            contextData = new HashMap<>();
+        }
+
+        return contextData;
     }
 
     @Override
