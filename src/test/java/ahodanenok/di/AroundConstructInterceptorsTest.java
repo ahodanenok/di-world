@@ -2,7 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
-import ahodanenok.di.interceptor.context.ObjectContext;
+import ahodanenok.di.interceptor.context.ObjectInvocationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -75,7 +75,7 @@ public class AroundConstructInterceptorsTest {
         assertThat(chain.getInterceptors()).hasSize(1);
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(chain.invoke(new ObjectContext(new A()))).isNull();
+        assertThat(chain.invoke(new ObjectInvocationContext(new A()))).isNull();
         assertThat(calledInterceptors).containsExactly("interceptor 1");
     }
 
@@ -105,7 +105,7 @@ public class AroundConstructInterceptorsTest {
         assertThat(chain.getInterceptors()).hasSize(3);
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(chain.invoke(new ObjectContext(new A()))).isNull();
+        assertThat(chain.invoke(new ObjectInvocationContext(new A()))).isNull();
         assertThat(calledInterceptors).containsExactly("interceptor 1", "interceptor 1", "interceptor 1");
     }
 
@@ -130,7 +130,7 @@ public class AroundConstructInterceptorsTest {
         assertThat(chain.getInterceptors()).hasSize(2);
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(chain.invoke(new ObjectContext(new A()))).isNull();
+        assertThat(chain.invoke(new ObjectInvocationContext(new A()))).isNull();
         assertThat(calledInterceptors).containsExactly("interceptor 1", "interceptor 2");
     }
 
