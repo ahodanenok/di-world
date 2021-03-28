@@ -1,5 +1,7 @@
 package ahodanenok.di.interceptor.context;
 
+import ahodanenok.di.util.ReflectionUtils;
+
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -51,7 +53,7 @@ public class ConstructorInvocationContext implements InvocationContext {
 
     @Override
     public void setParameters(Object[] params) {
-        // todo: check params are valid
+        ReflectionUtils.validateParameters(constructor, params);
         this.parameters = params;
     }
 

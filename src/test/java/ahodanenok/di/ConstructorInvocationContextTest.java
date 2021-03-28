@@ -66,11 +66,11 @@ public class ConstructorInvocationContextTest {
                 MultipleArgsConstructor.class.getDeclaredConstructor(String.class, Boolean.class, long.class));
         assertThat(context.getParameters()).hasSize(3).containsOnlyNulls();
 
-        context.setParameters(new Object[] { "first", true, 100 });
-        assertThat(context.getParameters()).hasSize(3).containsExactly("first", true, 100);
+        context.setParameters(new Object[] { "first", true, 100L });
+        assertThat(context.getParameters()).hasSize(3).containsExactly("first", true, 100L);
 
-        context.setParameters(new Object[] { "second", false, 200 });
-        assertThat(context.getParameters()).hasSize(3).containsExactly("second", false, 200);
+        context.setParameters(new Object[] { "second", false, 200L });
+        assertThat(context.getParameters()).hasSize(3).containsExactly("second", false, 200L);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class ConstructorInvocationContextTest {
     public void shouldInstantiateMultipleArgsConstructor() throws Exception {
         ConstructorInvocationContext context = new ConstructorInvocationContext(
                 MultipleArgsConstructor.class.getDeclaredConstructor(String.class, Boolean.class, long.class));
-        context.setParameters(new Object[] { "abc", true, 100 });
+        context.setParameters(new Object[] { "abc", true, 100L });
 
         Object obj = context.proceed();
         assertThat(obj).isNotNull();
@@ -120,5 +120,43 @@ public class ConstructorInvocationContextTest {
         context.getContextData().put("another", true);
         assertThat(context.getContextData()).hasSize(2);
         assertThat(context.getContextData().get("another")).isEqualTo(true);
+    }
+
+    @Test
+    public void shouldThrowErrorWhenParameterCountDoesNotMatch() throws Exception {
+        ConstructorInvocationContext context =
+                new ConstructorInvocationContext(OneArgConstructor.class.getDeclaredConstructor(int.class));
+
+        assertThatThrownBy(() -> context.setParameters(new Object[0]))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Parameters count doesn't match");
+
+        assertThatThrownBy(() -> context.setParameters(new Object[] { 10, 10 }))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Parameters count doesn't match");
+    }
+
+    @Test
+    public void shouldThrowErrorWhenParameterTypeDoesNotMatch() throws Exception {
+        ConstructorInvocationContext context =
+                new ConstructorInvocationContext(OneArgConstructor.class.getDeclaredConstructor(int.class));
+
+        assertThatThrownBy(() -> context.setParameters(new Object[] { "test" }))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Parameter type doesn't match");
+
+        assertThatThrownBy(() -> context.setParameters(new Object[] { 1.0 }))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Parameter type doesn't match");
+    }
+
+    @Test
+    public void shouldThrowErrorWhenNullPassedForPrimitive() throws Exception {
+        ConstructorInvocationContext context =
+                new ConstructorInvocationContext(OneArgConstructor.class.getDeclaredConstructor(int.class));
+
+        assertThatThrownBy(() -> context.setParameters(new Object[] { null }))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Passed null for primitive parameter");
     }
 }
