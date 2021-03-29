@@ -1,8 +1,9 @@
 package ahodanenok.di.util;
 
 import java.lang.reflect.Executable;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public class ReflectionUtils {
 
@@ -45,6 +46,89 @@ public class ReflectionUtils {
 
             // todo: this code doesn't let through widening conversions for numbers: int -> long, float -> double, etc, should allow that?
             // todo: think of additional checks
+        }
+    }
+
+    public static Collection<Method> getInstanceMethods(Class<?> clazz) {
+        Set<MethodKey> keys = new HashSet<>();
+        List<Method> methods = new ArrayList<>();
+        Class<?> currentClass = clazz;
+        while (currentClass != null) {
+            for (Method m : currentClass.getDeclaredMethods()) {
+                if (Modifier.isStatic(m.getModifiers())) {
+                    continue;
+                }
+
+                // todo: research about bridge and synthetic methods
+
+                if (Modifier.isPrivate(m.getModifiers())) {
+                    methods.add(m);
+                    continue;
+                }
+
+                if (keys.add(new MethodKey(m))) {
+                    // todo: specific
+                    methods.add(m);
+                }
+            }
+
+            currentClass = currentClass.getSuperclass();
+
+            if (Object.class.equals(currentClass)) {
+                break;
+            }
+        }
+
+        return methods;
+    }
+
+    private static boolean isPackagePrivate(Executable executable) {
+        int m = executable.getModifiers();
+        return !Modifier.isPrivate(m) && !Modifier.isProtected(m) && !Modifier.isPublic(m);
+    }
+
+    private static class MethodKey {
+
+        private final Method method;
+
+        MethodKey(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * 31 * method.getName().hashCode()
+                    + 31 * Arrays.hashCode(method.getParameterTypes())
+                    + (isPackagePrivate(method) ? 1 : 0);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            // never null
+
+            if (obj == this) {
+                return true;
+            }
+
+            // don't check - obj will always be of type MethodKey
+            // todo: suppress warning
+            MethodKey other = (MethodKey) obj;
+
+            // names are case-sensitive
+            if (!other.method.getName().equals(method.getName())) {
+                return false;
+            }
+
+            if (!Arrays.equals(other.method.getParameterTypes(), method.getParameterTypes())) {
+                return false;
+            }
+
+            if (isPackagePrivate(other.method) && isPackagePrivate(method)) {
+                return other.method.getDeclaringClass().getPackage().getName()
+                        .equals(method.getDeclaringClass().getPackage().getName());
+            }
+
+            return true;
         }
     }
 }
