@@ -9,6 +9,12 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// todo: inject static methods, own container for this? (StaticConfiguration?)
+// todo: instantiate eager objects
+// todo: destroying world
+// todo: qualifiers
+// todo: around invoke
+
 public class World implements Iterable<Container<?>> {
 
     public static void main(String[] args) {
@@ -76,12 +82,13 @@ public class World implements Iterable<Container<?>> {
             // todo: exception+message
             throw new IllegalStateException("multiple");
         } else {
+            // todo: exception+message
             throw new IllegalStateException("not found");
         }
     }
 
     public <T> List<T> findAll(ObjectRequest<T> request) {
-        // todo: supress unchecked
+        // todo: suppress unchecked
         return findContainers(request).stream().map(c -> (T) c.getObject()).collect(Collectors.toList());
     }
 

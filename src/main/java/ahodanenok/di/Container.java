@@ -24,7 +24,6 @@ public class Container<T> {
     private boolean interceptor;
     private List<Class<?>> interceptedBy;
 
-    // todo: unmodifiable names
     public Container(World world, Class<T> objectClass, Set<String> names, Scope<T> scope, boolean interceptor, List<Class<?>> interceptedBy) {
         this.world = world;
         this.objectClass = objectClass;
@@ -47,14 +46,12 @@ public class Container<T> {
     }
 
     private T doGetObject() {
-        // todo: scope
         Constructor<?> constructor = getConstructor();
         Object[] args = resolveArguments(constructor);
 
         ConstructorInvocationContext context = new ConstructorInvocationContext(constructor);
         context.setParameters(args);
 
-        // todo: intercept around construct
         // todo: intercept post construct
 
         try {
@@ -118,13 +115,17 @@ public class Container<T> {
     }
 
     private Object resolveArgument(Executable executable, int pos) {
-        // todo: intercept around resolve
         Class<?> paramType = executable.getParameterTypes()[pos];
+        // todo: intercept around resolve
+        // todo: by name
+        // todo: qualifiers
         return world.find(ObjectRequest.byType(paramType));
     }
 
     private Object resolvedDependency(Field field) {
         // todo: intercept around resolve
+        // todo: by name
+        // todo: qualifiers
         return world.find(ObjectRequest.byType(field.getType()));
     }
 
@@ -133,9 +134,11 @@ public class Container<T> {
         Map<Class<?>, List<Method>> methodsByClass = ReflectionUtils.getInstanceMethods(instance.getClass())
                 .stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
 
+        // todo: read about injection rules, for now as i remember it
         for (Class<?> clazz : ReflectionUtils.getInheritanceChain(instance.getClass())) {
             for (Field f : clazz.getDeclaredFields()) {
                 if (f.isAnnotationPresent(Inject.class)) {
+                    // todo: make accessible only when needed
                     f.setAccessible(true);
                     f.set(instance, resolvedDependency(f));
                 }

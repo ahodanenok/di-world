@@ -6,6 +6,7 @@ import ahodanenok.di.scope.Scope;
 import java.lang.reflect.Method;
 import java.util.*;
 
+// todo: validation
 public class ContainerConfiguration<T> {
 
     public static <T> ContainerConfiguration<T> ofClass(Class<T> clazz) {
