@@ -72,4 +72,16 @@ public class InjectTest {
         P3 obj = w.find(ObjectRequest.byType(P3.class));
         assertThat(obj.log).containsExactly("D0", "M1", "D1", "M2", "D2", "M3");
     }
+
+    @Test
+    public void shouldInjectBySuperclass() {
+        World w = new World();
+        w.getQueue().add(ContainerConfiguration.ofClass(P3.class));
+        w.getQueue().add(ContainerConfiguration.ofClass(DependsOnP0.class));
+        w.getQueue().add(ContainerConfiguration.ofClass(SimpleDependency.class));
+        w.getQueue().flush();
+
+        DependsOnP0 obj = w.find(ObjectRequest.byType(DependsOnP0.class));
+        assertThat(obj.p).isExactlyInstanceOf(P3.class);
+    }
 }
