@@ -4,14 +4,16 @@ import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import ahodanenok.di.scope.Scope;
+import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundConstruct;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Container<T> {
 
@@ -47,11 +49,7 @@ public class Container<T> {
     private T doGetObject() {
         // todo: scope
         Constructor<?> constructor = getConstructor();
-
-        Object[] args = new Object[constructor.getParameterCount()];
-        for (int i = 0; i < args.length; i++) {
-            args[i] = resolveArgument(constructor, i);
-        }
+        Object[] args = resolveArguments(constructor);
 
         ConstructorInvocationContext context = new ConstructorInvocationContext(constructor);
         context.setParameters(args);
@@ -61,14 +59,19 @@ public class Container<T> {
 
         try {
             // todo: suppress warning
+            T instance;
             if (!interceptor) {
                 InterceptorChain aroundConstructChain = world.getInterceptorChain(
                         InterceptorRequest.ofType(AroundConstruct.class.getName()).withClasses(interceptedBy));
 
-                return (T) aroundConstructChain.invoke(context);
+                instance = (T) aroundConstructChain.invoke(context);
             } else {
-                return (T) context.proceed();
+                instance = (T) context.proceed();
             }
+
+            inject(instance);
+
+            return instance;
         } catch (Exception e) {
             // todo: handle exceptions
             throw new IllegalStateException(e);
@@ -105,9 +108,46 @@ public class Container<T> {
         }
     }
 
-    private Object resolveArgument(Executable e, int pos) {
+    private Object[] resolveArguments(Executable executable) {
+        Object[] args = new Object[executable.getParameterCount()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = resolveArgument(executable, i);
+        }
+
+        return args;
+    }
+
+    private Object resolveArgument(Executable executable, int pos) {
         // todo: intercept around resolve
-        Class<?> paramType = e.getParameterTypes()[pos];
+        Class<?> paramType = executable.getParameterTypes()[pos];
         return world.find(ObjectRequest.byType(paramType));
+    }
+
+    private Object resolvedDependency(Field field) {
+        // todo: intercept around resolve
+        return world.find(ObjectRequest.byType(field.getType()));
+    }
+
+    // todo: how to handle exception?
+    private void inject(T instance) throws Exception {
+        Map<Class<?>, List<Method>> methodsByClass = ReflectionUtils.getInstanceMethods(instance.getClass())
+                .stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
+
+        for (Class<?> clazz : ReflectionUtils.getInheritanceChain(instance.getClass())) {
+            for (Field f : clazz.getDeclaredFields()) {
+                if (f.isAnnotationPresent(Inject.class)) {
+                    f.setAccessible(true);
+                    f.set(instance, resolvedDependency(f));
+                }
+            }
+
+            for (Method m : methodsByClass.getOrDefault(clazz, Collections.emptyList())) {
+                if (m.isAnnotationPresent(Inject.class)) {
+                    // todo: make accessible only when needed
+                    m.setAccessible(true);
+                    m.invoke(instance, resolveArguments(m));
+                }
+            }
+        }
     }
 }

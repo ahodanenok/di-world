@@ -49,6 +49,17 @@ public class ReflectionUtils {
         }
     }
 
+    public static List<Class<?>> getInheritanceChain(Class<?> clazz) {
+        List<Class<?>> hierarchy = new ArrayList<>();
+        Class<?> currentClass = clazz;
+        while (!currentClass.equals(Object.class)) {
+            hierarchy.add(0, currentClass);
+            currentClass = currentClass.getSuperclass();
+        }
+
+        return hierarchy;
+    }
+
     public static Collection<Method> getInstanceMethods(Class<?> clazz) {
         Set<MethodKey> keys = new HashSet<>();
         List<Method> methods = new ArrayList<>();
