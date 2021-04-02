@@ -1,5 +1,7 @@
 package ahodanenok.di.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -140,5 +142,31 @@ public class ReflectionUtils {
 
             return true;
         }
+    }
+
+    public static List<Annotation> getAnnotationsWithMetaAnnotation(AnnotatedElement element,
+                                                                    Class<? extends Annotation> metaAnnotationClass) {
+
+        List<Annotation> result = new ArrayList<>();
+
+        LinkedList<Annotation> queue = new LinkedList<>();
+        for (Annotation a : element.getAnnotations()) {
+            if (a.annotationType().isAnnotationPresent(metaAnnotationClass)) {
+                queue.addLast(a);
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            Annotation current = queue.removeFirst();
+            result.add(current);
+
+            for (Annotation a : current.annotationType().getDeclaredAnnotations()) {
+                if (a.annotationType().isAnnotationPresent(metaAnnotationClass) && !queue.contains(a)) {
+                    queue.addLast(a);
+                }
+            }
+        }
+
+        return result;
     }
 }

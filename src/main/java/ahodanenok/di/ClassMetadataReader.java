@@ -1,14 +1,13 @@
 package ahodanenok.di;
 
-import ahodanenok.di.scope.Scope;
+import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;
+import javax.inject.Scope;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ClassMetadataReader<T> {
 
@@ -19,10 +18,12 @@ public class ClassMetadataReader<T> {
     }
 
     /**
-     * Reads @Named annotation on a clazz and returns:
-     * - non-empty string with an explicit name
-     * - empty string meaning default name should be given
-     * - null meaning class doesn't have a name
+     * Finds @Named annotation on a clazz
+     *
+     * @return
+     * - non-empty string with an explicit name <br>
+     * - empty string meaning default name should be given <br>
+     * - null meaning class doesn't have a name <br>
      */
     public String readName() {
         Named named = clazz.getAnnotation(Named.class);
@@ -41,10 +42,28 @@ public class ClassMetadataReader<T> {
         return name;
     }
 
-    public Scope<T> readScope() {
+    /**
+     * Finds annotation marked with @Scope
+     *
+     * @return name of scope annotation
+     * @throws ConfigException if class contains multiple scope declarations or scope has attributes
+     */
+    public String readScope() {
+        List<Annotation> scopes = ReflectionUtils.getAnnotationsWithMetaAnnotation(clazz, Scope.class);
+        if (scopes.size() == 1) {
+            Class<? extends Annotation> scope = scopes.get(0).annotationType();
+            if (scope.getDeclaredMethods().length > 0) {
+                throw new ConfigException(String.format("Scope annotation must not declare any attributes, but '%s' has %s",
+                        scope.getName(),
+                        Arrays.toString(scope.getDeclaredMethods())));
+            }
 
-
-        return null;
+            return scope.getName();
+        } else if (scopes.size() > 1) {
+            throw new ConfigException(String.format("Multiple scopes are defined on a class '%s'", clazz));
+        } else{
+            return null;
+        }
     }
 
     public boolean readInterceptor() {
