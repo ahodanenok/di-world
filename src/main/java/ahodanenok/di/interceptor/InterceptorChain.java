@@ -7,26 +7,50 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Sequence of actions to be invoked before calling {@link InvocationContext#proceed()} of the given context.
+ */
 public class InterceptorChain {
 
-    private List<Interceptor> interceptors;
+    private final List<Interceptor> interceptors;
 
+    /**
+     * Constructs an empty chain
+     */
     public InterceptorChain() {
         this(Collections.emptyList());
     }
 
+    /**
+     * Constructs chain with the given interceptors
+     */
     public InterceptorChain(List<Interceptor> interceptors) {
         this.interceptors = interceptors;
     }
 
+    /**
+     * Get unmodifiable list of interceptors in the chain
+     */
     public List<Interceptor> getInterceptors() {
         return Collections.unmodifiableList(interceptors);
     }
 
+    /**
+     * Number of interceptors in the chain
+     * todo: is this method needed?
+     */
     public int length() {
         return interceptors.size();
     }
 
+    /**
+     * Execute chain of interceptors
+     *
+     * Given context will be executed only if every interceptor in the chain
+     * calls {@link InvocationContext#proceed()} of their parameter
+     *
+     * If the chain is empty, context will be invoked immediately
+     */
     public Object invoke(InvocationContext context) throws Exception {
         return new Execution(context).proceed();
     }

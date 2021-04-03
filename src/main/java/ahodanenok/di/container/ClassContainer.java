@@ -68,7 +68,7 @@ public class ClassContainer<T> {
             T instance;
             if (!character.isInterceptor()) {
                 InterceptorChain aroundConstructChain = world.getInterceptorChain(
-                        InterceptorRequest.ofType(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
+                        InterceptorRequest.of(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
 
                 instance = (T) aroundConstructChain.invoke(constructorContext);
             } else {
@@ -79,7 +79,7 @@ public class ClassContainer<T> {
 
             if (!character.isInterceptor()) {
                 InterceptorChain postConstructChain = world.getInterceptorChain(
-                        InterceptorRequest.ofType(PostConstruct.class.getName()).withClasses(character.getInterceptors()));
+                        InterceptorRequest.of(PostConstruct.class.getName()).withClasses(character.getInterceptors()));
 
                 InvocationContext postConstructContext;
                 Method interceptorMethod = character.getInterceptorMethod(PostConstruct.class.getName());

@@ -71,7 +71,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.ofType(AroundConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(AroundConstruct.class.getName()).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(1);
 
@@ -101,7 +101,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.ofType(AroundConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(AroundConstruct.class.getName()).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(3);
 
@@ -126,7 +126,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.ofType(AroundConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(AroundConstruct.class.getName()).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(2);
 

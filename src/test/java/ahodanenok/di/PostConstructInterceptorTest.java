@@ -80,7 +80,7 @@ public class PostConstructInterceptorTest {
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.ofType(PostConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(PostConstruct.class.getName()).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(1);
 
@@ -110,7 +110,7 @@ public class PostConstructInterceptorTest {
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.ofType(PostConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(PostConstruct.class.getName()).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(3);
 
