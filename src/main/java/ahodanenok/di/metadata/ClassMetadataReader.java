@@ -1,5 +1,6 @@
-package ahodanenok.di;
+package ahodanenok.di.metadata;
 
+import ahodanenok.di.ConfigException;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;

@@ -1,6 +1,5 @@
 package ahodanenok.di.metadata;
 
-import ahodanenok.di.ClassMetadataReader;
 import ahodanenok.di.ConfigException;
 import org.junit.jupiter.api.Test;
 
