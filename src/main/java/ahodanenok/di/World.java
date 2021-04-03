@@ -33,15 +33,15 @@ public class World implements Iterable<Container<?>> {
         return queue;
     }
 
-    private void register(List<ClassCharacter<?>> configs) {
-        for (ClassCharacter<?> config : configs) {
-            Container<?> container = buildContainer(config);
+    private void register(List<ClassCharacter<?>> characters) {
+        for (ClassCharacter<?> character : characters) {
+            Container<?> container = buildContainer(character);
             register(container);
 
             // todo: validate interceptors
             // todo: where to put available types?
             for (Class<?> type : Arrays.asList(AroundConstruct.class, PostConstruct.class, PreDestroy.class, AroundInvoke.class)) {
-                Method method = config.getInterceptorMethod(type.getName());
+                Method method = character.getInterceptorMethod(type.getName());
                 if (method != null) {
                     interceptors
                             .computeIfAbsent(type.getName(), __ -> new ArrayList<>())
@@ -63,17 +63,10 @@ public class World implements Iterable<Container<?>> {
         containers.add(container);
     }
 
-    private <T> Container<T> buildContainer(ClassCharacter<T> config) {
+    private <T> Container<T> buildContainer(ClassCharacter<T> character) {
         // todo: configuration class per container type (class, factory method, instance)
         // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
-        Container<T> container = new Container<>(
-                this,
-                config.getObjectClass(),
-                config.getNames(),
-                config.getScope(),
-                config.isInterceptor(),
-                config.getInterceptors()
-        );
+        Container<T> container = new Container<>(this,  character);
 
         return container;
     }

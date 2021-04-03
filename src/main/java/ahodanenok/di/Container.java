@@ -18,19 +18,19 @@ import java.util.stream.Collectors;
 public class Container<T> {
 
     private World world;
+    private ClassCharacter<T> character;
+
     private Class<T> objectClass;
     private Set<String> names;
     private Scope<T> scope;
-    private boolean interceptor;
-    private List<Class<?>> interceptedBy;
 
-    public Container(World world, Class<T> objectClass, Set<String> names, Scope<T> scope, boolean interceptor, List<Class<?>> interceptedBy) {
+    public Container(World world, ClassCharacter<T> character) {
         this.world = world;
-        this.objectClass = objectClass;
-        this.names = names;
-        this.scope = scope;
-        this.interceptor = interceptor;
-        this.interceptedBy = interceptedBy;
+        this.character = character;
+
+        this.objectClass = character.getObjectClass();
+        this.names = character.getNames();
+        this.scope = character.getScope();
     }
 
     public Class<T> getObjectClass() {
@@ -57,9 +57,9 @@ public class Container<T> {
         try {
             // todo: suppress warning
             T instance;
-            if (!interceptor) {
+            if (!character.isInterceptor()) {
                 InterceptorChain aroundConstructChain = world.getInterceptorChain(
-                        InterceptorRequest.ofType(AroundConstruct.class.getName()).withClasses(interceptedBy));
+                        InterceptorRequest.ofType(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
 
                 instance = (T) aroundConstructChain.invoke(context);
             } else {
@@ -79,7 +79,7 @@ public class Container<T> {
         // todo: additional rules for selecting constructors from class
 
         List<Constructor<?>> matched = new ArrayList<>();
-        for (Constructor<?> c : objectClass.getDeclaredConstructors()) {
+        for (Constructor<?> c : getObjectClass().getDeclaredConstructors()) {
             // todo: only @Inject is used to mark injectable constructors?
             if (c.getDeclaredAnnotation(Inject.class) != null) {
                 matched.add(c);
@@ -89,7 +89,7 @@ public class Container<T> {
         if (matched.isEmpty()) {
             try {
                 // todo: any public? no-arg is fallback?
-                matched.add(objectClass.getDeclaredConstructor());
+                matched.add(getObjectClass().getDeclaredConstructor());
             } catch (NoSuchMethodException e) {
                 // todo: exception
                 e.printStackTrace();
