@@ -8,27 +8,22 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Invocation context for AroundConstruct interceptors.
- *
- * Before the first interceptor is invoked, constructor arguments
- * have been already resolved and are available via {@link #getParameters} method.
- */
-public class ConstructorInvocationContext implements InvocationContext {
+public class MethodInvocationContext implements InvocationContext {
 
-    private Object target;
-    private final Constructor<?> constructor;
+    private final Object object;
+    private final Method method;
     private Object[] parameters;
     private Map<String, Object> contextData;
 
-    public ConstructorInvocationContext(Constructor<?> constructor) {
-        this.constructor = constructor;
-        this.parameters = new Object[constructor.getParameterCount()];
+    public MethodInvocationContext(Object object, Method method) {
+        this.object = object;
+        this.method = method;
+        this.parameters = new Object[method.getParameterCount()];
     }
 
     @Override
     public Object getTarget() {
-        return target;
+        return object;
     }
 
     @Override
@@ -38,12 +33,12 @@ public class ConstructorInvocationContext implements InvocationContext {
 
     @Override
     public Method getMethod() {
-        return null;
+        return method;
     }
 
     @Override
     public Constructor<?> getConstructor() {
-        return constructor;
+        return null;
     }
 
     @Override
@@ -54,7 +49,7 @@ public class ConstructorInvocationContext implements InvocationContext {
 
     @Override
     public void setParameters(Object[] params) {
-        ReflectionUtils.validateParameters(constructor, params);
+        ReflectionUtils.validateParameters(method, params);
         this.parameters = params;
     }
 
@@ -69,14 +64,8 @@ public class ConstructorInvocationContext implements InvocationContext {
 
     @Override
     public Object proceed() throws Exception {
-        if (target != null) {
-            return target;
-        }
-
-        // todo: accessible
-        constructor.setAccessible(true);
-
-        target = constructor.newInstance(parameters);
-        return target;
+        // todo: make accessible only if needed
+        method.setAccessible(true);
+        return method.invoke(object, parameters);
     }
 }
