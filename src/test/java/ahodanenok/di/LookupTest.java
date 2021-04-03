@@ -20,8 +20,8 @@ public class LookupTest {
     @Test
     public void shouldReturnObjectByItsType() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(B.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().add(ContainerConfiguration.of(B.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         assertThat(w.find(ObjectRequest.byType(A.class))).isNotNull().isExactlyInstanceOf(A.class);
@@ -30,8 +30,8 @@ public class LookupTest {
     @Test
     public void shouldReturnObjectByItsParentType() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(C1.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().add(ContainerConfiguration.of(C1.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         assertThat(w.find(ObjectRequest.byType(P.class))).isNotNull().isExactlyInstanceOf(C1.class);
@@ -40,9 +40,9 @@ public class LookupTest {
     @Test
     public void shouldReturnAllByType() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(B.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
+        w.getQueue().add(ContainerConfiguration.of(B.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         List<A> values = w.findAll(ObjectRequest.byType(A.class));
@@ -52,7 +52,7 @@ public class LookupTest {
     @Test
     public void shouldThrowErrorIfNoneMatched() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.byType(B.class)))
@@ -63,9 +63,9 @@ public class LookupTest {
     @Test
     public void shouldThrowErrorIfMultipleMatchedWhenOneRequested() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(B.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
+        w.getQueue().add(ContainerConfiguration.of(B.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.byType(A.class)))
@@ -76,8 +76,8 @@ public class LookupTest {
     @Test
     public void shouldReturnObjectByItsName() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class).withNames("A"));
-        w.getQueue().add(ContainerConfiguration.ofClass(B.class).withNames("B"));
+        w.getQueue().add(ContainerConfiguration.of(A.class).knownAs("A"));
+        w.getQueue().add(ContainerConfiguration.of(B.class).knownAs("B"));
         w.getQueue().flush();
 
         Object value = w.find(ObjectRequest.byName("A"));
@@ -87,8 +87,8 @@ public class LookupTest {
     @Test
     public void shouldReturnObjectByNameIgnoringType() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class).withNames("A"));
-        w.getQueue().add(ContainerConfiguration.ofClass(B.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class).knownAs("A"));
+        w.getQueue().add(ContainerConfiguration.of(B.class));
         w.getQueue().flush();
 
         assertThat(w.find(ObjectRequest.byName("A").withType(B.class))).isNotNull().isExactlyInstanceOf(A.class);
@@ -97,8 +97,8 @@ public class LookupTest {
     @Test
     public void shouldReturnByTypeQualifiedByName() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(C1.class).withNames("C1"));
-        w.getQueue().add(ContainerConfiguration.ofClass(C2.class).withNames("C2"));
+        w.getQueue().add(ContainerConfiguration.of(C1.class).knownAs("C1"));
+        w.getQueue().add(ContainerConfiguration.of(C2.class).knownAs("C2"));
         w.getQueue().flush();
 
         Object value = w.find(ObjectRequest.byName("C1").withType(P.class).qualifyByName());

@@ -4,6 +4,10 @@ import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.interceptor.AroundConstruct;
+import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -35,12 +39,13 @@ public class World implements Iterable<Container<?>> {
             register(container);
 
             // todo: validate interceptors
-            if (config.getDeclaredInterceptors() != null) {
-                for (Map.Entry<String, List<Method>> entry : config.getDeclaredInterceptors().entrySet()) {
-                    interceptors.computeIfAbsent(entry.getKey(), __ -> new ArrayList<>()).addAll(
-                            entry.getValue().stream()
-                                    .map(m -> new InterceptorInvoke(container, m))
-                                    .collect(Collectors.toList()));
+            // todo: where to put available types?
+            for (Class<?> type : Arrays.asList(AroundConstruct.class, PostConstruct.class, PreDestroy.class, AroundInvoke.class)) {
+                Method method = config.getInterceptorMethod(type.getName());
+                if (method != null) {
+                    interceptors
+                            .computeIfAbsent(type.getName(), __ -> new ArrayList<>())
+                            .add(new InterceptorInvoke(container, method));
                 }
             }
         }

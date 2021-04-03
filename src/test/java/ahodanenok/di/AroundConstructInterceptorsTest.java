@@ -62,11 +62,11 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldRegisterInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                    Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                    AroundConstruct.class.getName()));
+                .intercepts(
+                    AroundConstruct.class.getName(),
+                    Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
@@ -82,21 +82,21 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldRegisterSameMultipleInterceptors() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
@@ -112,16 +112,16 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldRegisterMultipleInterceptors() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_2.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_2.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
@@ -137,12 +137,12 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldInvokeInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class).interceptedBy(Interceptor_1.class));
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(A.class).interceptedBy(Interceptor_1.class));
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
@@ -153,17 +153,17 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldInvokeOnlyDeclaredInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_2.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_2.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class).interceptedBy(Interceptor_2.class));
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(A.class).interceptedBy(Interceptor_2.class));
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
@@ -174,17 +174,17 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldNotInvokeInterceptorIfNotDefined() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_2.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_2.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
@@ -195,17 +195,17 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldInvokeDeclaredInterceptorsInOrder() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_2.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_2.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(A.class)
                 .interceptedBy(Interceptor_2.class, Interceptor_1.class));
         w.getQueue().flush();
 
@@ -217,23 +217,23 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldChangeConstructorParameterInInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_1.class)
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_1.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_3.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_3.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_3.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Interceptor_2.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_3.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Interceptor_2.class)
                 .interceptor()
-                .declareInterceptor(
-                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class),
-                        AroundConstruct.class.getName()));
-        w.getQueue().add(ContainerConfiguration.ofClass(Dependency.class));
-        w.getQueue().add(ContainerConfiguration.ofClass(B.class)
+                .intercepts(
+                        AroundConstruct.class.getName(),
+                        Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
+        w.getQueue().add(ContainerConfiguration.of(Dependency.class));
+        w.getQueue().add(ContainerConfiguration.of(B.class)
                 .interceptedBy(Interceptor_1.class, Interceptor_3.class, Interceptor_2.class));
         w.getQueue().flush();
 

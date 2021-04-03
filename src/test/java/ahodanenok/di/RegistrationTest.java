@@ -10,7 +10,7 @@ public class RegistrationTest {
 
     @Test
     public void shouldRegisterContainerAfterFlush() {
-        ContainerConfiguration<A> config = ContainerConfiguration.ofClass(A.class);
+        ContainerConfiguration<A> config = ContainerConfiguration.of(A.class);
 
         World w = new World();
         assertThat(w).hasSize(0);
@@ -24,7 +24,7 @@ public class RegistrationTest {
 
     @Test
     public void shouldRegisterContainerWithTypeFromConfiguration() {
-        ContainerConfiguration<A> config = ContainerConfiguration.ofClass(A.class);
+        ContainerConfiguration<A> config = ContainerConfiguration.of(A.class);
 
         World w = new World();
         w.getQueue().add(config);
@@ -36,7 +36,7 @@ public class RegistrationTest {
 
     @Test
     public void shouldRegisterContainerWithNamesFromConfiguration() {
-        ContainerConfiguration<A> config = ContainerConfiguration.ofClass(A.class).withNames("a", "b", "a", "c");
+        ContainerConfiguration<A> config = ContainerConfiguration.of(A.class).knownAs("a", "b", "a", "c");
 
         World w = new World();
         w.getQueue().add(config);
@@ -47,8 +47,8 @@ public class RegistrationTest {
 
     @Test
     public void shouldThrowErrorIfContainerWithTheSameNameAlreadyRegistered() {
-        ContainerConfiguration<A> configA1 = ContainerConfiguration.ofClass(A.class).withNames("a1", "a");
-        ContainerConfiguration<A> configA2 = ContainerConfiguration.ofClass(A.class).withNames("a2", "a");
+        ContainerConfiguration<A> configA1 = ContainerConfiguration.of(A.class).knownAs("a1", "a");
+        ContainerConfiguration<A> configA2 = ContainerConfiguration.of(A.class).knownAs("a2", "a");
 
         World w = new World();
         w.getQueue().add(configA1);

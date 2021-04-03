@@ -13,7 +13,7 @@ public class ScopeTest {
     @Test
     public void shouldUseAlwaysNewScopeIfNoneProvided() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class));
+        w.getQueue().add(ContainerConfiguration.of(A.class));
         w.getQueue().flush();
 
         A first = w.find(ObjectRequest.byType(A.class));
@@ -28,7 +28,7 @@ public class ScopeTest {
     @Test
     public void shouldReturnNewInstanceOnEveryRequest() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class).withScope(AlwaysNewScope.getInstance()));
+        w.getQueue().add(ContainerConfiguration.of(A.class).withScope(AlwaysNewScope.getInstance()));
         w.getQueue().flush();
 
         A first = w.find(ObjectRequest.byType(A.class));
@@ -43,7 +43,7 @@ public class ScopeTest {
     @Test
     public void shouldReturnTheSameInstanceOnEveryRequest() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.ofClass(A.class).withScope(new SingletonScope<>()));
+        w.getQueue().add(ContainerConfiguration.of(A.class).withScope(new SingletonScope<>()));
         w.getQueue().flush();
 
         A first = w.find(ObjectRequest.byType(A.class));
