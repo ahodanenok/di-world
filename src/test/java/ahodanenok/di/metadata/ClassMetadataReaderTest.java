@@ -8,6 +8,7 @@ import javax.inject.Named;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 import javax.interceptor.Interceptor;
+import javax.interceptor.Interceptors;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -99,5 +100,26 @@ public class ClassMetadataReaderTest {
     @Test
     public void shouldNotReadInterceptorAsTrueIfInParent() {
         assertThat(new ClassMetadataReader<>(InterceptorInParent.class).readInterceptor()).isFalse();
+    }
+
+    @Interceptors({ Integer.class, Long.class })
+    public static class WithInterceptorsClass { }
+    public static class WithoutInterceptorsClass { }
+    public static class WithInterceptorsInParent extends WithInterceptorsClass { }
+
+    @Test
+    public void shouldReadInterceptors() {
+        assertThat(new ClassMetadataReader<>(WithInterceptorsClass.class).readInterceptors())
+                .containsExactly(Integer.class, Long.class);
+    }
+
+    @Test
+    public void shouldNotReadInterceptors() {
+        assertThat(new ClassMetadataReader<>(WithoutInterceptorsClass.class).readInterceptors()).isEmpty();
+    }
+
+    @Test
+    public void shouldNotReadInterceptorInParent() {
+        assertThat(new ClassMetadataReader<>(WithInterceptorsInParent.class).readInterceptors()).isEmpty();
     }
 }

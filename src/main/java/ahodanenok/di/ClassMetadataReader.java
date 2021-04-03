@@ -5,10 +5,10 @@ import ahodanenok.di.util.ReflectionUtils;
 import javax.inject.Named;
 import javax.inject.Scope;
 import javax.interceptor.Interceptor;
+import javax.interceptor.Interceptors;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClassMetadataReader<T> {
 
@@ -71,23 +71,12 @@ public class ClassMetadataReader<T> {
         return clazz.isAnnotationPresent(Interceptor.class);
     }
 
-    public Constructor<T> readConstructor() {
-        return null;
-    }
-
-    public List<Method> readInjectableFields() {
-        return new ArrayList<>();
-    }
-
-    public List<Method> readInjectableMethods() {
-        return new ArrayList<>();
-    }
-
     public List<Class<?>> readInterceptors() {
-        return new ArrayList<>();
-    }
-
-    public Map<String, Method> readInterceptorMethods() {
-        return new HashMap<>();
+        Interceptors interceptors = clazz.getDeclaredAnnotation(Interceptors.class);
+        if (interceptors != null) {
+            return Arrays.stream((Class<?>[]) interceptors.value()).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 }
