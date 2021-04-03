@@ -1,4 +1,4 @@
-package ahodanenok.di;
+package ahodanenok.di.character;
 
 import ahodanenok.di.metadata.ClassMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;

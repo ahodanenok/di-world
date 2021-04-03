@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.character.ClassCharacter;
 import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.Test;
 

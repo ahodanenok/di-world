@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.SingletonScope;
 import org.junit.jupiter.api.Test;

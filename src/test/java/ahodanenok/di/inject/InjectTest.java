@@ -1,6 +1,6 @@
 package ahodanenok.di.inject;
 
-import ahodanenok.di.ClassCharacter;
+import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.inject.classes.*;

@@ -1,4 +1,4 @@
-package ahodanenok.di;
+package ahodanenok.di.exception;
 
 public class ConfigException extends RuntimeException {
 

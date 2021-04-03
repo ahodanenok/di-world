@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.character.ClassCharacter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;

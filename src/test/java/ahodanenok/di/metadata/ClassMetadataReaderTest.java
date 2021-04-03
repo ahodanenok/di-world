@@ -1,6 +1,6 @@
 package ahodanenok.di.metadata;
 
-import ahodanenok.di.ConfigException;
+import ahodanenok.di.exception.ConfigException;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Named;

@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
