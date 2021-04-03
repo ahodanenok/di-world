@@ -8,6 +8,7 @@ import javax.inject.Scope;
 import javax.interceptor.Interceptor;
 import javax.interceptor.Interceptors;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,5 +80,17 @@ public class ClassMetadataReader<T> {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public Method readInterceptorMethod(String type) {
+        for (Method method : ReflectionUtils.getInstanceMethods(clazz)) {
+            for (Annotation a : method.getAnnotations()) {
+                if (a.annotationType().getName().equals(type)) {
+                    return method;
+                }
+            }
+        }
+
+        return null;
     }
 }

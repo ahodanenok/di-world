@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Named;
 import javax.inject.Scope;
 import javax.inject.Singleton;
+import javax.interceptor.AroundConstruct;
 import javax.interceptor.Interceptor;
 import javax.interceptor.Interceptors;
 
@@ -120,5 +121,16 @@ public class ClassMetadataReaderTest {
     @Test
     public void shouldNotReadInterceptorInParent() {
         assertThat(new ClassMetadataReader<>(WithInterceptorsInParent.class).readInterceptors()).isEmpty();
+    }
+
+    public static class WithInterceptorMethod {
+        @AroundConstruct public void method() { }
+    }
+
+    @Test
+    public void shouldFindInterceptorMethod() throws Exception {
+        assertThat(new ClassMetadataReader<>(WithInterceptorMethod.class)
+                    .readInterceptorMethod(AroundConstruct.class.getName()))
+                .isEqualTo(WithInterceptorMethod.class.getDeclaredMethod("method"));
     }
 }
