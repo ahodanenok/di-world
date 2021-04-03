@@ -33,8 +33,8 @@ public class World implements Iterable<Container<?>> {
         return queue;
     }
 
-    private void register(List<ContainerConfiguration<?>> configs) {
-        for (ContainerConfiguration<?> config : configs) {
+    private void register(List<ClassCharacter<?>> configs) {
+        for (ClassCharacter<?> config : configs) {
             Container<?> container = buildContainer(config);
             register(container);
 
@@ -63,7 +63,7 @@ public class World implements Iterable<Container<?>> {
         containers.add(container);
     }
 
-    private <T> Container<T> buildContainer(ContainerConfiguration<T> config) {
+    private <T> Container<T> buildContainer(ClassCharacter<T> config) {
         // todo: configuration class per container type (class, factory method, instance)
         // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
         Container<T> container = new Container<>(

@@ -1,6 +1,6 @@
 package ahodanenok.di.inject;
 
-import ahodanenok.di.ContainerConfiguration;
+import ahodanenok.di.ClassCharacter;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.inject.classes.*;
@@ -13,8 +13,8 @@ public class InjectTest {
     @Test
     public void shouldInjectPublicMethod() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(WithInjectablePublicMethod.class));
-        w.getQueue().add(ContainerConfiguration.of(SimpleDependency.class));
+        w.getQueue().add(ClassCharacter.of(WithInjectablePublicMethod.class));
+        w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
         WithInjectablePublicMethod obj = w.find(ObjectRequest.byType(WithInjectablePublicMethod.class));
@@ -26,8 +26,8 @@ public class InjectTest {
     @Test
     public void shouldInjectPrivateMethod() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(WithInjectablePrivateMethod.class));
-        w.getQueue().add(ContainerConfiguration.of(SimpleDependency.class));
+        w.getQueue().add(ClassCharacter.of(WithInjectablePrivateMethod.class));
+        w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
         WithInjectablePrivateMethod obj = w.find(ObjectRequest.byType(WithInjectablePrivateMethod.class));
@@ -39,8 +39,8 @@ public class InjectTest {
     @Test
     public void shouldInjectPackagePrivateMethod() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(WithInjectablePackagePrivateMethod.class));
-        w.getQueue().add(ContainerConfiguration.of(SimpleDependency.class));
+        w.getQueue().add(ClassCharacter.of(WithInjectablePackagePrivateMethod.class));
+        w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
         WithInjectablePackagePrivateMethod obj = w.find(ObjectRequest.byType(WithInjectablePackagePrivateMethod.class));
@@ -52,8 +52,8 @@ public class InjectTest {
     @Test
     public void shouldInjectProtectedMethod() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(WithInjectableProtectedMethod.class));
-        w.getQueue().add(ContainerConfiguration.of(SimpleDependency.class));
+        w.getQueue().add(ClassCharacter.of(WithInjectableProtectedMethod.class));
+        w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
         WithInjectableProtectedMethod obj = w.find(ObjectRequest.byType(WithInjectableProtectedMethod.class));
@@ -65,8 +65,8 @@ public class InjectTest {
     @Test
     public void shouldInjectParentsFirst() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(P3.class));
-        w.getQueue().add(ContainerConfiguration.of(SimpleDependency.class));
+        w.getQueue().add(ClassCharacter.of(P3.class));
+        w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
         P3 obj = w.find(ObjectRequest.byType(P3.class));
@@ -76,9 +76,9 @@ public class InjectTest {
     @Test
     public void shouldInjectBySuperclass() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(P3.class));
-        w.getQueue().add(ContainerConfiguration.of(DependsOnP0.class));
-        w.getQueue().add(ContainerConfiguration.of(SimpleDependency.class));
+        w.getQueue().add(ClassCharacter.of(P3.class));
+        w.getQueue().add(ClassCharacter.of(DependsOnP0.class));
+        w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
         DependsOnP0 obj = w.find(ObjectRequest.byType(DependsOnP0.class));

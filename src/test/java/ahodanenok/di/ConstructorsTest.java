@@ -33,7 +33,7 @@ public class ConstructorsTest {
     @Test
     public void shouldFindConstructorWithNoArguments() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(A.class));
+        w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().flush();
 
         assertThat(w.find(ObjectRequest.byType(A.class))).isNotNull().isExactlyInstanceOf(A.class);
@@ -42,9 +42,9 @@ public class ConstructorsTest {
     @Test
     public void shouldFindInjectAnnotatedConstructor() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(OneAnnotated.class));
-        w.getQueue().add(ContainerConfiguration.of(A.class));
-        w.getQueue().add(ContainerConfiguration.of(B.class));
+        w.getQueue().add(ClassCharacter.of(OneAnnotated.class));
+        w.getQueue().add(ClassCharacter.of(A.class));
+        w.getQueue().add(ClassCharacter.of(B.class));
         w.getQueue().flush();
 
         ObjectAssert<?> a = assertThat(w.find(ObjectRequest.byType(OneAnnotated.class)));
@@ -56,8 +56,8 @@ public class ConstructorsTest {
     @Test
     public void shouldFindPublicInjectConstructorAndProvideDependency() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(A.class));
-        w.getQueue().add(ContainerConfiguration.of(SingleDependency.class));
+        w.getQueue().add(ClassCharacter.of(A.class));
+        w.getQueue().add(ClassCharacter.of(SingleDependency.class));
         w.getQueue().flush();
 
         assertThat(w.find(ObjectRequest.byType(SingleDependency.class)))
@@ -68,9 +68,9 @@ public class ConstructorsTest {
     @Test
     public void shouldFindPublicInjectConstructorAndProvideMultipleDependencies() {
         World w = new World();
-        w.getQueue().add(ContainerConfiguration.of(A.class));
-        w.getQueue().add(ContainerConfiguration.of(MultipleDependencies.class));
-        w.getQueue().add(ContainerConfiguration.of(B.class));
+        w.getQueue().add(ClassCharacter.of(A.class));
+        w.getQueue().add(ClassCharacter.of(MultipleDependencies.class));
+        w.getQueue().add(ClassCharacter.of(B.class));
         w.getQueue().flush();
 
         ObjectAssert<?> a = assertThat(w.find(ObjectRequest.byType(MultipleDependencies.class)));

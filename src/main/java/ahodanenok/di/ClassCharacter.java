@@ -10,11 +10,11 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 // todo: validation
-public class ContainerConfiguration<T> {
+public class ClassCharacter<T> {
 
-    public static <T> ContainerConfiguration<T> of(Class<T> clazz) {
+    public static <T> ClassCharacter<T> of(Class<T> clazz) {
         // todo: read configuration from annotations
-        return new ContainerConfiguration<T>(clazz);
+        return new ClassCharacter<T>(clazz);
     }
 
     private final ClassMetadataReader<T> classMetadataReader;
@@ -27,7 +27,7 @@ public class ContainerConfiguration<T> {
     private List<Class<?>> interceptors;
     private Map<String, Method> interceptorMethods;
 
-    public ContainerConfiguration(Class<T> clazz) {
+    public ClassCharacter(Class<T> clazz) {
         this.classMetadataReader = new ClassMetadataReader<>(clazz);
         this.objectClass = clazz;
 
@@ -59,7 +59,7 @@ public class ContainerConfiguration<T> {
         return objectClass;
     }
 
-    public ContainerConfiguration<T> knownAs(String... name) {
+    public ClassCharacter<T> knownAs(String... name) {
         if (name.length == 0) {
             return this;
         }
@@ -74,7 +74,7 @@ public class ContainerConfiguration<T> {
         return Collections.unmodifiableSet(names);
     }
 
-    public ContainerConfiguration<T> withScope(Scope<T> scope) {
+    public ClassCharacter<T> withScope(Scope<T> scope) {
         // todo: check not null
         this.scope = scope;
         return this;
@@ -84,7 +84,7 @@ public class ContainerConfiguration<T> {
         return scope;
     }
 
-    public ContainerConfiguration<T> interceptedBy(Class<?>... interceptorClasses) {
+    public ClassCharacter<T> interceptedBy(Class<?>... interceptorClasses) {
         if (interceptorClasses.length == 0) {
             return this;
         }
@@ -101,7 +101,7 @@ public class ContainerConfiguration<T> {
         return interceptors != null ? interceptors : Collections.emptyList();
     }
 
-    public ContainerConfiguration<T> intercepts(String type, Method method) {
+    public ClassCharacter<T> intercepts(String type, Method method) {
         if (interceptorMethods == null) {
             interceptorMethods = new HashMap<>();
         }
@@ -124,7 +124,7 @@ public class ContainerConfiguration<T> {
         return interceptorMethods.computeIfAbsent(type, classMetadataReader::readInterceptorMethod);
     }
 
-    public ContainerConfiguration<T> interceptor() {
+    public ClassCharacter<T> interceptor() {
         this.interceptor = true;
         return this;
     }
