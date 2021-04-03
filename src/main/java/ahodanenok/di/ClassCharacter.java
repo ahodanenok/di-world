@@ -112,7 +112,7 @@ public class ClassCharacter<T> {
 
     public Method getInterceptorMethod(String type) {
         if (interceptorMethods == null) {
-            return null;
+            interceptorMethods = new HashMap<>();
         }
 
         // if there is entry with null method,

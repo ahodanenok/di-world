@@ -3,11 +3,15 @@ package ahodanenok.di;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
+import ahodanenok.di.interceptor.context.MethodInvocationContext;
+import ahodanenok.di.interceptor.context.ObjectInvocationContext;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.util.ReflectionUtils;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.interceptor.AroundConstruct;
+import javax.interceptor.InvocationContext;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -49,24 +53,41 @@ public class Container<T> {
         Constructor<?> constructor = getConstructor();
         Object[] args = resolveArguments(constructor);
 
-        ConstructorInvocationContext context = new ConstructorInvocationContext(constructor);
-        context.setParameters(args);
+        ConstructorInvocationContext constructorContext = new ConstructorInvocationContext(constructor);
+        constructorContext.setParameters(args);
 
         // todo: intercept post construct
 
         try {
+            // todo: split to InterceptorContainer and ClassContainer???
+
             // todo: suppress warning
             T instance;
             if (!character.isInterceptor()) {
                 InterceptorChain aroundConstructChain = world.getInterceptorChain(
                         InterceptorRequest.ofType(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
 
-                instance = (T) aroundConstructChain.invoke(context);
+                instance = (T) aroundConstructChain.invoke(constructorContext);
             } else {
-                instance = (T) context.proceed();
+                instance = (T) constructorContext.proceed();
             }
 
             inject(instance);
+
+            if (!character.isInterceptor()) {
+                InterceptorChain postConstructChain = world.getInterceptorChain(
+                        InterceptorRequest.ofType(PostConstruct.class.getName()).withClasses(character.getInterceptors()));
+
+                InvocationContext postConstructContext;
+                Method interceptorMethod = character.getInterceptorMethod(PostConstruct.class.getName());
+                if (interceptorMethod != null) {
+                    postConstructContext = new MethodInvocationContext(instance, interceptorMethod);
+                } else {
+                    postConstructContext = new ObjectInvocationContext(instance);
+                }
+
+                postConstructChain.invoke(postConstructContext);
+            }
 
             return instance;
         } catch (Exception e) {
