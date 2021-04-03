@@ -1,5 +1,7 @@
-package ahodanenok.di;
+package ahodanenok.di.container;
 
+import ahodanenok.di.ObjectRequest;
+import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
@@ -20,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Container<T> {
+public class ClassContainer<T> {
 
     private World world;
     private ClassCharacter<T> character;
@@ -29,7 +31,7 @@ public class Container<T> {
     private Set<String> names;
     private Scope<T> scope;
 
-    public Container(World world, ClassCharacter<T> character) {
+    public ClassContainer(World world, ClassCharacter<T> character) {
         this.world = world;
         this.character = character;
 

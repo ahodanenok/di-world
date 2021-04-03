@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.container.ClassContainer;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
@@ -20,13 +21,13 @@ import java.util.stream.Collectors;
 // todo: qualifiers
 // todo: around invoke
 
-public class World implements Iterable<Container<?>> {
+public class World implements Iterable<ClassContainer<?>> {
 
     public static void main(String[] args) {
 
     }
 
-    private List<Container<?>> containers = new ArrayList<>();
+    private List<ClassContainer<?>> containers = new ArrayList<>();
     private EntranceQueue queue = new EntranceQueue(this::register);
     private Map<String, List<InterceptorInvoke>> interceptors = new HashMap<>();
 
@@ -36,7 +37,7 @@ public class World implements Iterable<Container<?>> {
 
     private void register(List<ClassCharacter<?>> characters) {
         for (ClassCharacter<?> character : characters) {
-            Container<?> container = buildContainer(character);
+            ClassContainer<?> container = buildContainer(character);
             register(container);
 
             // todo: validate interceptors
@@ -52,8 +53,8 @@ public class World implements Iterable<Container<?>> {
         }
     }
 
-    private void register(Container<?> container) {
-        for (Container<?> c : containers) {
+    private void register(ClassContainer<?> container) {
+        for (ClassContainer<?> c : containers) {
             for (String n : c.getNames()) {
                 if (container.getNames().contains(n)) {
                     throw new IllegalStateException(n);
@@ -64,16 +65,16 @@ public class World implements Iterable<Container<?>> {
         containers.add(container);
     }
 
-    private <T> Container<T> buildContainer(ClassCharacter<T> character) {
+    private <T> ClassContainer<T> buildContainer(ClassCharacter<T> character) {
         // todo: configuration class per container type (class, factory method, instance)
         // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
-        Container<T> container = new Container<>(this,  character);
+        ClassContainer<T> container = new ClassContainer<>(this,  character);
 
         return container;
     }
 
     public <T> T find(ObjectRequest<T> request) {
-        List<Container<?>> containers = findContainers(request);
+        List<ClassContainer<?>> containers = findContainers(request);
         if (containers.size() == 1) {
             // todo: supress unchecked
             return (T) containers.get(0).getObject();
@@ -91,9 +92,9 @@ public class World implements Iterable<Container<?>> {
         return findContainers(request).stream().map(c -> (T) c.getObject()).collect(Collectors.toList());
     }
 
-    public <T> List<Container<?>> findContainers(ObjectRequest<T> request) {
-        List<Container<?>> matched = new ArrayList<>();
-        for (Container<?> c : containers) {
+    public <T> List<ClassContainer<?>> findContainers(ObjectRequest<T> request) {
+        List<ClassContainer<?>> matched = new ArrayList<>();
+        for (ClassContainer<?> c : containers) {
             if (request.getName() != null && !request.isNameAsQualifier() && c.getNames().contains(request.getName())) {
                 matched.add(c);
                 continue;
@@ -113,7 +114,7 @@ public class World implements Iterable<Container<?>> {
         return pickContainers(request, matched);
     }
 
-    private <T> List<Container<?>> pickContainers(ObjectRequest<T> request, List<Container<?>> containers) {
+    private <T> List<ClassContainer<?>> pickContainers(ObjectRequest<T> request, List<ClassContainer<?>> containers) {
 
         // todo: pick by request
         return containers;
@@ -159,10 +160,10 @@ public class World implements Iterable<Container<?>> {
      */
     private static class InterceptorInvoke implements Interceptor {
 
-        private final Container<?> container;
+        private final ClassContainer<?> container;
         private final Method method;
 
-        public InterceptorInvoke(Container<?> container, Method method) {
+        public InterceptorInvoke(ClassContainer<?> container, Method method) {
             this.container = container;
             this.method = method;
         }
@@ -181,7 +182,7 @@ public class World implements Iterable<Container<?>> {
     }
 
     @Override
-    public Iterator<Container<?>> iterator() {
+    public Iterator<ClassContainer<?>> iterator() {
         return Collections.unmodifiableCollection(containers).iterator();
     }
 }
