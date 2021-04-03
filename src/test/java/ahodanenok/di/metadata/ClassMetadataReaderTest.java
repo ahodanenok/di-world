@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Named;
 import javax.inject.Scope;
 import javax.inject.Singleton;
+import javax.interceptor.Interceptor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -79,5 +80,24 @@ public class ClassMetadataReaderTest {
         assertThatThrownBy(() -> new ClassMetadataReader<>(ScopedWithAttributes.class).readScope())
                 .isExactlyInstanceOf(ConfigException.class)
                 .hasMessageStartingWith("Scope annotation must not declare any attributes");
+    }
+
+    @Interceptor public static class InterceptorClass { }
+    public static class NotInterceptorClass { }
+    public static class InterceptorInParent extends InterceptorClass { }
+
+    @Test
+    public void shouldReadInterceptorAsTrue() {
+        assertThat(new ClassMetadataReader<>(InterceptorClass.class).readInterceptor()).isTrue();
+    }
+
+    @Test
+    public void shouldReadInterceptorAsFalse() {
+        assertThat(new ClassMetadataReader<>(NotInterceptorClass.class).readInterceptor()).isFalse();
+    }
+
+    @Test
+    public void shouldNotReadInterceptorAsTrueIfInParent() {
+        assertThat(new ClassMetadataReader<>(InterceptorInParent.class).readInterceptor()).isFalse();
     }
 }

@@ -4,6 +4,7 @@ import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;
 import javax.inject.Scope;
+import javax.interceptor.Interceptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -67,7 +68,7 @@ public class ClassMetadataReader<T> {
     }
 
     public boolean readInterceptor() {
-        return false;
+        return clazz.isAnnotationPresent(Interceptor.class);
     }
 
     public Constructor<T> readConstructor() {
