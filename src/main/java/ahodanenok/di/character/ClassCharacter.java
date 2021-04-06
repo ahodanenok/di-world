@@ -1,14 +1,17 @@
 package ahodanenok.di.character;
 
 import ahodanenok.di.metadata.ClassMetadataReader;
+import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
 
 import javax.inject.Singleton;
 import javax.interceptor.InvocationContext;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // todo: validation
 public class ClassCharacter<T> {
@@ -23,6 +26,7 @@ public class ClassCharacter<T> {
     private final Class<T> objectClass;
     private Set<String> names;
     private Scope<T> scope;
+    private ExecutableMetadataReader constructor;
 
     private boolean interceptor;
     private List<Class<?>> interceptors;
@@ -56,6 +60,23 @@ public class ClassCharacter<T> {
         } else {
             this.interceptors = Collections.emptyList();
         }
+
+        List<ExecutableMetadataReader> constructors = new ArrayList<>();
+        for (Constructor<?> constructor : objectClass.getDeclaredConstructors()) {
+            ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(constructor);
+            if (metadataReader.readInjectable()) {
+                constructors.add(metadataReader);
+            }
+        }
+
+        if (constructors.size() == 1) {
+            this.constructor = constructors.get(0);
+        } else if (constructors.size() > 1) {
+            throw new IllegalStateException(String.format(
+                    "Only one constructor can be injectable, injectable constructos in '%s' are: %s",
+                    objectClass,
+                    constructors.stream().map(ExecutableMetadataReader::getExecutable).collect(Collectors.toList())));
+        }
     }
 
     public Class<T> getObjectClass() {
@@ -75,6 +96,24 @@ public class ClassCharacter<T> {
 
     public Set<String> getNames() {
         return Collections.unmodifiableSet(names);
+    }
+
+    /**
+     * Use constructor to instantiate class
+     */
+    public ClassCharacter<T> constructedBy(Constructor<?> constructor) {
+        // todo: check constructor
+        this.constructor = new ExecutableMetadataReader(constructor);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked") // reader will have constructor from objectClass
+    public Constructor<T> getConstructor() {
+        if (constructor != null) {
+            return (Constructor<T>) constructor.getExecutable();
+        } else {
+            return null;
+        }
     }
 
     public ClassCharacter<T> withScope(Scope<T> scope) {

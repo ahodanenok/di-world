@@ -11,6 +11,10 @@ public class ExecutableMetadataReader {
         this.executable = executable;
     }
 
+    public Executable getExecutable() {
+        return executable;
+    }
+
     /**
      * Executable is injectable if it is annotated with @Inject annotation
      */

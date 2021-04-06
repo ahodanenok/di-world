@@ -9,11 +9,11 @@ import static org.assertj.core.api.Assertions.*;
 
 public class LookupTest {
 
-    static class A { }
+    public static class A { }
     static class B { }
 
     static class P { }
-    static class C1 extends P { }
+    public static class C1 extends P { }
     static class C2 extends P { }
 
     // todo: check with different modifiers

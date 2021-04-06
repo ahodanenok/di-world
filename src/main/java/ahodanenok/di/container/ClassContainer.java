@@ -3,11 +3,13 @@ package ahodanenok.di.container;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.exception.ConfigException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import ahodanenok.di.interceptor.context.MethodInvocationContext;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
+import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.util.ReflectionUtils;
 
@@ -30,6 +32,7 @@ public class ClassContainer<T> {
     private Class<T> objectClass;
     private Set<String> names;
     private Scope<T> scope;
+    private Constructor<?> constructor;
 
     public ClassContainer(World world, ClassCharacter<T> character) {
         this.world = world;
@@ -53,26 +56,26 @@ public class ClassContainer<T> {
     }
 
     private T doGetObject() {
-        Constructor<?> constructor = getConstructor();
+        if (constructor == null) {
+            constructor = resolveConstructor();
+        }
+
+        // todo: cache arguments?
         Object[] args = resolveArguments(constructor);
 
         ConstructorInvocationContext constructorContext = new ConstructorInvocationContext(constructor);
         constructorContext.setParameters(args);
 
-        // todo: intercept post construct
+        // todo: split to InterceptorContainer and ClassContainer???
 
         try {
-            // todo: split to InterceptorContainer and ClassContainer???
-
-            // todo: suppress warning
-            T instance;
+            Object instance;
             if (!character.isInterceptor()) {
                 InterceptorChain aroundConstructChain = world.getInterceptorChain(
                         InterceptorRequest.of(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
-
-                instance = (T) aroundConstructChain.invoke(constructorContext);
+                instance = aroundConstructChain.invoke(constructorContext);
             } else {
-                instance = (T) constructorContext.proceed();
+                instance = constructorContext.proceed();
             }
 
             inject(instance);
@@ -92,40 +95,35 @@ public class ClassContainer<T> {
                 postConstructChain.invoke(postConstructContext);
             }
 
-            return instance;
+            // todo: interceptors could swap created instance for something else, return Object?
+            // @SuppressWarnings("unchecked")
+            T castedInstance = (T) instance;
+
+            return castedInstance;
         } catch (Exception e) {
             // todo: handle exceptions
             throw new IllegalStateException(e);
         }
     }
 
-    private Constructor<?> getConstructor() {
-        // todo: additional rules for selecting constructors from class
-
-        List<Constructor<?>> matched = new ArrayList<>();
-        for (Constructor<?> c : getObjectClass().getDeclaredConstructors()) {
-            // todo: only @Inject is used to mark injectable constructors?
-            if (c.getDeclaredAnnotation(Inject.class) != null) {
-                matched.add(c);
-            }
+    private Constructor<?> resolveConstructor() {
+        if (character.getConstructor() != null) {
+            return character.getConstructor();
         }
 
-        if (matched.isEmpty()) {
-            try {
-                // todo: any public? no-arg is fallback?
-                matched.add(getObjectClass().getDeclaredConstructor());
-            } catch (NoSuchMethodException e) {
-                // todo: exception
-                e.printStackTrace();
-                throw new IllegalStateException("no constructor");
-            }
+        Constructor<?>[] constructors = objectClass.getConstructors();
+        // If there a single public constructor, using it
+        if (constructors.length == 1) {
+            return constructors[0];
         }
 
-        if (matched.size() == 1) {
-            return matched.get(0);
-        } else {
-            // todo: exception
-            throw new IllegalStateException("multiple constructors");
+        try {
+            // falling back to no-arg public constructor
+            return objectClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new ConfigException(String.format(
+                    "Couldn't resolve constructor for '%s', provide it explicitly in a character" +
+                    " or use @Inject annotation to mark which constructor to use", objectClass));
         }
     }
 
@@ -154,7 +152,7 @@ public class ClassContainer<T> {
     }
 
     // todo: how to handle exception?
-    private void inject(T instance) throws Exception {
+    private void inject(Object instance) throws Exception {
         Map<Class<?>, List<Method>> methodsByClass = ReflectionUtils.getInstanceMethods(instance.getClass())
                 .stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
 

@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.*;
 
 public class ConstructorsTest {
 
-    static class A { }
-    static class B { }
+    public static class A { }
+    public static class B { }
 
     static class OneAnnotated {
         A a;
