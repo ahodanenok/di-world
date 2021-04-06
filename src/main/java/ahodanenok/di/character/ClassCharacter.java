@@ -6,6 +6,7 @@ import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
 
 import javax.inject.Singleton;
+import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -104,6 +105,32 @@ public class ClassCharacter<T> {
      */
     public List<Class<?>> getInterceptors() {
         return interceptors;
+    }
+
+    /**
+     * Mark a method of a class as an interceptor of a type
+     *
+     * Expects given method to be declared exactly in the class
+     * and either have no parameters or InvocationContext as a single parameter
+     *
+     * @see #intercepts(String, Method)
+     */
+    public ClassCharacter<T> intercepts(String type, String methodName) {
+        try {
+            return intercepts(type, objectClass.getDeclaredMethod(methodName));
+        } catch (NoSuchMethodException e) {
+            // no-op
+        }
+
+        try {
+            return intercepts(type, objectClass.getDeclaredMethod(methodName, InvocationContext.class));
+        } catch (NoSuchMethodException e) {
+            // no-op
+        }
+
+        throw new IllegalArgumentException(String.format("Interceptor method '%s' not found in '%s'." +
+                " Make sure method is present and accepts either no parameters" +
+                " or InvocationContext as a single parameter", methodName, objectClass));
     }
 
     /**
