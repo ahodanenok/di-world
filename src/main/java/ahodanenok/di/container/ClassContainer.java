@@ -128,20 +128,28 @@ public class ClassContainer<T> {
     }
 
     private Object[] resolveArguments(Executable executable) {
+        ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(executable);
+
         Object[] args = new Object[executable.getParameterCount()];
         for (int i = 0; i < args.length; i++) {
-            args[i] = resolveArgument(executable, i);
+            args[i] = resolveArgument(metadataReader, i);
         }
 
         return args;
     }
 
-    private Object resolveArgument(Executable executable, int pos) {
-        Class<?> paramType = executable.getParameterTypes()[pos];
-        // todo: intercept around resolve
-        // todo: by name
+    private Object resolveArgument(ExecutableMetadataReader metadataReader, int paramNum) {
+        Class<?> paramType = metadataReader.getExecutable().getParameterTypes()[paramNum];
+        ObjectRequest<?> request = ObjectRequest.byType(paramType);
+
+        String name = metadataReader.readParameterName(paramNum);
+        if (name != null) {
+            request.withName(name);
+        }
+
         // todo: qualifiers
-        return world.find(ObjectRequest.byType(paramType));
+        // todo: intercept around resolve
+        return world.find(request);
     }
 
     private Object resolvedDependency(Field field) {

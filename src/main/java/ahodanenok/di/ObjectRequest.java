@@ -1,5 +1,8 @@
 package ahodanenok.di;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 public class ObjectRequest<T> {
 
     public static <T> ObjectRequest<T> byName(String name) {
@@ -17,6 +20,7 @@ public class ObjectRequest<T> {
     private Class<?> type;
     private String name;
     private boolean nameAsQualifier;
+    private List<Annotation> qualifiers;
 
     private ObjectRequest() { }
 
@@ -44,6 +48,11 @@ public class ObjectRequest<T> {
 
     public ObjectRequest<T> withName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public ObjectRequest<T> withQualifiers(List<Annotation> qualifiers) {
+        this.qualifiers = qualifiers;
         return this;
     }
 }
