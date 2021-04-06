@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.InvocationContext;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -147,7 +148,11 @@ public class ClassContainer<T> {
             request.withName(name);
         }
 
-        // todo: qualifiers
+        List<Annotation> qualifiers = metadataReader.readParameterQualifiers(paramNum);
+        if (qualifiers.isEmpty()) {
+            request.withQualifiers(qualifiers);
+        }
+
         // todo: intercept around resolve
         return world.find(request);
     }

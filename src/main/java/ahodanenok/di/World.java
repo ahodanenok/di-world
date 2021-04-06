@@ -93,6 +93,9 @@ public class World implements Iterable<ClassContainer<?>> {
     }
 
     public <T> List<ClassContainer<?>> findContainers(ObjectRequest<T> request) {
+
+        // todo: support qualifiers
+
         List<ClassContainer<?>> matched = new ArrayList<>();
         for (ClassContainer<?> c : containers) {
             if (request.getName() != null && !request.isNameAsQualifier() && c.getNames().contains(request.getName())) {

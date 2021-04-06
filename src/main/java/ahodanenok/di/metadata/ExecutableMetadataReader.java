@@ -1,11 +1,14 @@
 package ahodanenok.di.metadata;
 
 import ahodanenok.di.exception.ConfigException;
+import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
+import java.util.List;
 
 public class ExecutableMetadataReader {
 
@@ -42,5 +45,17 @@ public class ExecutableMetadataReader {
         }
 
         return null;
+    }
+
+    /**
+     * Find all @Qualifier annotations on the executable's parameter
+     */
+    public List<Annotation> readParameterQualifiers(int paramNum) {
+        if (paramNum < 0 || paramNum >= executable.getParameterCount()) {
+            throw new IllegalArgumentException(String.format(
+                    "Executable '%s' doesn't have parameter at %d", executable, paramNum));
+        }
+
+        return ReflectionUtils.getAnnotationsWithMetaAnnotation(executable.getParameters()[paramNum], Qualifier.class);
     }
 }

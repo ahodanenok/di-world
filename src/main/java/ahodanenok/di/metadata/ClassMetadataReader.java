@@ -4,6 +4,7 @@ import ahodanenok.di.exception.ConfigException;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;
+import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.interceptor.Interceptor;
 import javax.interceptor.Interceptors;
@@ -92,5 +93,12 @@ public class ClassMetadataReader<T> {
         }
 
         return null;
+    }
+
+    /**
+     * Find all @Qualifier annotations on the class
+     */
+    public List<Annotation> readQualifiers() {
+        return ReflectionUtils.getAnnotationsWithMetaAnnotation(clazz, Qualifier.class);
     }
 }

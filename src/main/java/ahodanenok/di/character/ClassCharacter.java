@@ -8,6 +8,7 @@ import ahodanenok.di.scope.SingletonScope;
 
 import javax.inject.Singleton;
 import javax.interceptor.InvocationContext;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -27,6 +28,7 @@ public class ClassCharacter<T> {
     private Set<String> names;
     private Scope<T> scope;
     private ExecutableMetadataReader constructor;
+    private List<Annotation> qualifiers;
 
     private boolean interceptor;
     private List<Class<?>> interceptors;
@@ -51,6 +53,8 @@ public class ClassCharacter<T> {
         } else {
             this.scope = AlwaysNewScope.getInstance();
         }
+
+        this.qualifiers = Collections.unmodifiableList(classMetadataReader.readQualifiers());
 
         this.interceptor = classMetadataReader.readInterceptor();
 
@@ -126,6 +130,10 @@ public class ClassCharacter<T> {
         return scope;
     }
 
+    public List<Annotation> getQualifiers() {
+        return qualifiers;
+    }
+
     /**
      * Set interceptors for a class
      * If called without any parameters - clears interceptors if any
@@ -143,7 +151,7 @@ public class ClassCharacter<T> {
      * @see javax.interceptor.Interceptors
      */
     public List<Class<?>> getInterceptors() {
-        return interceptors;
+        return Collections.unmodifiableList(interceptors);
     }
 
     /**
