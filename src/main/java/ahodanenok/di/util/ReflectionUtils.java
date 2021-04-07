@@ -1,11 +1,13 @@
 package ahodanenok.di.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Repeatable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class ReflectionUtils {
 
@@ -144,29 +146,70 @@ public class ReflectionUtils {
         }
     }
 
-    public static List<Annotation> getAnnotationsWithMetaAnnotation(AnnotatedElement element,
-                                                                    Class<? extends Annotation> metaAnnotationClass) {
+    public static List<Annotation> getAnnotations(AnnotatedElement element, Predicate<Annotation> predicate) {
+        return getAnnotations(element, predicate, false);
+    }
 
+    public static List<Annotation> getAnnotations(AnnotatedElement element,
+                                                  Predicate<Annotation> predicate,
+                                                  boolean composition) {
         List<Annotation> result = new ArrayList<>();
 
         LinkedList<Annotation> queue = new LinkedList<>();
         for (Annotation a : element.getAnnotations()) {
-            if (a.annotationType().isAnnotationPresent(metaAnnotationClass)) {
+            if (predicate.test(a)) {
                 queue.addLast(a);
             }
-        }
 
-        while (!queue.isEmpty()) {
-            Annotation current = queue.removeFirst();
-            result.add(current);
+            Class<? extends Annotation> repeatable = getRepeatableAnnotationClass(a);
 
-            for (Annotation a : current.annotationType().getDeclaredAnnotations()) {
-                if (a.annotationType().isAnnotationPresent(metaAnnotationClass) && !queue.contains(a)) {
-                    queue.addLast(a);
+            if (repeatable != null) {
+                for (Annotation r : element.getAnnotationsByType(repeatable)) {
+                    if (predicate.test(r)) {
+                        queue.addLast(r);
+                    }
                 }
             }
         }
 
+        if (composition) {
+            while (!queue.isEmpty()) {
+                Annotation current = queue.removeFirst();
+                result.add(current);
+
+                for (Annotation a : current.annotationType().getDeclaredAnnotations()) {
+                    if (predicate.test(a) && !queue.contains(a)) {
+                        queue.addLast(a);
+                    }
+                }
+            }
+        } else {
+            result.addAll(queue);
+        }
+
         return result;
+    }
+
+    private static Class<? extends Annotation> getRepeatableAnnotationClass(Annotation annotation) {
+        Method value;
+        try {
+            value = annotation.annotationType().getDeclaredMethod("value");
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
+
+        // repeatable contains has value method which returns array of @Repeatable annotations
+        if (value.getReturnType().isArray()
+                && value.getReturnType().getComponentType().isAnnotation()
+                && value.getReturnType().getComponentType().isAnnotationPresent(Repeatable.class)) {
+
+            @SuppressWarnings("unchecked") // cast is safe - value() returns an array of annotations
+            Class<? extends Annotation> repeatable
+                    = (Class<? extends Annotation>) value.getReturnType().getComponentType();
+
+            return repeatable;
+        }
+
+        return null;
     }
 }

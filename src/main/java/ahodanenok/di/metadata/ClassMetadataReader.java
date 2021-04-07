@@ -53,7 +53,8 @@ public class ClassMetadataReader<T> {
      * @throws ConfigException if class contains multiple scope declarations or scope has attributes
      */
     public String readScope() {
-        List<Annotation> scopes = ReflectionUtils.getAnnotationsWithMetaAnnotation(clazz, Scope.class);
+        List<Annotation> scopes = ReflectionUtils.getAnnotations(
+                clazz, a -> a.annotationType().isAnnotationPresent(Scope.class));
         if (scopes.size() == 1) {
             Class<? extends Annotation> scope = scopes.get(0).annotationType();
             if (scope.getDeclaredMethods().length > 0) {
@@ -99,6 +100,6 @@ public class ClassMetadataReader<T> {
      * Find all @Qualifier annotations on the class
      */
     public List<Annotation> readQualifiers() {
-        return ReflectionUtils.getAnnotationsWithMetaAnnotation(clazz, Qualifier.class);
+        return ReflectionUtils.getAnnotations(clazz, a -> a.annotationType().isAnnotationPresent(Qualifier.class));
     }
 }

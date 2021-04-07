@@ -48,7 +48,7 @@ public class GetAnnotationsTest {
 
     @Test
     public void shouldReturnAnnotationsWithMetaAnnotationDeclaredOnClass()  {
-        assertThat(ReflectionUtils.getAnnotationsWithMetaAnnotation(WithAnnotations.class, Meta.class))
+        assertThat(ReflectionUtils.getAnnotations(WithAnnotations.class, a -> a.annotationType().isAnnotationPresent(Meta.class), true))
                 .containsExactlyInAnyOrder(
                         MB.class.getDeclaredAnnotation(MA.class),
                         MC.class.getDeclaredAnnotation(MB.class),
@@ -57,7 +57,7 @@ public class GetAnnotationsTest {
 
     @Test
     public void shouldReturnAnnotationsWithMetaAnnotationDeclaredOnSuperClass()  {
-        assertThat(ReflectionUtils.getAnnotationsWithMetaAnnotation(Subclass.class, Meta.class))
+        assertThat(ReflectionUtils.getAnnotations(Subclass.class, a -> a.annotationType().isAnnotationPresent(Meta.class), true))
                 .containsExactlyInAnyOrder(
                         MB.class.getDeclaredAnnotation(MA.class));
     }

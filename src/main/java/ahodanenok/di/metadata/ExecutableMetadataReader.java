@@ -56,6 +56,8 @@ public class ExecutableMetadataReader {
                     "Executable '%s' doesn't have parameter at %d", executable, paramNum));
         }
 
-        return ReflectionUtils.getAnnotationsWithMetaAnnotation(executable.getParameters()[paramNum], Qualifier.class);
+        return ReflectionUtils.getAnnotations(
+                executable.getParameters()[paramNum],
+                a -> a.annotationType().isAnnotationPresent(Qualifier.class));
     }
 }
