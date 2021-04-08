@@ -1,5 +1,6 @@
 package ahodanenok.di.character;
 
+import ahodanenok.di.exception.ConfigException;
 import ahodanenok.di.metadata.ClassMetadataReader;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;
@@ -11,6 +12,7 @@ import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,7 +20,15 @@ import java.util.stream.Collectors;
 public class ClassCharacter<T> {
 
     public static <T> ClassCharacter<T> of(Class<T> clazz) {
-        // todo: read configuration from annotations
+
+        if (clazz.isInterface()) {
+            throw new ConfigException("Can't instantiate an interface");
+        }
+
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            throw new ConfigException("Can't instantiate an interface");
+        }
+
         return new ClassCharacter<T>(clazz);
     }
 
