@@ -212,4 +212,31 @@ public class ReflectionUtils {
 
         return null;
     }
+
+    // A bean is assignable to a given injection point if:
+    public static boolean isAssignable(Class<?> fromType, Class<?> toType) {
+        // The bean has a bean type that matches the required type.
+        if (fromType == toType) {
+            return true;
+        }
+
+        // The bean type is assignable to the required type
+        if (toType.isAssignableFrom(fromType)) {
+            return true;
+        }
+
+        // Array types are considered to match only if their element types are identical
+        if (fromType.isArray() && toType.isArray() && fromType.getComponentType() == toType.getComponentType()) {
+            return true;
+        }
+
+        // Primitive types are considered to match their corresponding wrapper types in java.lang
+        if (PRIMITIVE_WRAPPERS.getOrDefault(fromType, fromType) == PRIMITIVE_WRAPPERS.getOrDefault(toType, toType)) {
+            return true;
+        }
+
+        // todo: Assignability of raw and parameterized types
+
+        return false;
+    }
 }

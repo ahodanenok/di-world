@@ -6,13 +6,7 @@ import java.util.List;
 
 public class ObjectRequest<T> {
 
-    public static <T> ObjectRequest<T> byName(String name) {
-        ObjectRequest<T> request = new ObjectRequest<>();
-        request.withName(name);
-        return request;
-    }
-
-    public static <T> ObjectRequest<T> byType(Class<T> type) {
+    public static <T> ObjectRequest<T> of(Class<T> type) {
         ObjectRequest<T> request = new ObjectRequest<T>();
         request.withType(type);
         return request;
@@ -64,7 +58,7 @@ public class ObjectRequest<T> {
     @Override
     public String toString() {
         return String.format(
-                "ObjectRequest(type=%s, name=%s, qualifiers=%s, context=%s)",
-                type, name, qualifiers, context);
+                "ObjectRequest(type=%s, qualifiers=%s, context=%s)",
+                type, qualifiers, context);
     }
 }

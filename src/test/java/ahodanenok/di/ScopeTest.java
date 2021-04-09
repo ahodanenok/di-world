@@ -17,10 +17,10 @@ public class ScopeTest {
         w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().flush();
 
-        A first = w.find(ObjectRequest.byType(A.class));
+        A first = w.find(ObjectRequest.of(A.class));
         assertThat(first).isNotNull().isExactlyInstanceOf(A.class);
 
-        A second = w.find(ObjectRequest.byType(A.class));
+        A second = w.find(ObjectRequest.of(A.class));
         assertThat(second).isNotNull().isExactlyInstanceOf(A.class);
 
         assertThat(first).isNotSameAs(second);
@@ -32,10 +32,10 @@ public class ScopeTest {
         w.getQueue().add(ClassCharacter.of(A.class).withScope(AlwaysNewScope.getInstance()));
         w.getQueue().flush();
 
-        A first = w.find(ObjectRequest.byType(A.class));
+        A first = w.find(ObjectRequest.of(A.class));
         assertThat(first).isNotNull().isExactlyInstanceOf(A.class);
 
-        A second = w.find(ObjectRequest.byType(A.class));
+        A second = w.find(ObjectRequest.of(A.class));
         assertThat(second).isNotNull().isExactlyInstanceOf(A.class);
 
         assertThat(first).isNotSameAs(second);
@@ -47,10 +47,10 @@ public class ScopeTest {
         w.getQueue().add(ClassCharacter.of(A.class).withScope(new SingletonScope<>()));
         w.getQueue().flush();
 
-        A first = w.find(ObjectRequest.byType(A.class));
+        A first = w.find(ObjectRequest.of(A.class));
         assertThat(first).isNotNull().isExactlyInstanceOf(A.class);
 
-        A second = w.find(ObjectRequest.byType(A.class));
+        A second = w.find(ObjectRequest.of(A.class));
         assertThat(second).isNotNull().isExactlyInstanceOf(A.class);
 
         assertThat(first).isSameAs(second);

@@ -8,8 +8,6 @@ import ahodanenok.di.next.inject.classes.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -26,7 +24,7 @@ public class InjectionTest {
         w.getQueue().add(ClassCharacter.of(Color.class));
         w.getQueue().flush();
 
-        FoodContainer fc = w.find(ObjectRequest.byType(FoodContainer.class));
+        FoodContainer fc = w.find(ObjectRequest.of(FoodContainer.class));
         assertThat(fc.bread).isExactlyInstanceOf(Bread.class);
         assertThat(fc.butter).isExactlyInstanceOf(Butter.class);
         assertThat(fc.capacity).isExactlyInstanceOf(Capacity.class);
@@ -38,7 +36,7 @@ public class InjectionTest {
     public void errorNoDependencies() {
         World w = new World();
 
-        assertThatThrownBy(() -> w.find(ObjectRequest.byType(Drinkable.class)))
+        assertThatThrownBy(() -> w.find(ObjectRequest.of(Drinkable.class)))
                 .isExactlyInstanceOf(DependencyLookupException.class)
                 .hasMessageStartingWith("No dependencies are found for a request");
     }
@@ -51,7 +49,7 @@ public class InjectionTest {
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().flush();
 
-        assertThatThrownBy(() -> w.find(ObjectRequest.byType(Drinkable.class)))
+        assertThatThrownBy(() -> w.find(ObjectRequest.of(Drinkable.class)))
             .isExactlyInstanceOf(DependencyLookupException.class)
             .hasMessageStartingWith("Multiple matching dependencies are found for a request");
     }
@@ -65,7 +63,7 @@ public class InjectionTest {
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().flush();
 
-        Cup c = w.find(ObjectRequest.byType(Cup.class));
+        Cup c = w.find(ObjectRequest.of(Cup.class));
         assertThat(c).isExactlyInstanceOf(Cup.class);
         assertThat(c.drinkable).isExactlyInstanceOf(Coffee.class);
     }
@@ -79,7 +77,7 @@ public class InjectionTest {
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().flush();
 
-        Morning m = w.find(ObjectRequest.byType(Morning.class));
+        Morning m = w.find(ObjectRequest.of(Morning.class));
         assertThat(m).isExactlyInstanceOf(Morning.class);
         assertThat(m.drink).isExactlyInstanceOf(Coffee.class);
         assertThat(m.injectedDrink).isExactlyInstanceOf(Coffee.class);

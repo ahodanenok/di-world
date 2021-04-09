@@ -19,7 +19,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
 
-        assertThat(w.find(ObjectRequest.byType(Bread.class))).isExactlyInstanceOf(Bread.class);
+        assertThat(w.find(ObjectRequest.of(Bread.class))).isExactlyInstanceOf(Bread.class);
     }
 
     @Test
@@ -31,7 +31,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Butter.class));
         w.getQueue().flush();
 
-        Sandwich s = w.find(ObjectRequest.byType(Sandwich.class));
+        Sandwich s = w.find(ObjectRequest.of(Sandwich.class));
         assertThat(s).isExactlyInstanceOf(Sandwich.class);
         assertThat(s.bread).isExactlyInstanceOf(Bread.class);
         assertThat(s.butter).isExactlyInstanceOf(Butter.class);
@@ -44,7 +44,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Cheese.class));
         w.getQueue().flush();
 
-        assertThatThrownBy(() -> w.find(ObjectRequest.byType(Cheese.class)))
+        assertThatThrownBy(() -> w.find(ObjectRequest.of(Cheese.class)))
                 .isExactlyInstanceOf(ConfigException.class)
                 .hasMessageStartingWith("Couldn't resolve constructor");
     }
@@ -57,7 +57,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
 
-        Breakfast b = w.find(ObjectRequest.byType(Breakfast.class));
+        Breakfast b = w.find(ObjectRequest.of(Breakfast.class));
         assertThat(b).isExactlyInstanceOf(Breakfast.class);
         assertThat(b.bread).isExactlyInstanceOf(Bread.class);
     }
@@ -70,7 +70,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Lunch.class));
         w.getQueue().flush();
 
-        Lunch lunch = w.find(ObjectRequest.byType(Lunch.class));
+        Lunch lunch = w.find(ObjectRequest.of(Lunch.class));
         assertThat(lunch).isExactlyInstanceOf(Lunch.class);
         assertThat(lunch.bread).isExactlyInstanceOf(Bread.class);
     }
@@ -83,7 +83,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
 
-        Dinner d = w.find(ObjectRequest.byType(Dinner.class));
+        Dinner d = w.find(ObjectRequest.of(Dinner.class));
         assertThat(d).isExactlyInstanceOf(Dinner.class);
         assertThat(d.bread).isExactlyInstanceOf(Bread.class);
     }
@@ -96,7 +96,7 @@ public class ConstructorTest {
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
 
-        Supper s = w.find(ObjectRequest.byType(Supper.class));
+        Supper s = w.find(ObjectRequest.of(Supper.class));
         assertThat(s).isExactlyInstanceOf(Supper.class);
         assertThat(s.bread).isExactlyInstanceOf(Bread.class);
     }

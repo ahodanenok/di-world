@@ -131,7 +131,7 @@ public class PostConstructInterceptorTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(A.class))).isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isExactlyInstanceOf(A.class);
         assertThat(calledInterceptors).containsExactly("interceptor 1", "A");
     }
 
@@ -147,7 +147,7 @@ public class PostConstructInterceptorTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(C.class))).isExactlyInstanceOf(C.class);
+        assertThat(w.find(ObjectRequest.of(C.class))).isExactlyInstanceOf(C.class);
         assertThat(calledInterceptors).containsExactly("interceptor 1");
     }
 
@@ -169,7 +169,7 @@ public class PostConstructInterceptorTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(A.class))).isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isExactlyInstanceOf(A.class);
         assertThat(calledInterceptors).containsExactly("interceptor 2", "interceptor 1", "A");
     }
 }

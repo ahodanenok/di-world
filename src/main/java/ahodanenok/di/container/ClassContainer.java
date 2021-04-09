@@ -151,7 +151,7 @@ public class ClassContainer<T> {
                     .getActualTypeArguments()[0];
         }
 
-        ObjectRequest<?> request = ObjectRequest.byType(paramType);
+        ObjectRequest<?> request = ObjectRequest.of(paramType);
         request.withContext(metadataReader.getExecutable() + " "  + metadataReader.getExecutable().getParameters()[paramNum]);
 
         String name = metadataReader.readParameterName(paramNum);
@@ -182,7 +182,7 @@ public class ClassContainer<T> {
             paramType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
         }
 
-        ObjectRequest<?> request = ObjectRequest.byType(paramType);
+        ObjectRequest<?> request = ObjectRequest.of(paramType);
         request.withContext(field);
 
         String name = metadataReader.readName();

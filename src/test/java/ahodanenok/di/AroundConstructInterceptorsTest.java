@@ -147,7 +147,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(A.class))).isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isExactlyInstanceOf(A.class);
         assertThat(calledInterceptors).containsExactly("interceptor 1");
     }
 
@@ -168,7 +168,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(A.class))).isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isExactlyInstanceOf(A.class);
         assertThat(calledInterceptors).containsExactly("interceptor 2");
     }
 
@@ -189,7 +189,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(A.class))).isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isExactlyInstanceOf(A.class);
         assertThat(calledInterceptors).isEmpty();
     }
 
@@ -211,7 +211,7 @@ public class AroundConstructInterceptorsTest {
         w.getQueue().flush();
 
         assertThat(calledInterceptors).isEmpty();
-        assertThat(w.find(ObjectRequest.byType(A.class))).isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isExactlyInstanceOf(A.class);
         assertThat(calledInterceptors).containsExactly("interceptor 2", "interceptor 1");
     }
 
@@ -238,7 +238,7 @@ public class AroundConstructInterceptorsTest {
                 .interceptedBy(Interceptor_1.class, Interceptor_3.class, Interceptor_2.class));
         w.getQueue().flush();
 
-        B object = w.find(ObjectRequest.byType(B.class));
+        B object = w.find(ObjectRequest.of(B.class));
         assertThat(object.dependency.value).isEqualTo("from interceptor 3");
     }
 }

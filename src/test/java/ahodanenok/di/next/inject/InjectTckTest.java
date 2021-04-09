@@ -31,7 +31,7 @@ public class InjectTckTest {
         w.getQueue().add(ClassCharacter.of(Convertible.class));
         w.getQueue().add(ClassCharacter.of(DriversSeat.class)
                 .withQualifiers(Collections.singletonList(InjectTckTest.class.getAnnotation(Drivers.class))));
-        w.getQueue().add(ClassCharacter.of(SpareTire.class).knownAs("spare").withQualifiers(Collections.singleton(InjectTckTest.class.getAnnotation(Named.class))));
+        w.getQueue().add(ClassCharacter.of(SpareTire.class).knownAs("spare"));
         w.getQueue().add(ClassCharacter.of(FuelTank.class));
         w.getQueue().add(ClassCharacter.of(Seat.class));
         w.getQueue().add(ClassCharacter.of(Seatbelt.class));
@@ -42,30 +42,6 @@ public class InjectTckTest {
         w.getQueue().add(ClassCharacter.of(SpareTire.class));
         w.getQueue().flush();
 
-//        InstantiatingValue<Seat> driverSeat = new InstantiatingValue<>(Seat.class, DriversSeat.class);
-//        driverSeat.metadata().setQualifiers(InjectTckTest.class.getAnnotation(Drivers.class));
-//
-//        InstantiatingValue<Tire> spareTire = new InstantiatingValue<>(Tire.class, SpareTire.class);
-//        spareTire.metadata().setName("spare");
-//        spareTire.metadata().setQualifiers(InjectTckTest.class.getAnnotation(Named.class));
-//
-//        DIContainer container = DIContainer.builder()
-//                .addValue(new InstantiatingValue<>(Car.class, Convertible.class))
-//                .addValue(driverSeat)
-//                .addValue(new InstantiatingValue<>(FuelTank.class))
-//                .addValue(new InstantiatingValue<>(Seat.class))
-//                .addValue(new InstantiatingValue<>(Seatbelt.class))
-//                .addValue(new InstantiatingValue<>(Tire.class))
-//                .addValue(new InstantiatingValue<>(Engine.class, V8Engine.class))
-//                .addValue(new InstantiatingValue<>(Cupholder.class))
-//                .addValue(new InstantiatingValue<>(RoundThing.class))
-//                .addValue(new InstantiatingValue<>(SpareTire.class))
-//                .addValue(spareTire)
-//                .allowInjectStatic(Tire.class)
-//                .allowInjectStatic(SpareTire.class)
-//                .allowInjectStatic(Convertible.class)
-//                .build();
-
-        return Tck.testsFor(w.find(ObjectRequest.byType(Car.class)), false, true);
+        return Tck.testsFor(w.find(ObjectRequest.of(Car.class)), false, true);
     }
 }

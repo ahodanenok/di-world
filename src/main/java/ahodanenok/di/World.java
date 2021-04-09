@@ -6,9 +6,11 @@ import ahodanenok.di.exception.DependencyLookupException;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
+import ahodanenok.di.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Named;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
@@ -74,68 +76,95 @@ public class World implements Iterable<ClassContainer<?>> {
         return container;
     }
 
+    @SuppressWarnings("unchecked") // object matched by request will be of type T or its subtype
     public <T> T find(ObjectRequest<T> request) {
-        System.out.println(request);
         List<ClassContainer<?>> containers = findContainers(request);
+
         if (containers.size() == 1) {
-            // todo: suppress unchecked
             return (T) containers.get(0).getObject();
-        } else if (containers.size() > 1){
-            throw new DependencyLookupException(String.format(
-                    "Multiple matching dependencies are found for a request '%s': %s",
-                    request,
-                    containers.stream().map(c -> c.getObjectClass().getName()).collect(Collectors.toList())));
-        } else {
-            throw new DependencyLookupException(String.format("No dependencies are found for a request '%s'", request));
         }
+
+        if (containers.isEmpty()) {
+            throw new DependencyLookupException(String.format(
+                    "No dependencies are found for a request '%s'", request));
+        }
+
+        // There is a single object without any names and name is not specified in request
+        if (request.getName() == null) {
+            List<ClassContainer<?>> withoutName = containers.stream()
+                    .filter(c -> c.getNames().isEmpty())
+                    .collect(Collectors.toList());
+
+            if (withoutName.size() == 1) {
+                return (T) withoutName.get(0).getObject();
+            }
+        }
+
+        // There is a single object without any qualifiers and qualifiers are not specified in request
+        if (request.getQualifiers().isEmpty()) {
+            List<ClassContainer<?>> withoutQualifiers = containers.stream()
+                    .filter(c -> c.getQualifiers().isEmpty())
+                    .collect(Collectors.toList());
+
+            if (withoutQualifiers.size() == 1) {
+                return (T) withoutQualifiers.get(0).getObject();
+            }
+        }
+
+        {
+            // There is a single object with exact type as in request
+            List<ClassContainer<?>> withExactType = containers.stream()
+                    .filter(c -> c.getObjectClass() == request.getType())
+                    .collect(Collectors.toList());
+
+            if (withExactType.size() == 1) {
+                return (T) withExactType.get(0).getObject();
+            }
+        }
+
+        // None matched...
+        throw new DependencyLookupException(String.format(
+                "Multiple matching dependencies are found for a request '%s': %s",
+                request,
+                containers.stream().map(c -> c.getObjectClass().getName()).collect(Collectors.toList())));
     }
 
+    @SuppressWarnings("unchecked") // all objects matched by request will be of type T or its subtype
     public <T> List<T> findAll(ObjectRequest<T> request) {
-        // todo: suppress unchecked
-        return findContainers(request).stream().map(c -> (T) c.getObject()).collect(Collectors.toList());
+        return (List<T>) findContainers(request).stream()
+                .map(ClassContainer::getObject)
+                .collect(Collectors.toList());
     }
 
     public <T> List<ClassContainer<?>> findContainers(ObjectRequest<T> request) {
-
         List<ClassContainer<?>> matched = new ArrayList<>();
+
+        next:
         for (ClassContainer<?> c : containers) {
-            if (request.getType() != null && !request.getType().isAssignableFrom(c.getObjectClass())) {
+            // The bean has a bean type that matches the required type.
+            if (!ReflectionUtils.isAssignable(c.getObjectClass(), request.getType())) {
                 continue;
             }
 
+            // Use name as a qualifier
             if (request.getName() != null && !c.getNames().contains(request.getName())) {
                 continue;
             }
 
-            matched.add(c);
-        }
+            // The bean has all the required qualifiers.
+            for (Annotation qualifier : request.getQualifiers()) {
+                if (qualifier instanceof Named) {
+                    Named named = (Named) qualifier;
+                    if (named.value().isEmpty()) {
+                        throw new DependencyLookupException("@Named qualifier must have a value");
+                    }
 
-        return pickContainers(request, matched);
-    }
-
-    private <T> List<ClassContainer<?>> pickContainers(ObjectRequest<T> request, List<ClassContainer<?>> containers) {
-        List<ClassContainer<?>> matched = new ArrayList<>();
-
-        // todo: don't use @Named as qualifier
-
-        boolean hasExactTypeMatch = false;
-        if (request.getQualifiers().isEmpty()) {
-            for (ClassContainer<?> c : containers) {
-                if (c.getObjectClass().equals(request.getType())) {
-                    hasExactTypeMatch = true;
-                    break;
+                    if (!c.getNames().contains(named.value())) {
+                        continue next;
+                    }
+                } else if (!c.getQualifiers().contains(qualifier)) {
+                    continue next;
                 }
-            }
-        }
-
-        List<Annotation> requestQualifiers = request.getQualifiers();
-        for (ClassContainer<?> c : containers) {
-            if (!request.getQualifiers().isEmpty() && !c.getQualifiers().containsAll(requestQualifiers)) {
-                continue;
-            }
-
-            if (!c.getObjectClass().equals(request.getType()) && hasExactTypeMatch) {
-                continue;
             }
 
             matched.add(c);

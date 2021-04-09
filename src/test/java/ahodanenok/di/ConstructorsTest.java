@@ -37,7 +37,7 @@ public class ConstructorsTest {
         w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().flush();
 
-        assertThat(w.find(ObjectRequest.byType(A.class))).isNotNull().isExactlyInstanceOf(A.class);
+        assertThat(w.find(ObjectRequest.of(A.class))).isNotNull().isExactlyInstanceOf(A.class);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class ConstructorsTest {
         w.getQueue().add(ClassCharacter.of(B.class));
         w.getQueue().flush();
 
-        ObjectAssert<?> a = assertThat(w.find(ObjectRequest.byType(OneAnnotated.class)));
+        ObjectAssert<?> a = assertThat(w.find(ObjectRequest.of(OneAnnotated.class)));
         a.isNotNull().isExactlyInstanceOf(OneAnnotated.class);
         a.extracting("a").isNotNull().isExactlyInstanceOf(A.class);
         a.extracting("b").isNull();
@@ -61,7 +61,7 @@ public class ConstructorsTest {
         w.getQueue().add(ClassCharacter.of(SingleDependency.class));
         w.getQueue().flush();
 
-        assertThat(w.find(ObjectRequest.byType(SingleDependency.class)))
+        assertThat(w.find(ObjectRequest.of(SingleDependency.class)))
                 .isNotNull().isExactlyInstanceOf(SingleDependency.class)
                 .extracting("a").isNotNull().isExactlyInstanceOf(A.class);
     }
@@ -74,7 +74,7 @@ public class ConstructorsTest {
         w.getQueue().add(ClassCharacter.of(B.class));
         w.getQueue().flush();
 
-        ObjectAssert<?> a = assertThat(w.find(ObjectRequest.byType(MultipleDependencies.class)));
+        ObjectAssert<?> a = assertThat(w.find(ObjectRequest.of(MultipleDependencies.class)));
         a.isNotNull().isExactlyInstanceOf(MultipleDependencies.class);
         a.extracting("a").isNotNull().isExactlyInstanceOf(A.class);
         a.extracting("b").isNotNull().isExactlyInstanceOf(B.class);

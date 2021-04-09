@@ -17,7 +17,7 @@ public class InjectTest {
         w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
-        WithInjectablePublicMethod obj = w.find(ObjectRequest.byType(WithInjectablePublicMethod.class));
+        WithInjectablePublicMethod obj = w.find(ObjectRequest.of(WithInjectablePublicMethod.class));
         assertThat(obj.d).isNotNull();
         assertThat(obj.called_1).isTrue();
         assertThat(obj.called_2).isFalse();
@@ -30,7 +30,7 @@ public class InjectTest {
         w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
-        WithInjectablePrivateMethod obj = w.find(ObjectRequest.byType(WithInjectablePrivateMethod.class));
+        WithInjectablePrivateMethod obj = w.find(ObjectRequest.of(WithInjectablePrivateMethod.class));
         assertThat(obj.d).isNotNull();
         assertThat(obj.called_1).isTrue();
         assertThat(obj.called_2).isFalse();
@@ -43,7 +43,7 @@ public class InjectTest {
         w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
-        WithInjectablePackagePrivateMethod obj = w.find(ObjectRequest.byType(WithInjectablePackagePrivateMethod.class));
+        WithInjectablePackagePrivateMethod obj = w.find(ObjectRequest.of(WithInjectablePackagePrivateMethod.class));
         assertThat(obj.d).isNotNull();
         assertThat(obj.called_1).isTrue();
         assertThat(obj.called_2).isFalse();
@@ -56,7 +56,7 @@ public class InjectTest {
         w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
-        WithInjectableProtectedMethod obj = w.find(ObjectRequest.byType(WithInjectableProtectedMethod.class));
+        WithInjectableProtectedMethod obj = w.find(ObjectRequest.of(WithInjectableProtectedMethod.class));
         assertThat(obj.d).isNotNull();
         assertThat(obj.called_1).isTrue();
         assertThat(obj.called_2).isFalse();
@@ -69,7 +69,7 @@ public class InjectTest {
         w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
-        P3 obj = w.find(ObjectRequest.byType(P3.class));
+        P3 obj = w.find(ObjectRequest.of(P3.class));
         assertThat(obj.log).containsExactly("D0", "M1", "D1", "M2", "D2", "M3");
     }
 
@@ -81,7 +81,7 @@ public class InjectTest {
         w.getQueue().add(ClassCharacter.of(SimpleDependency.class));
         w.getQueue().flush();
 
-        DependsOnP0 obj = w.find(ObjectRequest.byType(DependsOnP0.class));
+        DependsOnP0 obj = w.find(ObjectRequest.of(DependsOnP0.class));
         assertThat(obj.p).isExactlyInstanceOf(P3.class);
     }
 }
