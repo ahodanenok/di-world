@@ -1,8 +1,7 @@
 package ahodanenok.di.next.metadata;
 
-import ahodanenok.di.exception.ConfigException;
+import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -130,7 +129,7 @@ public class ReadClassInterceptorsTest {
         assertThatThrownBy(() ->
                 new ClassMetadataReader<>(LoggingInterceptor.class)
                         .readInterceptorMethod(AroundConstruct.class.getName())
-        ).isExactlyInstanceOf(ConfigException.class)
+        ).isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessageStartingWith("Multiple interceptor methods of type 'javax.interceptor.AroundConstruct'");
     }
 }

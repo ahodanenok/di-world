@@ -29,7 +29,7 @@ public class ScopeTest {
     @Test
     public void shouldReturnNewInstanceOnEveryRequest() {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(A.class).withScope(AlwaysNewScope.getInstance()));
+        w.getQueue().add(ClassCharacter.of(A.class).scopedBy(AlwaysNewScope.getInstance()));
         w.getQueue().flush();
 
         A first = w.find(ObjectRequest.of(A.class));
@@ -44,7 +44,7 @@ public class ScopeTest {
     @Test
     public void shouldReturnTheSameInstanceOnEveryRequest() {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(A.class).withScope(new SingletonScope<>()));
+        w.getQueue().add(ClassCharacter.of(A.class).scopedBy(new SingletonScope<>()));
         w.getQueue().flush();
 
         A first = w.find(ObjectRequest.of(A.class));

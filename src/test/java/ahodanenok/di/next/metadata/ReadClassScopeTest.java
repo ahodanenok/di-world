@@ -1,6 +1,6 @@
 package ahodanenok.di.next.metadata;
 
-import ahodanenok.di.exception.ConfigException;
+import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,7 +72,7 @@ public class ReadClassScopeTest {
     @DisplayName("should throw error given multiple scopes are declared")
     public void multiple() {
         assertThatThrownBy(() -> new ClassMetadataReader<>(Oak.class).readScope())
-                .isExactlyInstanceOf(ConfigException.class)
+                .isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessageStartingWith("Multiple scopes");
     }
 
@@ -80,7 +80,7 @@ public class ReadClassScopeTest {
     @DisplayName("should throw error given scope has attributes")
     public void attributes() {
         assertThatThrownBy(() -> new ClassMetadataReader<>(SummerTree.class).readScope())
-                .isExactlyInstanceOf(ConfigException.class)
+                .isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessageStartingWith("Scope annotation must not declare any attributes");
     }
 }

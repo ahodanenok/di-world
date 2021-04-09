@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -44,14 +42,14 @@ public class ClassCharacterScopeTest {
     @Test
     @DisplayName("should be singleton given singleton set explicitly")
     public void singletonExplicit() {
-        assertThat(ClassCharacter.of(RequestContext.class).withScope(new SingletonScope<>()).getScope())
+        assertThat(ClassCharacter.of(RequestContext.class).scopedBy(new SingletonScope<>()).getScope())
                 .isExactlyInstanceOf(SingletonScope.class);
     }
 
     @Test
     @DisplayName("should override scope from annotation")
     public void overrides() {
-        assertThat(ClassCharacter.of(ApplicationContext.class).withScope(new ThreadScope<>()).getScope())
+        assertThat(ClassCharacter.of(ApplicationContext.class).scopedBy(new ThreadScope<>()).getScope())
                 .isExactlyInstanceOf(ThreadScope.class);
     }
 }

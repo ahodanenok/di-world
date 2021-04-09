@@ -3,7 +3,7 @@ package ahodanenok.di.container;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
-import ahodanenok.di.exception.ConfigException;
+import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
@@ -51,7 +51,7 @@ public class ClassContainer<T> {
         return names;
     }
 
-    public List<Annotation> getQualifiers() {
+    public Set<Annotation> getQualifiers() {
         return character.getQualifiers();
     }
 
@@ -125,7 +125,7 @@ public class ClassContainer<T> {
             // falling back to no-arg public constructor
             return objectClass.getConstructor();
         } catch (NoSuchMethodException e) {
-            throw new ConfigException(String.format(
+            throw new CharacterMetadataException(String.format(
                     "Couldn't resolve constructor for '%s', provide it explicitly in a character" +
                     " or use @Inject annotation to mark which constructor to use", objectClass));
         }

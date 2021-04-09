@@ -1,6 +1,6 @@
 package ahodanenok.di.metadata;
 
-import ahodanenok.di.exception.ConfigException;
+import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ public class ExecutableMetadataReader {
                 Named named = (Named) annotation;
                 String name = named.value().trim();
                 if (name.isEmpty()) {
-                    throw new ConfigException(String.format(
+                    throw new CharacterMetadataException(String.format(
                             "@Named on a parameter %d must have not empty value in %s",
                             paramNum, executable));
                 }

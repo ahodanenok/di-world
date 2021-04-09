@@ -239,4 +239,12 @@ public class ReflectionUtils {
 
         return false;
     }
+
+    public static boolean isInstantiatable(Class<?> clazz) {
+        return !clazz.isInterface()
+                && !clazz.isArray()
+                && !clazz.isEnum()
+                && !clazz.isAnnotation()
+                && !Modifier.isAbstract(clazz.getModifiers());
+    }
 }

@@ -30,7 +30,7 @@ public class InjectTckTest {
         World w = new World();
         w.getQueue().add(ClassCharacter.of(Convertible.class));
         w.getQueue().add(ClassCharacter.of(DriversSeat.class)
-                .withQualifiers(Collections.singletonList(InjectTckTest.class.getAnnotation(Drivers.class))));
+                .qualifiedAs(Collections.singletonList(InjectTckTest.class.getAnnotation(Drivers.class))));
         w.getQueue().add(ClassCharacter.of(SpareTire.class).knownAs("spare"));
         w.getQueue().add(ClassCharacter.of(FuelTank.class));
         w.getQueue().add(ClassCharacter.of(Seat.class));

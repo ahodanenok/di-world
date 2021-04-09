@@ -1,32 +1,30 @@
 package ahodanenok.di.character;
 
-import ahodanenok.di.exception.ConfigException;
+import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
+import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Singleton;
 import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// todo: validation
 public class ClassCharacter<T> {
 
     public static <T> ClassCharacter<T> of(Class<T> clazz) {
-
-        if (clazz.isInterface()) {
-            throw new ConfigException("Can't instantiate an interface");
+        if (clazz == null) {
+            throw new CharacterMetadataException("Class can't be null");
         }
 
-        if (Modifier.isAbstract(clazz.getModifiers())) {
-            throw new ConfigException("Can't instantiate an interface");
+        if (!ReflectionUtils.isInstantiatable(clazz)) {
+            throw new CharacterMetadataException(String.format("Class '%s' is not instantiatable", clazz.getName()));
         }
 
         return new ClassCharacter<T>(clazz);
@@ -38,7 +36,7 @@ public class ClassCharacter<T> {
     private Set<String> names;
     private Scope<T> scope;
     private ExecutableMetadataReader constructor;
-    private List<Annotation> qualifiers;
+    private Set<Annotation> qualifiers;
 
     private boolean interceptor;
     private List<Class<?>> interceptors;
@@ -49,7 +47,6 @@ public class ClassCharacter<T> {
         this.objectClass = clazz;
 
         String name = classMetadataReader.readName();
-        // todo: default name
         if (name != null) {
             this.names = Collections.singleton(name);
         } else {
@@ -67,13 +64,8 @@ public class ClassCharacter<T> {
         this.qualifiers = classMetadataReader.readQualifiers();
 
         this.interceptor = classMetadataReader.readInterceptor();
-
-        List<Class<?>> interceptors = classMetadataReader.readInterceptors();
-        if (interceptors != null) {
-            this.interceptors = new ArrayList<>(interceptors);
-        } else {
-            this.interceptors = Collections.emptyList();
-        }
+        this.interceptors = classMetadataReader.readInterceptors();
+        this.interceptors.forEach(this::validateInterceptor);
 
         List<ExecutableMetadataReader> constructors = new ArrayList<>();
         for (Constructor<?> constructor : objectClass.getDeclaredConstructors()) {
@@ -86,7 +78,7 @@ public class ClassCharacter<T> {
         if (constructors.size() == 1) {
             this.constructor = constructors.get(0);
         } else if (constructors.size() > 1) {
-            throw new IllegalStateException(String.format(
+            throw new CharacterMetadataException(String.format(
                     "Only one constructor can be injectable, injectable constructos in '%s' are: %s",
                     objectClass,
                     constructors.stream().map(ExecutableMetadataReader::getExecutable).collect(Collectors.toList())));
@@ -97,14 +89,31 @@ public class ClassCharacter<T> {
         return objectClass;
     }
 
-    public ClassCharacter<T> knownAs(String... name) {
-        if (name.length == 0) {
-            return this;
+    // todo: doc
+    public ClassCharacter<T> knownAs(String... names) {
+        return knownAs(Arrays.asList(names));
+    }
+
+    public ClassCharacter<T> knownAs(Collection<String> names) {
+        if (names == null || names.isEmpty()) {
+            throw new CharacterMetadataException("Provide at least one name");
         }
 
-        // todo: validation?
-        this.names = new HashSet<>();
-        Collections.addAll(this.names, name);
+        Set<String> newNames = new HashSet<>();
+        for (String name : names) {
+            if (name == null) {
+                throw new CharacterMetadataException("Name can't be null");
+            }
+
+            String n = name.trim();
+            if (n.isEmpty()) {
+                throw new CharacterMetadataException("Name can't be empty");
+            }
+
+            newNames.add(n);
+        }
+
+        this.names = newNames;
         return this;
     }
 
@@ -114,9 +123,18 @@ public class ClassCharacter<T> {
 
     /**
      * Use constructor to instantiate class
+     * todo: doc
      */
     public ClassCharacter<T> constructedBy(Constructor<?> constructor) {
-        // todo: check constructor
+        if (constructor == null) {
+            throw new CharacterMetadataException("Constructor can't be null");
+        }
+
+        if (constructor.getDeclaringClass() != objectClass) {
+            throw new CharacterMetadataException(String.format(
+                    "Constructor doesn't belong to class '%s'", objectClass));
+        }
+
         this.constructor = new ExecutableMetadataReader(constructor);
         return this;
     }
@@ -130,8 +148,11 @@ public class ClassCharacter<T> {
         }
     }
 
-    public ClassCharacter<T> withScope(Scope<T> scope) {
-        // todo: check not null
+    public ClassCharacter<T> scopedBy(Scope<T> scope) {
+        if (scope == null) {
+            throw new CharacterMetadataException("Scope can't be null");
+        }
+
         this.scope = scope;
         return this;
     }
@@ -140,13 +161,32 @@ public class ClassCharacter<T> {
         return scope;
     }
 
-    public ClassCharacter<T> withQualifiers(Collection<Annotation> qualifiers) {
-        this.qualifiers = new ArrayList<>(qualifiers);
+    public ClassCharacter<T> qualifiedAs(Annotation... qualifiers) {
+        return qualifiedAs(Arrays.asList(qualifiers));
+    }
+
+    public ClassCharacter<T> qualifiedAs(Collection<Annotation> qualifiers) {
+        if (qualifiers == null || qualifiers.isEmpty()) {
+            throw new CharacterMetadataException("Provide at least one qualifier");
+        }
+
+        Set<Annotation> newQualifiers = new HashSet<>();
+        for (Annotation q : qualifiers) {
+            if (q == null) {
+                throw new CharacterMetadataException("Qualifier can't be null");
+            }
+
+            // todo: should presence of @Qualifier meta-annotation should be checked here?
+
+            newQualifiers.add(q);
+        }
+
+        this.qualifiers = newQualifiers;
         return this;
     }
 
-    public List<Annotation> getQualifiers() {
-        return Collections.unmodifiableList(qualifiers);
+    public Set<Annotation> getQualifiers() {
+        return Collections.unmodifiableSet(qualifiers);
     }
 
     /**
@@ -154,9 +194,36 @@ public class ClassCharacter<T> {
      * If called without any parameters - clears interceptors if any
      */
     public ClassCharacter<T> interceptedBy(Class<?>... interceptors) {
-        this.interceptors = new ArrayList<>();
-        Collections.addAll(this.interceptors, interceptors);
+        return interceptedBy(Arrays.asList(interceptors));
+    }
+
+    public ClassCharacter<T> interceptedBy(Collection<Class<?>> interceptors) {
+        if (interceptors == null || interceptors.isEmpty()) {
+            throw new CharacterMetadataException("Provide at least one interceptor");
+        }
+
+        List<Class<?>> newInterceptors = new ArrayList<>();
+        for (Class<?> interceptor : interceptors) {
+            validateInterceptor(interceptor);
+            newInterceptors.add(interceptor);
+        }
+
+        this.interceptors = newInterceptors;
         return this;
+    }
+
+    private void validateInterceptor(Class<?> interceptor) {
+        if (interceptor == null) {
+            throw new CharacterMetadataException("Interceptor can't be null");
+        }
+
+        if (!ReflectionUtils.isInstantiatable(interceptor)) {
+            throw new CharacterMetadataException("Interceptor is not instantiatable");
+        }
+
+        if (interceptor == objectClass) {
+            throw new CharacterMetadataException("Class can't be interceptor for itself");
+        }
     }
 
     /**
@@ -190,7 +257,7 @@ public class ClassCharacter<T> {
             // no-op
         }
 
-        throw new IllegalArgumentException(String.format("Interceptor method '%s' not found in '%s'." +
+        throw new CharacterMetadataException(String.format("Interceptor method '%s' not found in '%s'." +
                 " Make sure method is present and accepts either no parameters" +
                 " or InvocationContext as a single parameter", methodName, objectClass));
     }
@@ -209,17 +276,32 @@ public class ClassCharacter<T> {
      *
      * @param type type of intercepted event
      * @param method method of a class
-     * @throws IllegalArgumentException if method doesn't belong to a class
+     * @throws CharacterMetadataException if method doesn't belong to a class
      * @see javax.interceptor.AroundConstruct
      * @see javax.interceptor.AroundInvoke
      * @see javax.annotation.PostConstruct
      * @see javax.annotation.PreDestroy
      */
     public ClassCharacter<T> intercepts(String type, Method method) {
-        if (!method.getDeclaringClass().equals(objectClass)) {
-            throw new IllegalArgumentException(
+        if (type == null) {
+            throw new CharacterMetadataException("Type can't be null");
+        }
+
+        type = type.trim();
+        if (type.isEmpty()) {
+            throw new CharacterMetadataException("Type can't be empty");
+        }
+
+        if (method == null) {
+            throw new CharacterMetadataException("Method can't be null");
+        }
+
+        if (method.getDeclaringClass() != objectClass) {
+            throw new CharacterMetadataException(
                     String.format("Method '%s' doesn't belong to a class '%s'", method, objectClass));
         }
+
+        // todo: validate method signature
 
         if (interceptorMethods == null) {
             interceptorMethods = new HashMap<>();
@@ -239,9 +321,15 @@ public class ClassCharacter<T> {
      * @see javax.annotation.PreDestroy
      */
     public Method getInterceptorMethod(String type) {
+        if (type == null || type.trim().isEmpty()) {
+            throw new IllegalArgumentException("Provide a type");
+        }
+
         if (interceptorMethods == null) {
             interceptorMethods = new HashMap<>();
         }
+
+        type = type.trim();
 
         // if there is an entry with null method,
         // then there is no interceptor for this type

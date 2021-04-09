@@ -36,9 +36,9 @@ public class ReadClassNameTest {
     }
 
     @Test
-    @DisplayName("should return empty string as the name given @Named with a blank value")
+    @DisplayName("should return default name given @Named with a blank value")
     public void defaultNamed() {
-        assertThat(new ClassMetadataReader<>(Spruce.class).readName()).isEmpty();
+        assertThat(new ClassMetadataReader<>(Spruce.class).readName()).isEqualTo("spruce");
     }
 
     @Test
