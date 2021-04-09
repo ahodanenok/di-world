@@ -64,7 +64,7 @@ public class ClassCharacter<T> {
             this.scope = AlwaysNewScope.getInstance();
         }
 
-        this.qualifiers = Collections.unmodifiableList(classMetadataReader.readQualifiers());
+        this.qualifiers = classMetadataReader.readQualifiers();
 
         this.interceptor = classMetadataReader.readInterceptor();
 
@@ -140,8 +140,13 @@ public class ClassCharacter<T> {
         return scope;
     }
 
+    public ClassCharacter<T> withQualifiers(Collection<Annotation> qualifiers) {
+        this.qualifiers = new ArrayList<>(qualifiers);
+        return this;
+    }
+
     public List<Annotation> getQualifiers() {
-        return qualifiers;
+        return Collections.unmodifiableList(qualifiers);
     }
 
     /**

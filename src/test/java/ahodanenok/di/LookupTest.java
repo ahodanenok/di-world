@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.exception.DependencyLookupException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -57,8 +58,8 @@ public class LookupTest {
         w.getQueue().flush();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.byType(B.class)))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("not found");
+                .isInstanceOf(DependencyLookupException.class)
+                .hasMessageStartingWith("No dependencies are found for a request");
     }
 
     @Test
@@ -70,8 +71,8 @@ public class LookupTest {
         w.getQueue().flush();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.byType(A.class)))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("multiple");
+                .isInstanceOf(DependencyLookupException.class)
+                .hasMessageStartingWith("Multiple matching dependencies are found for a request");
     }
 
     @Test
@@ -85,24 +86,24 @@ public class LookupTest {
         assertThat(value).isNotNull().isExactlyInstanceOf(A.class);
     }
 
-    @Test
-    public void shouldReturnObjectByNameIgnoringType() {
-        World w = new World();
-        w.getQueue().add(ClassCharacter.of(A.class).knownAs("A"));
-        w.getQueue().add(ClassCharacter.of(B.class));
-        w.getQueue().flush();
+//    @Test
+//    public void shouldReturnObjectByNameIgnoringType() {
+//        World w = new World();
+//        w.getQueue().add(ClassCharacter.of(A.class).knownAs("A"));
+//        w.getQueue().add(ClassCharacter.of(B.class));
+//        w.getQueue().flush();
+//
+//        assertThat(w.find(ObjectRequest.byName("A").withType(B.class))).isNotNull().isExactlyInstanceOf(A.class);
+//    }
 
-        assertThat(w.find(ObjectRequest.byName("A").withType(B.class))).isNotNull().isExactlyInstanceOf(A.class);
-    }
-
-    @Test
-    public void shouldReturnByTypeQualifiedByName() {
-        World w = new World();
-        w.getQueue().add(ClassCharacter.of(C1.class).knownAs("C1"));
-        w.getQueue().add(ClassCharacter.of(C2.class).knownAs("C2"));
-        w.getQueue().flush();
-
-        Object value = w.find(ObjectRequest.byName("C1").withType(P.class).qualifyByName());
-        assertThat(value).isNotNull().isExactlyInstanceOf(C1.class);
-    }
+//    @Test
+//    public void shouldReturnByTypeQualifiedByName() {
+//        World w = new World();
+//        w.getQueue().add(ClassCharacter.of(C1.class).knownAs("C1"));
+//        w.getQueue().add(ClassCharacter.of(C2.class).knownAs("C2"));
+//        w.getQueue().flush();
+//
+//        Object value = w.find(ObjectRequest.byName("C1").withType(P.class).qualifyByName());
+//        assertThat(value).isNotNull().isExactlyInstanceOf(C1.class);
+//    }
 }

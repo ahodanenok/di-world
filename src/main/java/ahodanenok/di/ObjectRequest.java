@@ -1,6 +1,7 @@
 package ahodanenok.di;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.List;
 
 public class ObjectRequest<T> {
@@ -17,14 +18,20 @@ public class ObjectRequest<T> {
         return request;
     }
 
+    private Object context;
     private Class<?> type;
     private String name;
     private List<Annotation> qualifiers;
 
     private ObjectRequest() { }
 
-    public ObjectRequest<T> qualifyByName() {
+    public ObjectRequest<T> withContext(Object context) {
+        this.context = context;
         return this;
+    }
+
+    public Object getContext() {
+        return context;
     }
 
     public Class<?> getType() {
@@ -51,11 +58,13 @@ public class ObjectRequest<T> {
     }
 
     public List<Annotation> getQualifiers() {
-        return qualifiers;
+        return qualifiers != null ? qualifiers : Collections.emptyList();
     }
 
     @Override
     public String toString() {
-        return String.format("ObjectRequest(type=%s, name=%s, qualifiers=%s)", type, name, qualifiers);
+        return String.format(
+                "ObjectRequest(type=%s, name=%s, qualifiers=%s, context=%s)",
+                type, name, qualifiers, context);
     }
 }

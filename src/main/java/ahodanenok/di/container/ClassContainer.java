@@ -16,13 +16,11 @@ import ahodanenok.di.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -147,7 +145,14 @@ public class ClassContainer<T> {
     private Object resolveArgument(ExecutableMetadataReader metadataReader, int paramNum) {
         // todo: support injecting list of dependencies
         Class<?> paramType = metadataReader.getExecutable().getParameterTypes()[paramNum];
+        if (Provider.class.equals(paramType)) {
+            paramType = (Class<?>) ((ParameterizedType) metadataReader
+                        .getExecutable().getGenericParameterTypes()[paramNum])
+                    .getActualTypeArguments()[0];
+        }
+
         ObjectRequest<?> request = ObjectRequest.byType(paramType);
+        request.withContext(metadataReader.getExecutable() + " "  + metadataReader.getExecutable().getParameters()[paramNum]);
 
         String name = metadataReader.readParameterName(paramNum);
         if (name != null) {
@@ -160,7 +165,11 @@ public class ClassContainer<T> {
         }
 
         // todo: intercept around resolve
-        return world.find(request);
+        if (Provider.class.equals(metadataReader.getExecutable().getParameterTypes()[paramNum])) {
+            return (Provider<?>) () -> world.find(request);
+        } else {
+            return world.find(request);
+        }
     }
 
     private Object resolvedDependency(Field field) {
@@ -169,7 +178,12 @@ public class ClassContainer<T> {
         FieldMetadataReader metadataReader = new FieldMetadataReader(field);
 
         Class<?> paramType = field.getType();
+        if (Provider.class.equals(paramType)) {
+            paramType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+        }
+
         ObjectRequest<?> request = ObjectRequest.byType(paramType);
+        request.withContext(field);
 
         String name = metadataReader.readName();
         if (name != null) {
@@ -182,7 +196,11 @@ public class ClassContainer<T> {
         }
 
         // todo: intercept around resolve
-        return world.find(request);
+        if (Provider.class.equals(field.getType())) {
+            return (Provider<?>) () -> world.find(request);
+        } else {
+            return world.find(request);
+        }
     }
 
     // todo: how to handle exception?

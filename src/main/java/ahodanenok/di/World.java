@@ -75,6 +75,7 @@ public class World implements Iterable<ClassContainer<?>> {
     }
 
     public <T> T find(ObjectRequest<T> request) {
+        System.out.println(request);
         List<ClassContainer<?>> containers = findContainers(request);
         if (containers.size() == 1) {
             // todo: suppress unchecked
@@ -115,16 +116,29 @@ public class World implements Iterable<ClassContainer<?>> {
     private <T> List<ClassContainer<?>> pickContainers(ObjectRequest<T> request, List<ClassContainer<?>> containers) {
         List<ClassContainer<?>> matched = new ArrayList<>();
 
-        if (request.getQualifiers() != null && !request.getQualifiers().isEmpty()) {
-            List<Annotation> requestQualifiers = request.getQualifiers();
+        // todo: don't use @Named as qualifier
+
+        boolean hasExactTypeMatch = false;
+        if (request.getQualifiers().isEmpty()) {
             for (ClassContainer<?> c : containers) {
-                List<Annotation> containerQualifiers = c.getQualifiers();
-                if (containerQualifiers.containsAll(requestQualifiers)) {
-                    matched.add(c);
+                if (c.getObjectClass().equals(request.getType())) {
+                    hasExactTypeMatch = true;
+                    break;
                 }
             }
-        } else {
-            matched = containers;
+        }
+
+        List<Annotation> requestQualifiers = request.getQualifiers();
+        for (ClassContainer<?> c : containers) {
+            if (!request.getQualifiers().isEmpty() && !c.getQualifiers().containsAll(requestQualifiers)) {
+                continue;
+            }
+
+            if (!c.getObjectClass().equals(request.getType()) && hasExactTypeMatch) {
+                continue;
+            }
+
+            matched.add(c);
         }
 
         return matched;
