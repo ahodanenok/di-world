@@ -19,18 +19,12 @@ public class ObjectRequest<T> {
 
     private Class<?> type;
     private String name;
-    private boolean nameAsQualifier;
     private List<Annotation> qualifiers;
 
     private ObjectRequest() { }
 
     public ObjectRequest<T> qualifyByName() {
-        nameAsQualifier = true;
         return this;
-    }
-
-    public boolean isNameAsQualifier() {
-        return nameAsQualifier;
     }
 
     public Class<?> getType() {
@@ -54,5 +48,14 @@ public class ObjectRequest<T> {
     public ObjectRequest<T> withQualifiers(List<Annotation> qualifiers) {
         this.qualifiers = qualifiers;
         return this;
+    }
+
+    public List<Annotation> getQualifiers() {
+        return qualifiers;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ObjectRequest(type=%s, name=%s, qualifiers=%s)", type, name, qualifiers);
     }
 }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-public class ClassContainerTest {
+public class ConstructorTest {
 
     @Test
     @DisplayName("should instantiate class using public no-arg constructor")
@@ -117,23 +117,5 @@ public class ClassContainerTest {
         assertThatThrownBy(() -> w.getQueue().add(ClassCharacter.of(Drink.class)))
                 .isExactlyInstanceOf(ConfigException.class)
                 .hasMessageStartingWith("Can't instantiate an interface");
-    }
-
-    @Test
-    @DisplayName("should inject members")
-    public void injectMembers() {
-        World w = new World();
-        w.getQueue().add(ClassCharacter.of(FoodContainer.class));
-        w.getQueue().add(ClassCharacter.of(Bread.class));
-        w.getQueue().add(ClassCharacter.of(Butter.class));
-        w.getQueue().add(ClassCharacter.of(Capacity.class));
-        w.getQueue().add(ClassCharacter.of(Color.class));
-        w.getQueue().flush();
-
-        FoodContainer fc = w.find(ObjectRequest.byType(FoodContainer.class));
-        assertThat(fc.bread).isExactlyInstanceOf(Bread.class);
-        assertThat(fc.butter).isExactlyInstanceOf(Butter.class);
-        assertThat(fc.capacity).isExactlyInstanceOf(Capacity.class);
-        assertThat(fc.color).isExactlyInstanceOf(Color.class);
     }
 }

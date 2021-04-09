@@ -10,6 +10,7 @@ import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import ahodanenok.di.interceptor.context.MethodInvocationContext;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
+import ahodanenok.di.metadata.FieldMetadataReader;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.util.ReflectionUtils;
 
@@ -50,6 +51,10 @@ public class ClassContainer<T> {
 
     public Set<String> getNames() {
         return names;
+    }
+
+    public List<Annotation> getQualifiers() {
+        return character.getQualifiers();
     }
 
     public T getObject() {
@@ -140,6 +145,7 @@ public class ClassContainer<T> {
     }
 
     private Object resolveArgument(ExecutableMetadataReader metadataReader, int paramNum) {
+        // todo: support injecting list of dependencies
         Class<?> paramType = metadataReader.getExecutable().getParameterTypes()[paramNum];
         ObjectRequest<?> request = ObjectRequest.byType(paramType);
 
@@ -149,7 +155,7 @@ public class ClassContainer<T> {
         }
 
         List<Annotation> qualifiers = metadataReader.readParameterQualifiers(paramNum);
-        if (qualifiers.isEmpty()) {
+        if (!qualifiers.isEmpty()) {
             request.withQualifiers(qualifiers);
         }
 
@@ -158,10 +164,25 @@ public class ClassContainer<T> {
     }
 
     private Object resolvedDependency(Field field) {
+        // todo: support injecting list of dependencies
+
+        FieldMetadataReader metadataReader = new FieldMetadataReader(field);
+
+        Class<?> paramType = field.getType();
+        ObjectRequest<?> request = ObjectRequest.byType(paramType);
+
+        String name = metadataReader.readName();
+        if (name != null) {
+            request.withName(name);
+        }
+
+        List<Annotation> qualifiers = metadataReader.readQualifiers();
+        if (!qualifiers.isEmpty()) {
+            request.withQualifiers(qualifiers);
+        }
+
         // todo: intercept around resolve
-        // todo: by name
-        // todo: qualifiers
-        return world.find(ObjectRequest.byType(field.getType()));
+        return world.find(request);
     }
 
     // todo: how to handle exception?

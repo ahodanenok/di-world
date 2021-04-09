@@ -2,6 +2,7 @@ package ahodanenok.di;
 
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.container.ClassContainer;
+import ahodanenok.di.exception.DependencyLookupException;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
@@ -11,6 +12,7 @@ import javax.annotation.PreDestroy;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,7 +20,6 @@ import java.util.stream.Collectors;
 // todo: inject static methods, own container for this? (StaticConfiguration?)
 // todo: instantiate eager objects
 // todo: destroying world
-// todo: qualifiers
 // todo: around invoke
 
 public class World implements Iterable<ClassContainer<?>> {
@@ -76,14 +77,15 @@ public class World implements Iterable<ClassContainer<?>> {
     public <T> T find(ObjectRequest<T> request) {
         List<ClassContainer<?>> containers = findContainers(request);
         if (containers.size() == 1) {
-            // todo: supress unchecked
+            // todo: suppress unchecked
             return (T) containers.get(0).getObject();
         } else if (containers.size() > 1){
-            // todo: exception+message
-            throw new IllegalStateException("multiple");
+            throw new DependencyLookupException(String.format(
+                    "Multiple matching dependencies are found for a request '%s': %s",
+                    request,
+                    containers.stream().map(c -> c.getObjectClass().getName()).collect(Collectors.toList())));
         } else {
-            // todo: exception+message
-            throw new IllegalStateException("not found");
+            throw new DependencyLookupException(String.format("No dependencies are found for a request '%s'", request));
         }
     }
 
@@ -94,15 +96,8 @@ public class World implements Iterable<ClassContainer<?>> {
 
     public <T> List<ClassContainer<?>> findContainers(ObjectRequest<T> request) {
 
-        // todo: support qualifiers
-
         List<ClassContainer<?>> matched = new ArrayList<>();
         for (ClassContainer<?> c : containers) {
-            if (request.getName() != null && !request.isNameAsQualifier() && c.getNames().contains(request.getName())) {
-                matched.add(c);
-                continue;
-            }
-
             if (request.getType() != null && !request.getType().isAssignableFrom(c.getObjectClass())) {
                 continue;
             }
@@ -118,9 +113,21 @@ public class World implements Iterable<ClassContainer<?>> {
     }
 
     private <T> List<ClassContainer<?>> pickContainers(ObjectRequest<T> request, List<ClassContainer<?>> containers) {
+        List<ClassContainer<?>> matched = new ArrayList<>();
 
-        // todo: pick by request
-        return containers;
+        if (request.getQualifiers() != null && !request.getQualifiers().isEmpty()) {
+            List<Annotation> requestQualifiers = request.getQualifiers();
+            for (ClassContainer<?> c : containers) {
+                List<Annotation> containerQualifiers = c.getQualifiers();
+                if (containerQualifiers.containsAll(requestQualifiers)) {
+                    matched.add(c);
+                }
+            }
+        } else {
+            matched = containers;
+        }
+
+        return matched;
     }
 
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
