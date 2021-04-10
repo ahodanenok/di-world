@@ -2,15 +2,18 @@ package ahodanenok.di.next.character;
 
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.CharacterMetadataException;
-import ahodanenok.di.next.character.classes.Milk;
-import ahodanenok.di.next.character.classes.Tea;
-import ahodanenok.di.next.inject.classes.Water;
-import org.assertj.core.api.Assertions;
+import ahodanenok.di.next.character.classes.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.interceptor.AroundConstruct;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.*;
@@ -108,31 +111,47 @@ public class ClassCharacterTest {
     @Test
     @DisplayName("should read class qualifiers declared on a class")
     public void qualifiers() {
-
+        assertThat(ClassCharacter.of(Water.class).getQualifiers())
+                .containsExactlyInAnyOrder(
+                        Water.class.getDeclaredAnnotation(Cold.class),
+                        Water.class.getDeclaredAnnotation(Tasteless.class));
     }
 
     @Test
     @DisplayName("should read class qualifiers declared on a class and its parent")
     public void qualifiersParent() {
-
+        assertThat(ClassCharacter.of(OrangeJuice.class).getQualifiers())
+                .containsExactlyInAnyOrder(
+                        Juice.class.getDeclaredAnnotation(Fresh.class),
+                        OrangeJuice.class.getDeclaredAnnotation(Vitamin.class));
     }
 
     @Test
     @DisplayName("should read repeatable qualifiers")
     public void qualifiersRepeatable() {
-
+        assertThat(ClassCharacter.of(GingerTea.class).getQualifiers())
+                .containsExactlyInAnyOrder(GingerTea.class.getDeclaredAnnotationsByType(Ingredient.class));
     }
 
     @Test
     @DisplayName("should override qualifiers declared with annotations")
-    public void qualifiersOverride() {
-
+    @Fresh
+    public void qualifiersOverride() throws Exception {
+        Method m = getClass().getDeclaredMethod("qualifiersOverride");
+        assertThat(ClassCharacter.of(Water.class).qualifiedAs(m.getDeclaredAnnotation(Fresh.class)).getQualifiers())
+                .containsExactly(m.getDeclaredAnnotation(Fresh.class));
     }
 
     @Test
     @DisplayName("should explicitly set qualifiers")
-    public void qualifiersExplicitly() {
-
+    @Fresh
+    @Vitamin("many")
+    public void qualifiersExplicitly() throws Exception {
+        Method m = getClass().getDeclaredMethod("qualifiersExplicitly");
+        assertThat(ClassCharacter.of(Smoothie.class)
+                    .qualifiedAs(m.getDeclaredAnnotation(Fresh.class), m.getDeclaredAnnotation(Vitamin.class))
+                    .getQualifiers())
+                .containsExactlyInAnyOrder(m.getDeclaredAnnotation(Fresh.class), m.getDeclaredAnnotation(Vitamin.class));
     }
 
     @Test
@@ -149,5 +168,78 @@ public class ClassCharacterTest {
         assertThatThrownBy(() -> ClassCharacter.of(Water.class).qualifiedAs((Annotation) null))
                 .isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessage("Qualifier can't be null");
+    }
+
+    @Test
+    @DisplayName("should get interceptors from @Interceptors annotation")
+    public void interceptors() {
+        assertThat(ClassCharacter.of(Water.class).getInterceptors())
+                .containsExactly(Filter.class, ConsumptionTracker.class);
+    }
+
+    @Test
+    @DisplayName("should find no interceptors given class doesn't have any")
+    public void noInterceptors() {
+        assertThat(ClassCharacter.of(OrangeJuice.class).getInterceptors()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should override interceptors from annotation")
+    public void interceptorsOverride() {
+        assertThat(ClassCharacter.of(Water.class).interceptedBy(Boiler.class).getInterceptors())
+                .containsExactly(Boiler.class);
+    }
+
+    @Test
+    @DisplayName("should set interceptors explicitly")
+    public void interceptorsExplicitly() {
+        assertThat(ClassCharacter.of(OrangeJuice.class).interceptedBy(ConsumptionTracker.class).getInterceptors())
+                .containsExactly(ConsumptionTracker.class);
+    }
+
+    @Test
+    @DisplayName("should detect class as interceptor")
+    public void interceptor() {
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).isInterceptor()).isTrue();
+    }
+
+    @Test
+    @DisplayName("should not detect class as interceptor")
+    public void notInterceptor() {
+        assertThat(ClassCharacter.of(Boiler.class).isInterceptor()).isFalse();
+    }
+
+    @Test
+    @DisplayName("should mark class as interceptor if set explicitly")
+    public void interceptorExplicitly() {
+        assertThat(ClassCharacter.of(Boiler.class).interceptor().isInterceptor()).isTrue();
+    }
+
+    @Test
+    @DisplayName("should find @PreDestroy method")
+    public void preDestroy() throws Exception {
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(PreDestroy.class.getName()))
+                .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("preDestroy", InvocationContext.class));
+    }
+
+    @Test
+    @DisplayName("should find @PostConstruct method")
+    public void postConstruct() throws Exception {
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(PostConstruct.class.getName()))
+                .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("postConstruct"));
+    }
+
+    @Test
+    @DisplayName("should find @AroundConstruct method")
+    public void aroundConstruct() throws Exception {
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(AroundConstruct.class.getName()))
+                .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("aroundConstruct"));
+    }
+
+    @Test
+    @DisplayName("should find @AroundInvoke method")
+    public void aroundInvoke() throws Exception {
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(AroundInvoke.class.getName()))
+                .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("aroundInvoke", InvocationContext.class));
     }
 }

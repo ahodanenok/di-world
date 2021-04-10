@@ -6,5 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Qualifier
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Cold { }
+public @interface Fresh { }
