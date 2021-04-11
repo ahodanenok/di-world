@@ -3,11 +3,15 @@ package ahodanenok.di.next.character;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.next.character.classes.*;
+import ahodanenok.di.scope.AlwaysNewScope;
+import ahodanenok.di.scope.Scope;
+import ahodanenok.di.scope.SingletonScope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Provider;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
@@ -256,5 +260,38 @@ public class ClassCharacterTest {
                     .intercepts(PostConstruct.class.getName(), "healthCheck")
                     .getInterceptorMethod(PostConstruct.class.getName()))
                 .isEqualTo(Boiler.class.getDeclaredMethod("healthCheck"));
+    }
+
+    @Test
+    @DisplayName("should have AlwaysNew scope given no scope is set")
+    public void scopeAlwaysNew() {
+        assertThat(ClassCharacter.of(Boiler.class).getScope()).isExactlyInstanceOf(AlwaysNewScope.class);
+    }
+
+    @Test
+    @DisplayName("should be set as singleton by annotation")
+    public void scopeSingletonAnnotation() {
+        assertThat(ClassCharacter.of(Cooler.class).getScope()).isExactlyInstanceOf(SingletonScope.class);
+    }
+
+    @Test
+    @DisplayName("should set singleton scope explicitly")
+    public void scopeSingletonExplicit() {
+        assertThat(ClassCharacter.of(Cooler.class).scopedBy(new SingletonScope<>()).getScope())
+                .isExactlyInstanceOf(SingletonScope.class);
+    }
+
+    @Test
+    @DisplayName("should override scope from annotation")
+    public void scopeOverride() {
+        class CustomScope<T> implements Scope<T> {
+            @Override
+            public T getObject(Provider<T> provider) {
+                return provider.get();
+            }
+        }
+
+        assertThat(ClassCharacter.of(Cooler.class).scopedBy(new CustomScope<>()).getScope())
+                .isExactlyInstanceOf(CustomScope.class);
     }
 }
