@@ -242,4 +242,19 @@ public class ClassCharacterTest {
         assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(AroundInvoke.class.getName()))
                 .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("aroundInvoke", InvocationContext.class));
     }
+
+    @Test
+    @DisplayName("should not find interceptor method if it is not defined")
+    public void noInterceptorMethod() throws Exception {
+        assertThat(ClassCharacter.of(Boiler.class).getInterceptorMethod(PostConstruct.class.getName())).isNull();
+    }
+
+    @Test
+    @DisplayName("should set interceptor method explicitly")
+    public void interceptorMethodExplicitly() throws Exception {
+        assertThat(ClassCharacter.of(Boiler.class)
+                    .intercepts(PostConstruct.class.getName(), "healthCheck")
+                    .getInterceptorMethod(PostConstruct.class.getName()))
+                .isEqualTo(Boiler.class.getDeclaredMethod("healthCheck"));
+    }
 }
