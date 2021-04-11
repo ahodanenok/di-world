@@ -56,18 +56,50 @@ public class ClassMetadataReader<T> {
      * @throws CharacterMetadataException if class contains multiple scope declarations or scope has attributes
      */
     public String readScope() {
+        // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#type_level_inheritance
+        // If X is annotated with a scope type Z then Y inherits the annotation if and only if Z declares
+        // the @Inherited meta-annotation and neither Y nor any intermediate class that is a subclass of X
+        // and a superclass of Y declares a scope type.
+
         List<Annotation> scopes = ReflectionUtils.getAnnotations(
                 clazz, a -> a.annotationType().isAnnotationPresent(Scope.class));
+
+        if (scopes.size() > 1) {
+            List<Annotation> firstDeclared = new ArrayList<>();
+
+            Class<?> currentClass = clazz;
+            while (currentClass != Object.class && firstDeclared.isEmpty()) {
+                for (Annotation s : scopes) {
+                    // collect all on a class to throw error if multiple scopes are defined
+                    Collections.addAll(firstDeclared, currentClass.getDeclaredAnnotationsByType(s.annotationType()));
+                }
+
+                currentClass = currentClass.getSuperclass();
+            }
+
+            if (!firstDeclared.isEmpty()) {
+                scopes = firstDeclared;
+            }
+        }
+
         if (scopes.size() == 1) {
             Class<? extends Annotation> scope = scopes.get(0).annotationType();
             if (scope.getDeclaredMethods().length > 0) {
-                throw new CharacterMetadataException(String.format("Scope annotation must not declare any attributes, but '%s' has %s",
+                // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#defining_new_scope_type
+                // A scope type must not have any attributes.
+                // If a scope type has attributes non-portable behavior results.
+                throw new CharacterMetadataException(String.format(
+                        "Scope annotation must not declare any attributes, but '%s' has %s",
                         scope.getName(),
                         Arrays.toString(scope.getDeclaredMethods())));
             }
 
             return scope.getName();
         } else if (scopes.size() > 1) {
+            // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#declaring_bean_scope
+            // A bean class or producer method or field may specify at most one scope type annotation.
+            // If a bean class or producer method or field specifies multiple scope type annotations,
+            // the container automatically detects the problem and treats it as a definition error.
             throw new CharacterMetadataException(String.format("Multiple scopes are defined on a class '%s'", clazz));
         } else{
             return null;
