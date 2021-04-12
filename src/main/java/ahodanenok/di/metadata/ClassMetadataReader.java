@@ -120,15 +120,25 @@ public class ClassMetadataReader<T> {
     }
 
     public Method readInterceptorMethod(String type) {
+        List<Method> methods = new ArrayList<>();
         for (Method method : ReflectionUtils.getInstanceMethods(clazz)) {
             for (Annotation a : method.getAnnotations()) {
                 if (a.annotationType().getName().equals(type)) {
-                    return method;
+                    methods.add(method);
                 }
             }
         }
 
-        return null;
+        if (methods.size() == 1) {
+            return methods.get(0);
+        } else if (methods.size() > 1) {
+            // A given class must not declare more than one {type} method
+            throw new CharacterMetadataException(String.format(
+                    "Multiple interceptors of type '%s' are defined in a class '%s': %s",
+                    type, clazz.getName(), methods));
+        } else {
+            return null;
+        }
     }
 
     /**

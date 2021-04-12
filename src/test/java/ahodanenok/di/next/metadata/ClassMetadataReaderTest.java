@@ -125,30 +125,47 @@ public class ClassMetadataReaderTest {
     }
 
     @Test
-    @DisplayName("should find @AroundInvoke interceptor on an interceptor class")
+    @DisplayName("should find @AroundInvoke interceptor in an interceptor class")
     public void aroundInvokeInInterceptor() throws Exception {
         assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(AroundInvoke.class.getName()))
                 .isEqualTo(Forest.class.getDeclaredMethod("onTreeGrowing"));
     }
 
     @Test
-    @DisplayName("should find @AroundConstruct interceptor on an interceptor class")
+    @DisplayName("should find @AroundConstruct interceptor in an interceptor class")
     public void aroundConstructInInterceptor() throws Exception {
         assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(AroundConstruct.class.getName()))
                 .isEqualTo(Forest.class.getDeclaredMethod("onTreeCreated"));
     }
 
     @Test
-    @DisplayName("should find @PreDestroy interceptor on an interceptor class")
+    @DisplayName("should find @PreDestroy interceptor in an interceptor class")
     public void preDestroyInInterceptor() throws Exception {
         assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(PreDestroy.class.getName()))
                 .isEqualTo(Forest.class.getDeclaredMethod("beforeTreeDestroyed"));
     }
 
     @Test
-    @DisplayName("should find @PostConstruct interceptor on an interceptor class")
+    @DisplayName("should find @PostConstruct interceptor in an interceptor class")
     public void postConstructInInterceptor() throws Exception {
         assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(PostConstruct.class.getName()))
                 .isEqualTo(Forest.class.getDeclaredMethod("afterTreeCreated"));
+    }
+
+    @Test
+    @DisplayName("should find interceptor in an interceptor's superclass")
+    public void aroundInvokeInSuperclass() throws Exception {
+        assertThat(new ClassMetadataReader<>(TropicalForest.class).readInterceptorMethod(AroundInvoke.class.getName()))
+                .isEqualTo(Forest.class.getDeclaredMethod("onTreeGrowing"));
+    }
+
+    @Test
+    @DisplayName("should throw error if multiple interceptors are found in an interceptor")
+    public void multipleAroundInvoke() {
+        assertThatThrownBy(() ->
+                    new ClassMetadataReader<>(Soil.class).readInterceptorMethod(PostConstruct.class.getName()))
+                .isExactlyInstanceOf(CharacterMetadataException.class)
+                .hasMessageStartingWith("Multiple interceptors of type 'javax.annotation.PostConstruct' are defined" +
+                        " in a class 'ahodanenok.di.next.metadata.classes.Soil'");
     }
 }
