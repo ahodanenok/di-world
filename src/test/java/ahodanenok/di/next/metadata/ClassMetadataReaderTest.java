@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.AroundInvoke;
+import javax.swing.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -167,5 +169,42 @@ public class ClassMetadataReaderTest {
                 .isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessageStartingWith("Multiple interceptors of type 'javax.annotation.PostConstruct' are defined" +
                         " in a class 'ahodanenok.di.next.metadata.classes.Soil'");
+    }
+
+    @Test
+    @DisplayName("should read no qualifiers")
+    public void noQualifiers() {
+        assertThat(new ClassMetadataReader<>(Leaf.class).readQualifiers()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should read qualifiers from a class")
+    public void qualifiersClass() {
+        assertThat(new ClassMetadataReader<>(Spruce.class).readQualifiers()).containsExactlyInAnyOrder(
+                Spruce.class.getDeclaredAnnotation(Named.class),
+                Spruce.class.getDeclaredAnnotation(Needles.class),
+                Spruce.class.getDeclaredAnnotation(Tall.class)
+        );
+    }
+
+    @Test
+    @DisplayName("should read qualifier from parent given it is @Inherited")
+    public void qualifiersParent() {
+        assertThat(new ClassMetadataReader<>(Yggdrasil.class).readQualifiers())
+                .containsExactly(WorldTree.class.getDeclaredAnnotation(Epic.class));
+    }
+
+    @Test
+    @DisplayName("should not read qualifiers from other qualifiers")
+    public void qualifiersComposition() {
+        assertThat(new ClassMetadataReader<>(Tree.class).readQualifiers()).containsExactly(
+                Tree.class.getDeclaredAnnotation(Plant.class));
+    }
+
+    @Test
+    @DisplayName("should read repeatable qualifiers from a class")
+    public void repeatable() {
+        assertThat(new ClassMetadataReader<>(Banana.class).readQualifiers())
+                .containsExactlyInAnyOrder(Banana.class.getAnnotationsByType(Habitat.class));
     }
 }

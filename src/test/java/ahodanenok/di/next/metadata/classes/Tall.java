@@ -6,4 +6,4 @@ import java.lang.annotation.RetentionPolicy;
 
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Needles { }
+public @interface Tall { }

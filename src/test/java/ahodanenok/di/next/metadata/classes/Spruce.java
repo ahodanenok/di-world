@@ -4,6 +4,7 @@ import javax.inject.Named;
 import javax.interceptor.Interceptors;
 
 @Named
+@Tall
 @Needles
 @Evergreen
 @Interceptors({Soil.class, Forest.class, Seasons.class})
