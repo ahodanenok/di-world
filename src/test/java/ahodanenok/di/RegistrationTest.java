@@ -1,5 +1,6 @@
 package ahodanenok.di;
 
+import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,6 @@ public class RegistrationTest {
 
         assertThat(w.iterator().next().getObjectClass()).isEqualTo(A.class);
     }
-
 
     @Test
     public void shouldRegisterContainerWithNamesFromConfiguration() {

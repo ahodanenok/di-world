@@ -1,138 +1,208 @@
-//package ahodanenok.di.metadata;
-//
-//import ahodanenok.di.exception.CharacterMetadataException;
-//import org.junit.jupiter.api.Disabled;
-//import org.junit.jupiter.api.Test;
-//
-//import javax.inject.Named;
-//import javax.inject.Scope;
-//import javax.inject.Singleton;
-//import javax.interceptor.AroundConstruct;
-//import javax.interceptor.Interceptor;
-//import javax.interceptor.Interceptors;
-//
-//import java.lang.annotation.Retention;
-//import java.lang.annotation.RetentionPolicy;
-//
-//import static org.assertj.core.api.Assertions.*;
-//
-//@Disabled
-//public class ClassMetadataReaderTest {
-//
-//    static class NotNamedClass { }
-//
-//    @Named
-//    static class DefaultNamedClass { }
-//
-//    @Named("test name")
-//    static class NamedClass { }
-//
-//    @Test
-//    public void shouldReadNullAsClassNameForClassNotAnnotatedWithNamed() {
-//        assertThat(new ClassMetadataReader<>(NotNamedClass.class).readName()).isNull();
-//    }
-//
-//    @Test
-//    public void shouldReadEmptyStringAsClassNameForClassWithNamedWithoutExplicitName() {
-//        assertThat(new ClassMetadataReader<>(DefaultNamedClass.class).readName()).isEmpty();
-//    }
-//
-//    @Test
-//    public void shouldReadEnteredClassNameInNamedAnnotation() {
-//        assertThat(new ClassMetadataReader<>(NamedClass.class).readName()).isEqualTo("test name");
-//    }
-//
-//    @Scope
-//    @Retention(RetentionPolicy.RUNTIME)
-//    @interface TestScope { }
-//
-//    @Scope
-//    @Retention(RetentionPolicy.RUNTIME)
-//    @interface ScopeWithAttribute { String value() default ""; }
-//
-//    static class NotScopedClass { }
-//
-//    @Singleton
-//    static class ScopedClass { }
-//
-//    @Singleton @TestScope
-//    static class MultipleScopesClass { }
-//
-//    @ScopeWithAttribute("test")
-//    static class ScopedWithAttributes { }
-//
-//    @Test
-//    public void shouldReadNoScope() {
-//        assertThat(new ClassMetadataReader<>(NotScopedClass.class).readScope()).isNull();
-//    }
-//
-//    @Test
-//    public void shouldReadScope() {
-//        assertThat(new ClassMetadataReader<>(ScopedClass.class).readScope()).isEqualTo(Singleton.class.getName());
-//    }
-//
-//    @Test
-//    public void shouldThrowErrorIfMultipleScopes() {
-//        assertThatThrownBy(() -> new ClassMetadataReader<>(MultipleScopesClass.class).readScope())
-//                .isExactlyInstanceOf(CharacterMetadataException.class)
-//                .hasMessageStartingWith("Multiple scopes");
-//    }
-//
-//    @Test
-//    public void shouldThrowErrorIfScopeHasAttributes() {
-//        assertThatThrownBy(() -> new ClassMetadataReader<>(ScopedWithAttributes.class).readScope())
-//                .isExactlyInstanceOf(CharacterMetadataException.class)
-//                .hasMessageStartingWith("Scope annotation must not declare any attributes");
-//    }
-//
-//    @Interceptor public static class InterceptorClass { }
-//    public static class NotInterceptorClass { }
-//    public static class InterceptorInParent extends InterceptorClass { }
-//
-//    @Test
-//    public void shouldReadInterceptorAsTrue() {
-//        assertThat(new ClassMetadataReader<>(InterceptorClass.class).readInterceptor()).isTrue();
-//    }
-//
-//    @Test
-//    public void shouldReadInterceptorAsFalse() {
-//        assertThat(new ClassMetadataReader<>(NotInterceptorClass.class).readInterceptor()).isFalse();
-//    }
-//
-//    @Test
-//    public void shouldNotReadInterceptorAsTrueIfInParent() {
-//        assertThat(new ClassMetadataReader<>(InterceptorInParent.class).readInterceptor()).isFalse();
-//    }
-//
-//    @Interceptors({ Integer.class, Long.class })
-//    public static class WithInterceptorsClass { }
-//    public static class WithoutInterceptorsClass { }
-//    public static class WithInterceptorsInParent extends WithInterceptorsClass { }
-//
-//    @Test
-//    public void shouldReadInterceptors() {
-//        assertThat(new ClassMetadataReader<>(WithInterceptorsClass.class).readInterceptors())
-//                .containsExactly(Integer.class, Long.class);
-//    }
-//
-//    @Test
-//    public void shouldNotReadInterceptors() {
-//        assertThat(new ClassMetadataReader<>(WithoutInterceptorsClass.class).readInterceptors()).isEmpty();
-//    }
-//
-//    @Test
-//    public void shouldNotReadInterceptorInParent() {
-//        assertThat(new ClassMetadataReader<>(WithInterceptorsInParent.class).readInterceptors()).isEmpty();
-//    }
-//
-//    public static class WithInterceptorMethod {
-//        @AroundConstruct public void method() { }
-//    }
-//
-//    @Test
-//    public void shouldFindInterceptorMethod() throws Exception {
-//        assertThat(new ClassMetadataReader<>(WithInterceptorMethod.class)
-//                    .readInterceptorMethod(AroundConstruct.class.getName()))
-//                .isEqualTo(WithInterceptorMethod.class.getDeclaredMethod("method"));
-//    }
-//}
+package ahodanenok.di.metadata;
+
+import ahodanenok.di.exception.CharacterMetadataException;
+import ahodanenok.di.metadata.classes.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.interceptor.AroundConstruct;
+import javax.interceptor.AroundInvoke;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+public class ClassMetadataReaderTest {
+
+    @Test
+    @DisplayName("should return null as the name given class doesn't have @Named annotation")
+    public void notNamed() {
+        assertThat(new ClassMetadataReader<>(Banana.class).readName()).isNull();
+    }
+
+    @Test
+    @DisplayName("should not inherit name from @Named in parent")
+    public void notNamedByParent() {
+        assertThat(new ClassMetadataReader<>(Trunk.class).readName()).isNull();
+    }
+
+    @Test
+    @DisplayName("should return default name given @Named with a blank value")
+    public void defaultNamed() {
+        assertThat(new ClassMetadataReader<>(Spruce.class).readName()).isEqualTo("spruce");
+    }
+
+    @Test
+    @DisplayName("should return name defined in @Named annotation")
+    public void named() {
+        assertThat(new ClassMetadataReader<>(Oak.class).readName()).isEqualTo("I'm an Oak!");
+    }
+
+    @Test
+    @DisplayName("should return null as scope given class doesn't have any @Scope annotation ")
+    public void notScoped() {
+        assertThat(new ClassMetadataReader<>(Tree.class).readScope()).isNull();
+    }
+
+    @Test
+    @DisplayName("should not inherited scope from parent given it's not inheritable")
+    public void notInheritedScope() {
+        assertThat(new ClassMetadataReader<>(Yggdrasil.class).readScope()).isNull();
+    }
+
+    @Test
+    @DisplayName("should inherit scope from parent given it's inheritable and class doesn't define any")
+    public void inheritedScope() {
+        assertThat(new ClassMetadataReader<>(Trunk.class).readScope()).isEqualTo(PerTree.class.getName());
+    }
+
+    @Test
+    @DisplayName("should not inherit scope from parent given scope inheritable but class defines own scope")
+    public void notInheritedScopeIfDefined() {
+        assertThat(new ClassMetadataReader<>(Leaf.class).readScope()).isEqualTo(PerBranch.class.getName());
+    }
+
+    @Test
+    @DisplayName("should return singleton scope given class has a @Singleton annotation")
+    public void singletonScope() {
+        assertThat(new ClassMetadataReader<>(WorldTree.class).readScope()).isEqualTo(Singleton.class.getName());
+    }
+
+    @Test
+    @DisplayName("should read custom scope given class is annotated with it")
+    public void customScope() {
+        assertThat(new ClassMetadataReader<>(Spruce.class).readScope()).isEqualTo(Evergreen.class.getName());
+    }
+
+    @Test
+    @DisplayName("should throw error given multiple scopes are declared")
+    public void multipleScopes() {
+        assertThatThrownBy(() -> new ClassMetadataReader<>(Banana.class).readScope())
+                .isExactlyInstanceOf(CharacterMetadataException.class)
+                .hasMessageStartingWith("Multiple scopes");
+    }
+
+    @Test
+    @DisplayName("should throw error given scope has attributes")
+    public void scopeAttributes() {
+        assertThatThrownBy(() -> new ClassMetadataReader<>(Oak.class).readScope())
+                .isExactlyInstanceOf(CharacterMetadataException.class)
+                .hasMessageStartingWith("Scope annotation must not declare any attributes");
+    }
+
+    @Test
+    @DisplayName("should return true if class is interceptor")
+    public void interceptor() {
+        assertThat(new ClassMetadataReader<>(Forest.class).readInterceptor()).isTrue();
+    }
+
+    @Test
+    @DisplayName("should return false if class is not interceptor")
+    public void notInterceptor() {
+        assertThat(new ClassMetadataReader<>(Oak.class).readInterceptor()).isFalse();
+    }
+
+    @Test
+    @DisplayName("should return no interceptors if class doesn't define any")
+    public void noInterceptors() {
+        assertThat(new ClassMetadataReader<>(Tree.class).readInterceptors()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should return one interceptor if class defines one")
+    public void singleInterceptor() {
+        assertThat(new ClassMetadataReader<>(Oak.class).readInterceptors()).containsExactly(Forest.class);
+    }
+
+    @Test
+    @DisplayName("should return multiple interceptors in the order they are defined in")
+    public void multipleInterceptors() {
+        assertThat(new ClassMetadataReader<>(Spruce.class).readInterceptors())
+                .containsExactly(Soil.class, Forest.class, Seasons.class);
+    }
+
+    @Test
+    @DisplayName("should find @AroundInvoke interceptor in an interceptor class")
+    public void aroundInvokeInInterceptor() throws Exception {
+        assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(AroundInvoke.class.getName()))
+                .isEqualTo(Forest.class.getDeclaredMethod("onTreeGrowing"));
+    }
+
+    @Test
+    @DisplayName("should find @AroundConstruct interceptor in an interceptor class")
+    public void aroundConstructInInterceptor() throws Exception {
+        assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(AroundConstruct.class.getName()))
+                .isEqualTo(Forest.class.getDeclaredMethod("onTreeCreated"));
+    }
+
+    @Test
+    @DisplayName("should find @PreDestroy interceptor in an interceptor class")
+    public void preDestroyInInterceptor() throws Exception {
+        assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(PreDestroy.class.getName()))
+                .isEqualTo(Forest.class.getDeclaredMethod("beforeTreeDestroyed"));
+    }
+
+    @Test
+    @DisplayName("should find @PostConstruct interceptor in an interceptor class")
+    public void postConstructInInterceptor() throws Exception {
+        assertThat(new ClassMetadataReader<>(Forest.class).readInterceptorMethod(PostConstruct.class.getName()))
+                .isEqualTo(Forest.class.getDeclaredMethod("afterTreeCreated"));
+    }
+
+    @Test
+    @DisplayName("should find interceptor in an interceptor's superclass")
+    public void aroundInvokeInSuperclass() throws Exception {
+        assertThat(new ClassMetadataReader<>(TropicalForest.class).readInterceptorMethod(AroundInvoke.class.getName()))
+                .isEqualTo(Forest.class.getDeclaredMethod("onTreeGrowing"));
+    }
+
+    @Test
+    @DisplayName("should throw error if multiple interceptors are found in an interceptor")
+    public void multipleAroundInvoke() {
+        assertThatThrownBy(() ->
+                    new ClassMetadataReader<>(Soil.class).readInterceptorMethod(PostConstruct.class.getName()))
+                .isExactlyInstanceOf(CharacterMetadataException.class)
+                .hasMessageStartingWith("Multiple interceptors of type 'javax.annotation.PostConstruct' are defined" +
+                        " in a class 'ahodanenok.di.metadata.classes.Soil'");
+    }
+
+    @Test
+    @DisplayName("should read no qualifiers")
+    public void noQualifiers() {
+        assertThat(new ClassMetadataReader<>(Leaf.class).readQualifiers()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should read qualifiers from a class")
+    public void qualifiersClass() {
+        assertThat(new ClassMetadataReader<>(Spruce.class).readQualifiers()).containsExactlyInAnyOrder(
+                Spruce.class.getDeclaredAnnotation(Named.class),
+                Spruce.class.getDeclaredAnnotation(Needles.class),
+                Spruce.class.getDeclaredAnnotation(Tall.class)
+        );
+    }
+
+    @Test
+    @DisplayName("should read qualifier from parent given it is @Inherited")
+    public void qualifiersParent() {
+        assertThat(new ClassMetadataReader<>(Yggdrasil.class).readQualifiers())
+                .containsExactly(WorldTree.class.getDeclaredAnnotation(Epic.class));
+    }
+
+    @Test
+    @DisplayName("should not read qualifiers from other qualifiers")
+    public void qualifiersComposition() {
+        assertThat(new ClassMetadataReader<>(Tree.class).readQualifiers()).containsExactly(
+                Tree.class.getDeclaredAnnotation(Plant.class));
+    }
+
+    @Test
+    @DisplayName("should read repeatable qualifiers from a class")
+    public void repeatable() {
+        assertThat(new ClassMetadataReader<>(Banana.class).readQualifiers())
+                .containsExactlyInAnyOrder(Banana.class.getAnnotationsByType(Habitat.class));
+    }
+}

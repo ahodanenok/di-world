@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.ObjectRequest;
+import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.SingletonScope;
