@@ -1,5 +1,7 @@
 package ahodanenok.di.util;
 
+import javax.inject.Named;
+import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.AnnotatedElement;
@@ -10,6 +12,9 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class ReflectionUtils {
+
+    public static final Predicate<Annotation> QUALIFIER_PREDICATE =
+            (a) -> a.annotationType().isAnnotationPresent(Qualifier.class) && !(a instanceof Named);
 
     private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();
 

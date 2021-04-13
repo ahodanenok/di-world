@@ -14,7 +14,6 @@ public class ObjectRequest<T> {
 
     private Object context;
     private Class<?> type;
-    private String name;
     private List<Annotation> qualifiers;
 
     private ObjectRequest() { }
@@ -34,15 +33,6 @@ public class ObjectRequest<T> {
 
     public <C extends T> ObjectRequest<T> withType(Class<C> type) {
         this.type = type;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ObjectRequest<T> withName(String name) {
-        this.name = name;
         return this;
     }
 

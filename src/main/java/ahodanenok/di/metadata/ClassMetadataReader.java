@@ -1,10 +1,10 @@
 package ahodanenok.di.metadata;
 
 import ahodanenok.di.exception.CharacterMetadataException;
+import ahodanenok.di.util.NamedQualifier;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;
-import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.interceptor.Interceptor;
 import javax.interceptor.Interceptors;
@@ -23,25 +23,34 @@ public class ClassMetadataReader<T> {
     }
 
     /**
-     * Finds @Named annotation on a clazz
-     *
-     * @return
-     * - non-empty string with a name <br>
-     * - null meaning class doesn't have a name <br>
+     * Determine name based on @Named annotation
+     * @return name (never blank) or null if @Named is not present
      */
-    public String readName() {
+    public String readNamed() {
+        // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#declaring_bean_name
+        // To specify the name of a bean, the qualifier @javax.inject.Named is applied to the bean class.
         Named named = clazz.getAnnotation(Named.class);
 
         String name;
         if (named != null) {
             name = named.value();
         } else {
+            // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#beans_with_no_name
+            // If @Named is not declared by the bean, nor by its stereotypes, a bean has no name.
+            // todo: stereotypes?
             name = null;
         }
 
         if (name != null) {
             name = name.trim();
+
+            // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#default_name
+            // A bean class or producer method or field of a bean declares a @Named
+            // annotation and no bean name is explicitly specified by the value member.
             if (name.isEmpty()) {
+                // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#managed_bean_name
+                // The default name for a managed bean is the unqualified class name of
+                // the bean class, after converting the first character to lower case.
                 name = Introspector.decapitalize(clazz.getSimpleName());
             }
         }
@@ -144,8 +153,14 @@ public class ClassMetadataReader<T> {
     /**
      * Find all @Qualifier annotations on the class
      */
-    public Set<Annotation> readQualifiers() {
-        return new HashSet<>(ReflectionUtils.getAnnotations(clazz,
-                a -> a.annotationType().isAnnotationPresent(Qualifier.class)));
+    public List<Annotation> readQualifiers() {
+        List<Annotation> qualifiers = ReflectionUtils.getAnnotations(clazz, ReflectionUtils.QUALIFIER_PREDICATE);
+
+        String named = readNamed();
+        if (named != null) {
+            qualifiers.add(new NamedQualifier(named));
+        }
+
+        return qualifiers;
     }
 }

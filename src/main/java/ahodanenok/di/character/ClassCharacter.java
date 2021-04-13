@@ -36,7 +36,7 @@ public class ClassCharacter<T> {
     private Set<String> names;
     private Scope<T> scope;
     private ExecutableMetadataReader constructor;
-    private Set<Annotation> qualifiers;
+    private List<Annotation> qualifiers;
 
     private boolean interceptor;
     private List<Class<?>> interceptors;
@@ -46,7 +46,7 @@ public class ClassCharacter<T> {
         this.classMetadataReader = new ClassMetadataReader<>(clazz);
         this.objectClass = clazz;
 
-        String name = classMetadataReader.readName();
+        String name = classMetadataReader.readNamed();
         if (name != null) {
             this.names = Collections.singleton(name);
         } else {
@@ -170,7 +170,7 @@ public class ClassCharacter<T> {
             throw new CharacterMetadataException("Provide at least one qualifier");
         }
 
-        Set<Annotation> newQualifiers = new HashSet<>();
+        List<Annotation> newQualifiers = new ArrayList<>();
         for (Annotation q : qualifiers) {
             if (q == null) {
                 throw new CharacterMetadataException("Qualifier can't be null");
@@ -185,8 +185,8 @@ public class ClassCharacter<T> {
         return this;
     }
 
-    public Set<Annotation> getQualifiers() {
-        return Collections.unmodifiableSet(qualifiers);
+    public List<Annotation> getQualifiers() {
+        return Collections.unmodifiableList(qualifiers);
     }
 
     /**

@@ -89,17 +89,6 @@ public class World implements Iterable<ClassContainer<?>> {
                     "No dependencies are found for a request '%s'", request));
         }
 
-        // There is a single object without any names and name is not specified in request
-        if (request.getName() == null) {
-            List<ClassContainer<?>> withoutName = containers.stream()
-                    .filter(c -> c.getNames().isEmpty())
-                    .collect(Collectors.toList());
-
-            if (withoutName.size() == 1) {
-                return (T) withoutName.get(0).getObject();
-            }
-        }
-
         // There is a single object without any qualifiers and qualifiers are not specified in request
         if (request.getQualifiers().isEmpty()) {
             List<ClassContainer<?>> withoutQualifiers = containers.stream()
@@ -108,6 +97,17 @@ public class World implements Iterable<ClassContainer<?>> {
 
             if (withoutQualifiers.size() == 1) {
                 return (T) withoutQualifiers.get(0).getObject();
+            }
+        }
+
+        {
+            // There is a single object without any names
+            List<ClassContainer<?>> withoutName = containers.stream()
+                    .filter(c -> c.getNames().isEmpty())
+                    .collect(Collectors.toList());
+
+            if (withoutName.size() == 1) {
+                return (T) withoutName.get(0).getObject();
             }
         }
 
@@ -147,9 +147,9 @@ public class World implements Iterable<ClassContainer<?>> {
             }
 
             // Use name as a qualifier
-            if (request.getName() != null && !c.getNames().contains(request.getName())) {
-                continue;
-            }
+//            if (request.getName() != null && !c.getNames().contains(request.getName())) {
+//                continue;
+//            }
 
             // The bean has all the required qualifiers.
             for (Annotation qualifier : request.getQualifiers()) {

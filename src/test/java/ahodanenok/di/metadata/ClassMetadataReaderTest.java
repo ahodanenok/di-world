@@ -20,25 +20,25 @@ public class ClassMetadataReaderTest {
     @Test
     @DisplayName("should return null as the name given class doesn't have @Named annotation")
     public void notNamed() {
-        assertThat(new ClassMetadataReader<>(Banana.class).readName()).isNull();
+        assertThat(new ClassMetadataReader<>(Banana.class).readNamed()).isNull();
     }
 
     @Test
     @DisplayName("should not inherit name from @Named in parent")
     public void notNamedByParent() {
-        assertThat(new ClassMetadataReader<>(Trunk.class).readName()).isNull();
+        assertThat(new ClassMetadataReader<>(Trunk.class).readNamed()).isNull();
     }
 
     @Test
     @DisplayName("should return default name given @Named with a blank value")
     public void defaultNamed() {
-        assertThat(new ClassMetadataReader<>(Spruce.class).readName()).isEqualTo("spruce");
+        assertThat(new ClassMetadataReader<>(Spruce.class).readNamed()).isEqualTo("spruce");
     }
 
     @Test
     @DisplayName("should return name defined in @Named annotation")
     public void named() {
-        assertThat(new ClassMetadataReader<>(Oak.class).readName()).isEqualTo("I'm an Oak!");
+        assertThat(new ClassMetadataReader<>(Oak.class).readNamed()).isEqualTo("I'm an Oak!");
     }
 
     @Test
@@ -177,9 +177,10 @@ public class ClassMetadataReaderTest {
 
     @Test
     @DisplayName("should read qualifiers from a class")
-    public void qualifiersClass() {
+    @Named("spruce")
+    public void qualifiersClass() throws Exception {
         assertThat(new ClassMetadataReader<>(Spruce.class).readQualifiers()).containsExactlyInAnyOrder(
-                Spruce.class.getDeclaredAnnotation(Named.class),
+                getClass().getDeclaredMethod("qualifiersClass").getDeclaredAnnotation(Named.class),
                 Spruce.class.getDeclaredAnnotation(Needles.class),
                 Spruce.class.getDeclaredAnnotation(Tall.class)
         );

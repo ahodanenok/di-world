@@ -51,7 +51,7 @@ public class ClassContainer<T> {
         return names;
     }
 
-    public Set<Annotation> getQualifiers() {
+    public List<Annotation> getQualifiers() {
         return character.getQualifiers();
     }
 
@@ -154,11 +154,6 @@ public class ClassContainer<T> {
         ObjectRequest<?> request = ObjectRequest.of(paramType);
         request.withContext(metadataReader.getExecutable() + " "  + metadataReader.getExecutable().getParameters()[paramNum]);
 
-        String name = metadataReader.readParameterName(paramNum);
-        if (name != null) {
-            request.withName(name);
-        }
-
         List<Annotation> qualifiers = metadataReader.readParameterQualifiers(paramNum);
         if (!qualifiers.isEmpty()) {
             request.withQualifiers(qualifiers);
@@ -184,11 +179,6 @@ public class ClassContainer<T> {
 
         ObjectRequest<?> request = ObjectRequest.of(paramType);
         request.withContext(field);
-
-        String name = metadataReader.readName();
-        if (name != null) {
-            request.withName(name);
-        }
 
         List<Annotation> qualifiers = metadataReader.readQualifiers();
         if (!qualifiers.isEmpty()) {
