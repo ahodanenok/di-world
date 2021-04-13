@@ -1,9 +1,11 @@
 package ahodanenok.di.container;
 
+import ahodanenok.di.InjectionPoint;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.CharacterMetadataException;
+import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
@@ -15,7 +17,6 @@ import ahodanenok.di.scope.Scope;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.InvocationContext;
@@ -65,7 +66,7 @@ public class ClassContainer<T> {
         }
 
         // todo: cache arguments?
-        Object[] args = resolveArguments(constructor);
+        Object[] args = resolveArguments(new ExecutableMetadataReader(constructor));
 
         ConstructorInvocationContext constructorContext = new ConstructorInvocationContext(constructor);
         constructorContext.setParameters(args);
@@ -105,6 +106,10 @@ public class ClassContainer<T> {
 
             return castedInstance;
         } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+
             // todo: handle exceptions
             throw new IllegalStateException(e);
         }
@@ -131,65 +136,77 @@ public class ClassContainer<T> {
         }
     }
 
-    private Object[] resolveArguments(Executable executable) {
-        ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(executable);
+    private Object[] resolveArguments(ExecutableMetadataReader metadataReader) {
 
-        Object[] args = new Object[executable.getParameterCount()];
+        Object[] args = new Object[metadataReader.getExecutable().getParameterCount()];
         for (int i = 0; i < args.length; i++) {
-            args[i] = resolveArgument(metadataReader, i);
+            InjectionPoint injectionPoint = new InjectionPoint(
+                    metadataReader.getExecutable(), i, metadataReader.readParameterQualifiers(i));
+
+            args[i] = resolveDependency(injectionPoint);
         }
 
         return args;
     }
 
-    private Object resolveArgument(ExecutableMetadataReader metadataReader, int paramNum) {
-        // todo: support injecting list of dependencies
-        Class<?> paramType = metadataReader.getExecutable().getParameterTypes()[paramNum];
-        if (Provider.class.equals(paramType)) {
-            paramType = (Class<?>) ((ParameterizedType) metadataReader
-                        .getExecutable().getGenericParameterTypes()[paramNum])
-                    .getActualTypeArguments()[0];
-        }
-
-        ObjectRequest<?> request = ObjectRequest.of(paramType);
-        request.withContext(metadataReader.getExecutable() + " "  + metadataReader.getExecutable().getParameters()[paramNum]);
-
-        List<Annotation> qualifiers = metadataReader.readParameterQualifiers(paramNum);
-        if (!qualifiers.isEmpty()) {
-            request.withQualifiers(qualifiers);
-        }
-
-        // todo: intercept around resolve
-        if (Provider.class.equals(metadataReader.getExecutable().getParameterTypes()[paramNum])) {
-            return (Provider<?>) () -> world.find(request);
-        } else {
-            return world.find(request);
-        }
+    private Object resolveDependency(InjectionPoint injectionPoint) {
+        return resolveDependency(injectionPoint, injectionPoint.getGenericType(), false, false);
     }
 
-    private Object resolvedDependency(Field field) {
-        // todo: support injecting list of dependencies
+    private Object resolveDependency(InjectionPoint injectionPoint, Type type, boolean optional, boolean multiple) {
+//        world.pushInjectionPoint(injectionPoint);
+        try {
+//            InterceptorChain aroundInjectChain = world.getInterceptorChain(
+//                    InterceptorRequest.of("AroundInject").matchAll());
+//
+//            Object value = aroundInjectChain.invoke(new DependencyLookupInvocationContext(request));
 
-        FieldMetadataReader metadataReader = new FieldMetadataReader(field);
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                Type rawType = parameterizedType.getRawType();
+                if (rawType == Provider.class) {
+                    if (multiple) {
+                        throw new DependencyInjectionException(String.format(
+                                "Injecting collection of providers is not supported, target = '%s'",
+                                injectionPoint.getTarget()));
+                    }
 
-        Class<?> paramType = field.getType();
-        if (Provider.class.equals(paramType)) {
-            paramType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-        }
+                    Type objectType = parameterizedType.getActualTypeArguments()[0];
+                    return (Provider<?>) () -> resolveDependency(injectionPoint, objectType, optional, false);
+                } else if (rawType == Optional.class) {
+                    if (multiple) {
+                        throw new DependencyInjectionException(String.format(
+                                "Injecting collection of optionals is not supported, target = '%s'",
+                                injectionPoint.getTarget()));
+                    }
 
-        ObjectRequest<?> request = ObjectRequest.of(paramType);
-        request.withContext(field);
+                    Type objectType = parameterizedType.getActualTypeArguments()[0];
+                    return Optional.ofNullable(resolveDependency(injectionPoint, objectType, true, false));
+                } else if (rawType instanceof Class<?> && Collection.class.isAssignableFrom((Class<?>) rawType)) {
+                    Type objectType = parameterizedType.getActualTypeArguments()[0];
+                    return resolveDependency(injectionPoint, objectType, optional, true);
+                } else {
+                    throw new IllegalStateException();
+                }
+            } else if (type instanceof Class<?>){
+                Class<?> objectType = (Class<?>) type;
+                ObjectRequest<?> request = ObjectRequest.of(objectType).withQualifiers(injectionPoint.getQualifiers());
 
-        List<Annotation> qualifiers = metadataReader.readQualifiers();
-        if (!qualifiers.isEmpty()) {
-            request.withQualifiers(qualifiers);
-        }
+                if (optional) {
+                    request.optional();
+                }
 
-        // todo: intercept around resolve
-        if (Provider.class.equals(field.getType())) {
-            return (Provider<?>) () -> world.find(request);
-        } else {
-            return world.find(request);
+                if (multiple) {
+                    return world.findAll(request);
+                } else {
+                    return world.find(request);
+                }
+            } else {
+                // todo: exception + message
+                throw new IllegalStateException(type.toString());
+            }
+        } finally {
+//            world.popInjectionPoint(injectionPoint);
         }
     }
 
@@ -201,18 +218,23 @@ public class ClassContainer<T> {
         // todo: read about injection rules, for now as i remember it
         for (Class<?> clazz : ReflectionUtils.getInheritanceChain(instance.getClass())) {
             for (Field f : clazz.getDeclaredFields()) {
-                if (f.isAnnotationPresent(Inject.class)) {
+                FieldMetadataReader metadataReader = new FieldMetadataReader(f);
+
+                if (metadataReader.readInjectable()) {
+                    InjectionPoint injectionPoint = new InjectionPoint(f, metadataReader.readQualifiers());
+
                     // todo: make accessible only when needed
                     f.setAccessible(true);
-                    f.set(instance, resolvedDependency(f));
+                    f.set(instance, resolveDependency(injectionPoint));
                 }
             }
 
             for (Method m : methodsByClass.getOrDefault(clazz, Collections.emptyList())) {
-                if (m.isAnnotationPresent(Inject.class)) {
+                ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(m);
+                if (metadataReader.readInjectable()) {
                     // todo: make accessible only when needed
                     m.setAccessible(true);
-                    m.invoke(instance, resolveArguments(m));
+                    m.invoke(instance, resolveArguments(metadataReader));
                 }
             }
         }

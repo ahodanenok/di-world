@@ -15,6 +15,7 @@ public class ObjectRequest<T> {
     private Object context;
     private Class<?> type;
     private List<Annotation> qualifiers;
+    private boolean optional;
 
     private ObjectRequest() { }
 
@@ -43,6 +44,15 @@ public class ObjectRequest<T> {
 
     public List<Annotation> getQualifiers() {
         return qualifiers != null ? qualifiers : Collections.emptyList();
+    }
+
+    public ObjectRequest<T> optional() {
+        this.optional = true;
+        return this;
+    }
+
+    public boolean isOptional() {
+        return optional;
     }
 
     @Override

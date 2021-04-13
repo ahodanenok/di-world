@@ -84,6 +84,10 @@ public class World implements Iterable<ClassContainer<?>> {
             return (T) containers.get(0).getObject();
         }
 
+        if (containers.isEmpty() && request.isOptional()) {
+            return null;
+        }
+
         if (containers.isEmpty()) {
             throw new DependencyLookupException(String.format(
                     "No dependencies are found for a request '%s'", request));
