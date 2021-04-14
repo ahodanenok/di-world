@@ -19,6 +19,7 @@ public class ObjectRequest<T> {
 
     private ObjectRequest() { }
 
+    // todo: remove this, information about the current context will be taken from the current injection point
     public ObjectRequest<T> withContext(Object context) {
         this.context = context;
         return this;

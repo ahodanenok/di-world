@@ -25,6 +25,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// todo: think of possible name alternatives
+// todo: split to ClassContainer and InterceptorContainer
 public class ClassContainer<T> {
 
     private World world;
@@ -156,6 +158,7 @@ public class ClassContainer<T> {
     private Object resolveDependency(InjectionPoint injectionPoint, Type type, boolean optional, boolean multiple) {
 //        world.pushInjectionPoint(injectionPoint);
         try {
+            // todo: around dependency resolution
 //            InterceptorChain aroundInjectChain = world.getInterceptorChain(
 //                    InterceptorRequest.of("AroundInject").matchAll());
 //
@@ -186,6 +189,9 @@ public class ClassContainer<T> {
                     Type objectType = parameterizedType.getActualTypeArguments()[0];
                     return resolveDependency(injectionPoint, objectType, optional, true);
                 } else {
+                    // todo: support generic object types?
+
+                    // todo: exception + message
                     throw new IllegalStateException();
                 }
             } else if (type instanceof Class<?>){
@@ -215,7 +221,6 @@ public class ClassContainer<T> {
         Map<Class<?>, List<Method>> methodsByClass = ReflectionUtils.getInstanceMethods(instance.getClass())
                 .stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
 
-        // todo: read about injection rules, for now as i remember it
         for (Class<?> clazz : ReflectionUtils.getInheritanceChain(instance.getClass())) {
             for (Field f : clazz.getDeclaredFields()) {
                 FieldMetadataReader metadataReader = new FieldMetadataReader(f);

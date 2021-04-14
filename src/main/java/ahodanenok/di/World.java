@@ -19,10 +19,16 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// todo: inject static methods, own container for this? (StaticConfiguration?)
+// todo: inject static methods (StaticCharacter?)
+// todo: container for user-instantiated objects
+// todo: container for interceptors
 // todo: instantiate eager objects
-// todo: destroying world
+// todo: destroying world + @PreDestroy
 // todo: around invoke
+// todo: interceptor bindings
+// todo: allow setting the current InjectionPoint
+// todo: inject InjectionPoint
+// todo: event handlers
 
 public class World implements Iterable<ClassContainer<?>> {
 
@@ -43,7 +49,6 @@ public class World implements Iterable<ClassContainer<?>> {
             ClassContainer<?> container = buildContainer(character);
             register(container);
 
-            // todo: validate interceptors
             // todo: where to put available types?
             for (Class<?> type : Arrays.asList(AroundConstruct.class, PostConstruct.class, PreDestroy.class, AroundInvoke.class)) {
                 Method method = character.getInterceptorMethod(type.getName());
@@ -57,6 +62,7 @@ public class World implements Iterable<ClassContainer<?>> {
     }
 
     private void register(ClassContainer<?> container) {
+        // todo: names are not required to be unique
         for (ClassContainer<?> c : containers) {
             for (String n : c.getNames()) {
                 if (container.getNames().contains(n)) {
@@ -178,8 +184,6 @@ public class World implements Iterable<ClassContainer<?>> {
     }
 
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
-        // todo: bindings
-
         List<InterceptorInvoke> typeInterceptors = interceptors.getOrDefault(request.getType(), Collections.emptyList());
 
         List<Class<?>> interceptorClasses = request.getClasses();
@@ -231,7 +235,7 @@ public class World implements Iterable<ClassContainer<?>> {
 
         @Override
         public Object execute(InvocationContext context) throws Exception {
-            // todo: create method for invoking methods
+            // todo: create method for invoking methods (ReflectionUtils)
             // todo: support interceptor methods with zero parameters
             Object instance = container.getObject();
             return method.invoke(instance, context);

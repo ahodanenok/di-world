@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// todo: docs
 public class ClassCharacter<T> {
 
     public static <T> ClassCharacter<T> of(Class<T> clazz) {
