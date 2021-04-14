@@ -156,63 +156,85 @@ public class ClassContainer<T> {
     }
 
     private Object resolveDependency(InjectionPoint injectionPoint, Type type, boolean optional, boolean multiple) {
-//        world.pushInjectionPoint(injectionPoint);
-        try {
-            // todo: around dependency resolution
+
+        // todo: around dependency resolution
 //            InterceptorChain aroundInjectChain = world.getInterceptorChain(
 //                    InterceptorRequest.of("AroundInject").matchAll());
 //
 //            Object value = aroundInjectChain.invoke(new DependencyLookupInvocationContext(request));
 
-            if (type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
-                Type rawType = parameterizedType.getRawType();
-                if (rawType == Provider.class) {
-                    if (multiple) {
-                        throw new DependencyInjectionException(String.format(
-                                "Injecting collection of providers is not supported, target = '%s'",
-                                injectionPoint.getTarget()));
-                    }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            if (rawType == Provider.class) {
+                if (multiple) {
+                    throw new DependencyInjectionException(String.format(
+                            "Injecting collection of providers is not supported, target = '%s'",
+                            injectionPoint.getTarget()));
+                }
 
-                    Type objectType = parameterizedType.getActualTypeArguments()[0];
-                    return (Provider<?>) () -> resolveDependency(injectionPoint, objectType, optional, false);
-                } else if (rawType == Optional.class) {
-                    if (multiple) {
-                        throw new DependencyInjectionException(String.format(
-                                "Injecting collection of optionals is not supported, target = '%s'",
-                                injectionPoint.getTarget()));
-                    }
+                Type objectType = parameterizedType.getActualTypeArguments()[0];
+                // technically it is possible to inject Provider<InjectionPoint>, but its lazy nature
+                // makes it impossible to retrieve underlying injection point as it will be long gone
+                // when Provider#get() will be finally invoked
+                return (Provider<?>) () -> resolveDependency(injectionPoint, objectType, optional, false);
+            } else if (rawType == Optional.class) {
+                if (multiple) {
+                    throw new DependencyInjectionException(String.format(
+                            "Injecting collection of optionals is not supported, target = '%s'",
+                            injectionPoint.getTarget()));
+                }
 
-                    Type objectType = parameterizedType.getActualTypeArguments()[0];
-                    return Optional.ofNullable(resolveDependency(injectionPoint, objectType, true, false));
-                } else if (rawType instanceof Class<?> && Collection.class.isAssignableFrom((Class<?>) rawType)) {
-                    Type objectType = parameterizedType.getActualTypeArguments()[0];
-                    return resolveDependency(injectionPoint, objectType, optional, true);
+                Type objectType = parameterizedType.getActualTypeArguments()[0];
+                return Optional.ofNullable(resolveDependency(injectionPoint, objectType, true, false));
+            } else if (rawType instanceof Class<?> && Collection.class.isAssignableFrom((Class<?>) rawType)) {
+                Type objectType = parameterizedType.getActualTypeArguments()[0];
+                Collection<?> collection =
+                        (Collection<?>) resolveDependency(injectionPoint, objectType, optional, true);
+
+                Class<?> collectionType = (Class<?>) rawType;
+                if (Collection.class == collectionType) {
+                    return collection;
+                } else if (List.class == collectionType) {
+                    return new ArrayList<>(collection);
+                } else if (Set.class == collectionType) {
+                    return new LinkedHashSet<>(collection);
                 } else {
-                    // todo: support generic object types?
-
-                    // todo: exception + message
-                    throw new IllegalStateException();
+                    throw new DependencyInjectionException(String.format(
+                            "Injecting collection type '%s' is not supported", collectionType.getName()));
                 }
-            } else if (type instanceof Class<?>){
-                Class<?> objectType = (Class<?>) type;
-                ObjectRequest<?> request = ObjectRequest.of(objectType).withQualifiers(injectionPoint.getQualifiers());
+            } else {
+                // todo: support generic object types?
 
-                if (optional) {
-                    request.optional();
-                }
+                // todo: exception + message
+                throw new IllegalStateException();
+            }
+        } else if (type instanceof Class<?>){
+            Class<?> objectType = (Class<?>) type;
+            ObjectRequest<?> request = ObjectRequest.of(objectType).withQualifiers(injectionPoint.getQualifiers());
 
+            if (optional) {
+                request.optional();
+            }
+
+            if (type != InjectionPoint.class) {
+                world.pushInjectionPoint(injectionPoint);
+            }
+
+            try {
                 if (multiple) {
                     return world.findAll(request);
                 } else {
                     return world.find(request);
                 }
-            } else {
-                // todo: exception + message
-                throw new IllegalStateException(type.toString());
+            } finally {
+                if (type != InjectionPoint.class) {
+                    world.popInjectionPoint();
+                }
             }
-        } finally {
-//            world.popInjectionPoint(injectionPoint);
+        } else {
+            // todo: exception + message
+            throw new IllegalStateException(type.toString());
         }
     }
 

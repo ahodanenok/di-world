@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 // todo: destroying world + @PreDestroy
 // todo: around invoke
 // todo: interceptor bindings
-// todo: allow setting the current InjectionPoint
-// todo: inject InjectionPoint
 // todo: event handlers
 
 public class World implements Iterable<ClassContainer<?>> {
@@ -39,6 +37,7 @@ public class World implements Iterable<ClassContainer<?>> {
     private List<ClassContainer<?>> containers = new ArrayList<>();
     private EntranceQueue queue = new EntranceQueue(this::register);
     private Map<String, List<InterceptorInvoke>> interceptors = new HashMap<>();
+    private LinkedList<InjectionPoint> injectionPoints = new LinkedList<>();
 
     public EntranceQueue getQueue() {
         return queue;
@@ -84,6 +83,14 @@ public class World implements Iterable<ClassContainer<?>> {
 
     @SuppressWarnings("unchecked") // object matched by request will be of type T or its subtype
     public <T> T find(ObjectRequest<T> request) {
+        if (request.getType() == InjectionPoint.class) {
+            if (injectionPoints.isEmpty()) {
+                throw new DependencyLookupException("No active injection point");
+            }
+
+            return (T) injectionPoints.getLast();
+        }
+
         List<ClassContainer<?>> containers = findContainers(request);
 
         if (containers.size() == 1) {
@@ -141,6 +148,14 @@ public class World implements Iterable<ClassContainer<?>> {
 
     @SuppressWarnings("unchecked") // all objects matched by request will be of type T or its subtype
     public <T> List<T> findAll(ObjectRequest<T> request) {
+        if (request.getType() == InjectionPoint.class) {
+            if (injectionPoints.isEmpty()) {
+                throw new DependencyLookupException("No active injection point");
+            }
+
+            return (List<T>) Collections.singletonList(injectionPoints.getLast());
+        }
+
         return (List<T>) findContainers(request).stream()
                 .map(ClassContainer::getObject)
                 .collect(Collectors.toList());
@@ -181,6 +196,22 @@ public class World implements Iterable<ClassContainer<?>> {
         }
 
         return matched;
+    }
+
+    public void pushInjectionPoint(InjectionPoint injectionPoint) {
+        if (injectionPoint == null) {
+            throw new IllegalArgumentException("Injection point is null");
+        }
+
+        injectionPoints.addLast(injectionPoint);
+    }
+
+    public void popInjectionPoint() {
+        if (injectionPoints.isEmpty()) {
+            throw new IllegalStateException("No active injection point");
+        }
+
+        injectionPoints.removeLast();
     }
 
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
