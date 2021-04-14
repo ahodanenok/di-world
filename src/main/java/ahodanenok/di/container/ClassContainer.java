@@ -6,6 +6,7 @@ import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.exception.DependencyInjectionException;
+import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
@@ -108,12 +109,8 @@ public class ClassContainer<T> {
 
             return castedInstance;
         } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-
-            // todo: handle exceptions
-            throw new IllegalStateException(e);
+             throw new ObjectRetrievalException(
+                    String.format("Can't get object of type '%s'", objectClass.getName()), e);
         }
     }
 
@@ -181,7 +178,7 @@ public class ClassContainer<T> {
             } else if (rawType == Optional.class) {
                 if (multiple) {
                     throw new DependencyInjectionException(String.format(
-                            "Injecting collection of optionals is not supported, target = '%s'",
+                            "Injecting collection of optionals is not supported, target is '%s'",
                             injectionPoint.getTarget()));
                 }
 
@@ -201,13 +198,15 @@ public class ClassContainer<T> {
                     return new LinkedHashSet<>(collection);
                 } else {
                     throw new DependencyInjectionException(String.format(
-                            "Injecting collection type '%s' is not supported", collectionType.getName()));
+                            "Injecting collection type '%s' is not supported, target is '%s'",
+                            collectionType.getName(), injectionPoint.getTarget()));
                 }
             } else {
                 // todo: support generic object types?
 
-                // todo: exception + message
-                throw new IllegalStateException();
+                throw new DependencyInjectionException(String.format(
+                        "Injection of type '%s' is not supported, target is '%s' ",
+                        rawType.getTypeName(), injectionPoint.getTarget()));
             }
         } else if (type instanceof Class<?>){
             Class<?> objectType = (Class<?>) type;
@@ -233,8 +232,9 @@ public class ClassContainer<T> {
                 }
             }
         } else {
-            // todo: exception + message
-            throw new IllegalStateException(type.toString());
+            throw new DependencyInjectionException(String.format(
+                    "Injection of type '%s' is not supported, target is '%s' ",
+                    type.getTypeName(), injectionPoint.getTarget()));
         }
     }
 

@@ -4,6 +4,7 @@ import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.DependencyInjectionException;
+import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.inject.classes.Drinkable;
 import ahodanenok.di.inject.classes.Tea;
 import ahodanenok.di.inject.classes.Water;
@@ -68,7 +69,8 @@ public class CollectionTest {
         w.getQueue().flush();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.of(CollectionProviderCup.class)))
-                .isExactlyInstanceOf(DependencyInjectionException.class)
+                .isExactlyInstanceOf(ObjectRetrievalException.class)
+                .getCause().isExactlyInstanceOf(DependencyInjectionException.class)
                 .hasMessageStartingWith("Injecting collection of providers is not supported");
 
     }
@@ -95,7 +97,8 @@ public class CollectionTest {
         w.getQueue().flush();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.of(CollectionOptionalCup.class)))
-                .isExactlyInstanceOf(DependencyInjectionException.class)
+                .isExactlyInstanceOf(ObjectRetrievalException.class)
+                .getCause().isExactlyInstanceOf(DependencyInjectionException.class)
                 .hasMessageStartingWith("Injecting collection of optionals is not supported");
 
     }
