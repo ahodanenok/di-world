@@ -12,22 +12,11 @@ public class ObjectRequest<T> {
         return request;
     }
 
-    private Object context;
     private Class<?> type;
     private List<Annotation> qualifiers;
     private boolean optional;
 
     private ObjectRequest() { }
-
-    // todo: remove this, information about the current context will be taken from the current injection point
-    public ObjectRequest<T> withContext(Object context) {
-        this.context = context;
-        return this;
-    }
-
-    public Object getContext() {
-        return context;
-    }
 
     public Class<?> getType() {
         return type;
@@ -58,8 +47,6 @@ public class ObjectRequest<T> {
 
     @Override
     public String toString() {
-        return String.format(
-                "ObjectRequest(type=%s, qualifiers=%s, context=%s)",
-                type, qualifiers, context);
+        return String.format("ObjectRequest(type=%s, qualifiers=%s)", type, qualifiers);
     }
 }

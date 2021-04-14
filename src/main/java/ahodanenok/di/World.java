@@ -171,11 +171,6 @@ public class World implements Iterable<ClassContainer<?>> {
                 continue;
             }
 
-            // Use name as a qualifier
-//            if (request.getName() != null && !c.getNames().contains(request.getName())) {
-//                continue;
-//            }
-
             // The bean has all the required qualifiers.
             for (Annotation qualifier : request.getQualifiers()) {
                 if (qualifier instanceof Named) {
