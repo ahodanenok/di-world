@@ -73,10 +73,7 @@ public class ConstructorInvocationContext implements InvocationContext {
             return target;
         }
 
-        // todo: accessible
-        constructor.setAccessible(true);
-
-        target = constructor.newInstance(parameters);
+        target = ReflectionUtils.newInstance(constructor, parameters);
         return target;
     }
 }

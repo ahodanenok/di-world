@@ -64,8 +64,6 @@ public class MethodInvocationContext implements InvocationContext {
 
     @Override
     public Object proceed() throws Exception {
-        // todo: make accessible only if needed
-        method.setAccessible(true);
-        return method.invoke(object, parameters);
+        return ReflectionUtils.invoke(method, object, parameters);
     }
 }

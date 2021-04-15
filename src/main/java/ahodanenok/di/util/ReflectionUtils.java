@@ -4,10 +4,7 @@ import javax.inject.Named;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -251,5 +248,44 @@ public class ReflectionUtils {
                 && !clazz.isEnum()
                 && !clazz.isAnnotation()
                 && !Modifier.isAbstract(clazz.getModifiers());
+    }
+
+    public static Object invoke(Method method, Object instance, Object... args) throws InvocationTargetException {
+        // todo: make accessible only when needed
+        method.setAccessible(true);
+
+        try {
+            return method.invoke(instance, args);
+        } catch (IllegalAccessException e) {
+            // todo: can it happen?
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static <T> T newInstance(Constructor<T> constructor, Object... parameters) throws InvocationTargetException {
+        // todo: make accessible only when needed
+        constructor.setAccessible(true);
+
+        try {
+            return constructor.newInstance(parameters);
+        } catch (IllegalAccessException e) {
+            // todo: can it happen?
+            throw new IllegalStateException(e);
+        } catch (InstantiationException e) {
+            // todo: how to handle?
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setField(Field field, Object instance, Object value) {
+        // todo: make accessible only when needed
+        field.setAccessible(true);
+
+        try {
+            field.set(instance, value);
+        } catch (IllegalAccessException e) {
+            // todo: can it happen?
+            e.printStackTrace();
+        }
     }
 }

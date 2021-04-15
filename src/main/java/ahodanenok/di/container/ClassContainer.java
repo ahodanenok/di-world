@@ -238,7 +238,6 @@ public class ClassContainer<T> {
         }
     }
 
-    // todo: how to handle exception?
     private void inject(Object instance) throws Exception {
         Map<Class<?>, List<Method>> methodsByClass = ReflectionUtils.getInstanceMethods(instance.getClass())
                 .stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
@@ -246,22 +245,16 @@ public class ClassContainer<T> {
         for (Class<?> clazz : ReflectionUtils.getInheritanceChain(instance.getClass())) {
             for (Field f : clazz.getDeclaredFields()) {
                 FieldMetadataReader metadataReader = new FieldMetadataReader(f);
-
                 if (metadataReader.readInjectable()) {
                     InjectionPoint injectionPoint = new InjectionPoint(f, metadataReader.readQualifiers());
-
-                    // todo: make accessible only when needed
-                    f.setAccessible(true);
-                    f.set(instance, resolveDependency(injectionPoint));
+                    ReflectionUtils.setField(f, instance, resolveDependency(injectionPoint));
                 }
             }
 
             for (Method m : methodsByClass.getOrDefault(clazz, Collections.emptyList())) {
                 ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(m);
                 if (metadataReader.readInjectable()) {
-                    // todo: make accessible only when needed
-                    m.setAccessible(true);
-                    m.invoke(instance, resolveArguments(metadataReader));
+                    ReflectionUtils.invoke(m, instance, resolveArguments(metadataReader));
                 }
             }
         }

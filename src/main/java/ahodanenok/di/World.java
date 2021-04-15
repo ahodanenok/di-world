@@ -261,10 +261,9 @@ public class World implements Iterable<ClassContainer<?>> {
 
         @Override
         public Object execute(InvocationContext context) throws Exception {
-            // todo: create method for invoking methods (ReflectionUtils)
             // todo: support interceptor methods with zero parameters
             Object instance = container.getObject();
-            return method.invoke(instance, context);
+            return ReflectionUtils.invoke(method, instance, context);
         }
     }
 
