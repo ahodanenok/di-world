@@ -247,6 +247,8 @@ public class ReflectionUtils {
                 && !clazz.isArray()
                 && !clazz.isEnum()
                 && !clazz.isAnnotation()
+                && void.class != clazz
+                && !clazz.isPrimitive()
                 && !Modifier.isAbstract(clazz.getModifiers());
     }
 
