@@ -48,8 +48,8 @@ public class World implements Iterable<ClassContainer<?>> {
             ClassContainer<?> container = buildContainer(character);
             register(container);
 
-            // todo: where to put available types?
-            for (Class<?> type : Arrays.asList(AroundConstruct.class, PostConstruct.class, PreDestroy.class, AroundInvoke.class)) {
+            // todo: where to put available types? (resolve them lazy?)
+            for (Class<?> type : Arrays.asList(AroundConstruct.class, PostConstruct.class, PreDestroy.class, AroundInvoke.class, AroundInject.class)) {
                 Method method = character.getInterceptorMethod(type.getName());
                 if (method != null) {
                     interceptors

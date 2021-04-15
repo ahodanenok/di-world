@@ -1,5 +1,6 @@
 package ahodanenok.di.container;
 
+import ahodanenok.di.AroundInject;
 import ahodanenok.di.InjectionPoint;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
@@ -10,6 +11,7 @@ import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
+import ahodanenok.di.interceptor.context.InjectionPointInvocationContext;
 import ahodanenok.di.interceptor.context.MethodInvocationContext;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
@@ -153,13 +155,6 @@ public class ClassContainer<T> {
     }
 
     private Object resolveDependency(InjectionPoint injectionPoint, Type type, boolean optional, boolean multiple) {
-
-        // todo: around dependency resolution
-//            InterceptorChain aroundInjectChain = world.getInterceptorChain(
-//                    InterceptorRequest.of("AroundInject").matchAll());
-//
-//            Object value = aroundInjectChain.invoke(new DependencyLookupInvocationContext(request));
-
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
@@ -221,11 +216,21 @@ public class ClassContainer<T> {
             }
 
             try {
-                if (multiple) {
-                    return world.findAll(request);
-                } else {
-                    return world.find(request);
-                }
+                InterceptorChain aroundInjectChain = world.getInterceptorChain(
+                        InterceptorRequest.of(AroundInject.class.getName()).matchAll());
+
+                // looks like a hack for me to use invocation context in a such way
+                // but it's nice to use the existing interceptors mechanism
+                return aroundInjectChain.invoke(new InjectionPointInvocationContext(injectionPoint, () -> {
+                    if (multiple) {
+                        return world.findAll(request);
+                    } else {
+                        return world.find(request);
+                    }
+                }));
+            } catch (Exception e) {
+                throw new DependencyInjectionException(
+                        "Dependency lookup failed during processing interceptor chain", e);
             } finally {
                 if (type != InjectionPoint.class) {
                     world.popInjectionPoint();

@@ -4,6 +4,7 @@ import ahodanenok.di.InjectionPoint;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.DependencyLookupException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -168,7 +169,8 @@ public class InjectionPointTest {
         assertThat(holder.field).isNotNull();
         assertThat(holder.field.injectionPoint).isNotNull();
         assertThatThrownBy(() -> holder.field.injectionPoint.get())
-                .isExactlyInstanceOf(DependencyLookupException.class)
+                .isExactlyInstanceOf(DependencyInjectionException.class)
+                .getCause().isExactlyInstanceOf(DependencyLookupException.class)
                 .hasMessage("No active injection point");
 
     }
