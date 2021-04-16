@@ -1,4 +1,4 @@
 package ahodanenok.di.metadata.classes;
 
-public class Seasons {
-}
+@Winter
+public class Seasons { }

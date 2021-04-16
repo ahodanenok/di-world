@@ -41,6 +41,7 @@ public class ClassCharacter<T> {
 
     private boolean interceptor;
     private List<Class<?>> interceptors;
+    private List<Annotation> interceptorBindings;
     private Map<String, Method> interceptorMethods;
 
     public ClassCharacter(Class<T> clazz) {
@@ -67,6 +68,7 @@ public class ClassCharacter<T> {
         this.interceptor = classMetadataReader.readInterceptor();
         this.interceptors = classMetadataReader.readInterceptors();
         this.interceptors.forEach(this::validateInterceptor);
+        this.interceptorBindings = classMetadataReader.readInterceptorBindings();
 
         List<ExecutableMetadataReader> constructors = new ArrayList<>();
         for (Constructor<?> constructor : objectClass.getDeclaredConstructors()) {
@@ -235,6 +237,15 @@ public class ClassCharacter<T> {
      */
     public List<Class<?>> getInterceptors() {
         return Collections.unmodifiableList(interceptors);
+    }
+
+    /**
+     * Interceptor bindings of a class
+     * @return list of interceptor bindings, empty if there is no bindings
+     * @see javax.interceptor.InterceptorBinding
+     */
+    public List<Annotation> getInterceptorBindings() {
+        return Collections.unmodifiableList(interceptorBindings);
     }
 
     /**

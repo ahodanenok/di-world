@@ -30,6 +30,13 @@ public class ExecutableMetadataReader {
     }
 
     /**
+     * Find all @InterceptorBinding annotations of an executable
+     */
+    public List<Annotation> readInterceptorBindings() {
+        return ReflectionUtils.getAnnotations(executable, ReflectionUtils.INTERCEPTOR_BINDING_PREDICATE);
+    }
+
+    /**
      * Read @Named qualifier's value
      * @return value (never blank) or null if @Named is not present
      * @throws CharacterMetadataException if value is blank

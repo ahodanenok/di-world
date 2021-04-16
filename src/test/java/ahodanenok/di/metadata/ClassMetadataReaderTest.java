@@ -202,8 +202,23 @@ public class ClassMetadataReaderTest {
 
     @Test
     @DisplayName("should read repeatable qualifiers from a class")
-    public void repeatable() {
+    public void qualifierRepeatable() {
         assertThat(new ClassMetadataReader<>(Banana.class).readQualifiers())
                 .containsExactlyInAnyOrder(Banana.class.getAnnotationsByType(Habitat.class));
+    }
+
+    @Test
+    @DisplayName("should read interceptor bindings")
+    public void interceptorBindings() {
+        assertThat(new ClassMetadataReader<>(Seasons.class).readInterceptorBindings()).containsExactlyInAnyOrder(
+                Seasons.class.getDeclaredAnnotation(Winter.class),
+                Winter.class.getDeclaredAnnotation(Ice.class),
+                Winter.class.getDeclaredAnnotation(Snow.class));
+    }
+
+    @Test
+    @DisplayName("should not read interceptor bindings")
+    public void noInterceptorBindings() {
+        assertThat(new ClassMetadataReader<>(Tree.class).readInterceptorBindings()).isEmpty();
     }
 }

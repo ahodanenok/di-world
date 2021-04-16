@@ -150,6 +150,11 @@ public class ClassMetadataReader<T> {
         }
     }
 
+    public List<Annotation> readInterceptorBindings() {
+        // todo: interceptor bindings from stereotypes
+        return ReflectionUtils.getAnnotations(clazz, ReflectionUtils.INTERCEPTOR_BINDING_PREDICATE, true);
+    }
+
     /**
      * Find all @Qualifier annotations on the class
      */

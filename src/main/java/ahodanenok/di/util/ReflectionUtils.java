@@ -2,6 +2,7 @@ package ahodanenok.di.util;
 
 import javax.inject.Named;
 import javax.inject.Qualifier;
+import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.*;
@@ -12,6 +13,9 @@ public class ReflectionUtils {
 
     public static final Predicate<Annotation> QUALIFIER_PREDICATE =
             (a) -> a.annotationType().isAnnotationPresent(Qualifier.class) && !(a instanceof Named);
+
+    public static final Predicate<Annotation> INTERCEPTOR_BINDING_PREDICATE =
+            (a) -> a.annotationType().isAnnotationPresent(InterceptorBinding.class);
 
     private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();
 

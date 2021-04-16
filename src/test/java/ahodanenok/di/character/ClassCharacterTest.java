@@ -2,6 +2,7 @@ package ahodanenok.di.character;
 
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.character.classes.*;
+import ahodanenok.di.inject.classes.Coffee;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
@@ -292,5 +293,18 @@ public class ClassCharacterTest {
 
         assertThat(ClassCharacter.of(Cooler.class).scopedBy(new CustomScope<>()).getScope())
                 .isExactlyInstanceOf(CustomScope.class);
+    }
+
+    @Test
+    @DisplayName("should read interceptor bindings")
+    public void interceptorBindings() {
+        assertThat(ClassCharacter.of(Tea.class).getInterceptorBindings())
+                .containsExactly(Tea.class.getDeclaredAnnotation(MakeHot.class));
+    }
+
+    @Test
+    @DisplayName("should not read interceptor bindings")
+    public void noInterceptorBindings() {
+        assertThat(ClassCharacter.of(Coffee.class).getInterceptorBindings()).isEmpty();
     }
 }
