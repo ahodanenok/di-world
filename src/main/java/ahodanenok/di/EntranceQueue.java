@@ -1,6 +1,6 @@
 package ahodanenok.di;
 
-import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.character.Character;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,14 +8,14 @@ import java.util.function.Consumer;
 
 public class EntranceQueue {
 
-    private final Consumer<List<ClassCharacter<?>>> gate;
-    private List<ClassCharacter<?>> configs;
+    private final Consumer<List<Character<?>>> gate;
+    private List<Character<?>> configs;
 
-    public EntranceQueue(Consumer<List<ClassCharacter<?>>> gate) {
+    public EntranceQueue(Consumer<List<Character<?>>> gate) {
         this.gate = gate;
     }
 
-    public void add(ClassCharacter<?> config) {
+    public void add(Character<?> config) {
         if (configs == null) {
             configs = new ArrayList<>();
         }
@@ -24,7 +24,7 @@ public class EntranceQueue {
     }
 
     public void flush() {
-        List<ClassCharacter<?>> inQueue = configs;
+        List<Character<?>> inQueue = configs;
         configs = null;
         gate.accept(inQueue);
     }

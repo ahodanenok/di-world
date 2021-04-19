@@ -1,5 +1,7 @@
 package ahodanenok.di.character;
 
+import ahodanenok.di.World;
+import ahodanenok.di.container.impl.DefaultClassContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
@@ -17,7 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 // todo: docs
-public class ClassCharacter<T> {
+public class ClassCharacter<T> implements Character<T> {
 
     public static <T> ClassCharacter<T> of(Class<T> clazz) {
         if (clazz == null) {
@@ -373,5 +375,10 @@ public class ClassCharacter<T> {
      */
     public boolean isInterceptor() {
         return interceptor;
+    }
+
+    @Override
+    public DefaultClassContainer<T> build(World world) {
+        return new DefaultClassContainer<>(world, this);
     }
 }

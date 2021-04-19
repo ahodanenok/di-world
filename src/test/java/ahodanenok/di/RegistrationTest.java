@@ -1,7 +1,8 @@
 package ahodanenok.di;
 
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.container.impl.DefaultClassContainer;
+import ahodanenok.di.container.Container;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -43,18 +44,22 @@ public class RegistrationTest {
         w.getQueue().add(config);
         w.getQueue().flush();
 
-        assertThat(w.iterator().next().getNames()).containsOnly("a", "b", "c");
+        Container<?> container = w.iterator().next();
+        assertThat(container).isExactlyInstanceOf(DefaultClassContainer.class);
+
+        DefaultClassContainer<?> classContainer = (DefaultClassContainer<?>) container;
+        assertThat(classContainer.getNames()).containsOnly("a", "b", "c");
     }
 
-    @Test
-    public void shouldThrowErrorIfContainerWithTheSameNameAlreadyRegistered() {
-        ClassCharacter<A> configA1 = ClassCharacter.of(A.class).knownAs("a1", "a");
-        ClassCharacter<A> configA2 = ClassCharacter.of(A.class).knownAs("a2", "a");
-
-        World w = new World();
-        w.getQueue().add(configA1);
-        w.getQueue().add(configA2);
-
-        assertThatThrownBy(() -> w.getQueue().flush()).isInstanceOf(IllegalStateException.class).hasMessage("a");
-    }
+//    @Test
+//    public void shouldThrowErrorIfContainerWithTheSameNameAlreadyRegistered() {
+//        ClassCharacter<A> configA1 = ClassCharacter.of(A.class).knownAs("a1", "a");
+//        ClassCharacter<A> configA2 = ClassCharacter.of(A.class).knownAs("a2", "a");
+//
+//        World w = new World();
+//        w.getQueue().add(configA1);
+//        w.getQueue().add(configA2);
+//
+//        assertThatThrownBy(() -> w.getQueue().flush()).isInstanceOf(IllegalStateException.class).hasMessage("a");
+//    }
 }

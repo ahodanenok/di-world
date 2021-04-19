@@ -3,6 +3,7 @@ package ahodanenok.di.interceptor;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,8 +65,7 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldRegisterInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                     AroundConstruct.class.getName(),
                     Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -84,18 +84,15 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldRegisterSameMultipleInterceptors() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -114,13 +111,11 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldRegisterMultipleInterceptors() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_2.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -139,8 +134,7 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldInvokeInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -155,13 +149,11 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldInvokeOnlyDeclaredInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_2.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -176,13 +168,11 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldNotInvokeInterceptorIfNotDefined() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_2.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -197,13 +187,11 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldInvokeDeclaredInterceptorsInOrder() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_2.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
@@ -219,18 +207,15 @@ public class AroundConstructInterceptorsTest {
     @Test
     public void shouldChangeConstructorParameterInInterceptor() throws Exception {
         World w = new World();
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_3.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_3.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_3.class.getDeclaredMethod("interceptor", InvocationContext.class)));
-        w.getQueue().add(ClassCharacter.of(Interceptor_2.class)
-                .interceptor()
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
                         AroundConstruct.class.getName(),
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));

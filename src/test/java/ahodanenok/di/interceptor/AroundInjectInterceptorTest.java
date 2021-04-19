@@ -4,6 +4,7 @@ import ahodanenok.di.AroundInject;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.character.InterceptorCharacter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -80,9 +81,9 @@ public class AroundInjectInterceptorTest {
         World w = new World();
         w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().add(ClassCharacter.of(B.class));
-        w.getQueue().add(ClassCharacter.of(Interceptor_1.class));
-        w.getQueue().add(ClassCharacter.of(Interceptor_2.class));
-        w.getQueue().add(ClassCharacter.of(Interceptor_3.class));
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class));
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class));
+        w.getQueue().add(InterceptorCharacter.of(Interceptor_3.class));
         w.getQueue().flush();
 
         A a = w.find(ObjectRequest.of(A.class));

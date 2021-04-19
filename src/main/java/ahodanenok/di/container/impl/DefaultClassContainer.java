@@ -1,10 +1,12 @@
-package ahodanenok.di.container;
+package ahodanenok.di.container.impl;
 
 import ahodanenok.di.AroundInject;
 import ahodanenok.di.InjectionPoint;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
+import ahodanenok.di.container.Container;
+import ahodanenok.di.container.InjectableContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.ObjectRetrievalException;
@@ -29,8 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 // todo: think of possible name alternatives
-// todo: split to ClassContainer and InterceptorContainer
-public class ClassContainer<T> {
+public class DefaultClassContainer<T> implements Container<T>, InjectableContainer<T> {
 
     private World world;
     private ClassCharacter<T> character;
@@ -40,7 +41,7 @@ public class ClassContainer<T> {
     private Scope<T> scope;
     private Constructor<?> constructor;
 
-    public ClassContainer(World world, ClassCharacter<T> character) {
+    public DefaultClassContainer(World world, ClassCharacter<T> character) {
         this.world = world;
         this.character = character;
 
@@ -76,10 +77,9 @@ public class ClassContainer<T> {
         ConstructorInvocationContext constructorContext = new ConstructorInvocationContext(constructor);
         constructorContext.setParameters(args);
 
-        // todo: split to InterceptorContainer and ClassContainer???
-
         try {
             Object instance;
+            // todo: isInterceptor flag is not needed anymore, remove it from character and here
             if (!character.isInterceptor()) {
                 InterceptorChain aroundConstructChain = world.getInterceptorChain(
                         InterceptorRequest.of(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));

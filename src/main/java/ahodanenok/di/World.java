@@ -1,18 +1,16 @@
 package ahodanenok.di;
 
-import ahodanenok.di.character.ClassCharacter;
-import ahodanenok.di.container.ClassContainer;
+import ahodanenok.di.character.Character;
+import ahodanenok.di.container.Container;
+import ahodanenok.di.container.InjectableContainer;
+import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.DependencyLookupException;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.util.ReflectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Named;
-import javax.interceptor.AroundConstruct;
-import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -21,65 +19,46 @@ import java.util.stream.Collectors;
 
 // todo: inject static methods (StaticCharacter?)
 // todo: container for user-instantiated objects
-// todo: container for interceptors
 // todo: instantiate eager objects
 // todo: destroying world + @PreDestroy
 // todo: around invoke
-// todo: interceptor bindings
 // todo: event handlers
 
-public class World implements Iterable<ClassContainer<?>> {
+public class World implements Iterable<Container<?>> {
 
     public static void main(String[] args) {
 
     }
 
-    private List<ClassContainer<?>> containers = new ArrayList<>();
+    private List<Container<?>> containers = new ArrayList<>();
     private EntranceQueue queue = new EntranceQueue(this::register);
-    private Map<String, List<InterceptorInvoke>> interceptors = new HashMap<>();
     private LinkedList<InjectionPoint> injectionPoints = new LinkedList<>();
 
     public EntranceQueue getQueue() {
         return queue;
     }
 
-    private void register(List<ClassCharacter<?>> characters) {
-        for (ClassCharacter<?> character : characters) {
-            ClassContainer<?> container = buildContainer(character);
-            register(container);
-
-            // todo: where to put available types? (resolve them lazy?)
-            for (Class<?> type : Arrays.asList(AroundConstruct.class, PostConstruct.class, PreDestroy.class, AroundInvoke.class, AroundInject.class)) {
-                Method method = character.getInterceptorMethod(type.getName());
-                if (method != null) {
-                    interceptors
-                            .computeIfAbsent(type.getName(), __ -> new ArrayList<>())
-                            .add(new InterceptorInvoke(container, method));
-                }
-            }
+    private void register(List<Character<?>> characters) {
+        for (Character<?> character : characters) {
+            Container<?> container = character.build(this);
+            // todo: split containers by collections - injectable, interceptors?
+            // todo: is something required to be done before container is added to the world?
+            containers.add(container);
         }
     }
 
-    private void register(ClassContainer<?> container) {
-        // todo: names are not required to be unique
-        for (ClassContainer<?> c : containers) {
-            for (String n : c.getNames()) {
-                if (container.getNames().contains(n)) {
-                    throw new IllegalStateException(n);
-                }
-            }
-        }
-
-        containers.add(container);
-    }
-
-    private <T> ClassContainer<T> buildContainer(ClassCharacter<T> character) {
-        // todo: configuration class per container type (class, factory method, instance)
-        // todo: configuration instantiates container of the appropriate type and later world is bound - c.bind(world)
-        ClassContainer<T> container = new ClassContainer<>(this,  character);
-
-        return container;
-    }
+    // todo: names are not required to be unique, but should they be checked somehow?
+//    private void register(ClassContainer<?> container) {
+//        for (ClassContainer<?> c : containers) {
+//            for (String n : c.getNames()) {
+//                if (container.getNames().contains(n)) {
+//                    throw new IllegalStateException(n);
+//                }
+//            }
+//        }
+//
+//        containers.add(container);
+//    }
 
     @SuppressWarnings("unchecked") // object matched by request will be of type T or its subtype
     public <T> T find(ObjectRequest<T> request) {
@@ -91,7 +70,7 @@ public class World implements Iterable<ClassContainer<?>> {
             return (T) injectionPoints.getLast();
         }
 
-        List<ClassContainer<?>> containers = findContainers(request);
+        List<InjectableContainer<?>> containers = findContainers(request);
 
         if (containers.size() == 1) {
             return (T) containers.get(0).getObject();
@@ -108,7 +87,7 @@ public class World implements Iterable<ClassContainer<?>> {
 
         // There is a single object without any qualifiers and qualifiers are not specified in request
         if (request.getQualifiers().isEmpty()) {
-            List<ClassContainer<?>> withoutQualifiers = containers.stream()
+            List<InjectableContainer<?>> withoutQualifiers = containers.stream()
                     .filter(c -> c.getQualifiers().isEmpty())
                     .collect(Collectors.toList());
 
@@ -119,7 +98,7 @@ public class World implements Iterable<ClassContainer<?>> {
 
         {
             // There is a single object without any names
-            List<ClassContainer<?>> withoutName = containers.stream()
+            List<InjectableContainer<?>> withoutName = containers.stream()
                     .filter(c -> c.getNames().isEmpty())
                     .collect(Collectors.toList());
 
@@ -130,7 +109,7 @@ public class World implements Iterable<ClassContainer<?>> {
 
         {
             // There is a single object with exact type as in request
-            List<ClassContainer<?>> withExactType = containers.stream()
+            List<InjectableContainer<?>> withExactType = containers.stream()
                     .filter(c -> c.getObjectClass() == request.getType())
                     .collect(Collectors.toList());
 
@@ -157,15 +136,22 @@ public class World implements Iterable<ClassContainer<?>> {
         }
 
         return (List<T>) findContainers(request).stream()
-                .map(ClassContainer::getObject)
+                .map(Container::getObject)
                 .collect(Collectors.toList());
     }
 
-    public <T> List<ClassContainer<?>> findContainers(ObjectRequest<T> request) {
-        List<ClassContainer<?>> matched = new ArrayList<>();
+    // cache resolved containers
+    private <T> List<InjectableContainer<?>> findContainers(ObjectRequest<T> request) {
+        List<InjectableContainer<?>> matched = new ArrayList<>();
 
         next:
-        for (ClassContainer<?> c : containers) {
+        for (Container<?> c : containers) {
+            if (!(c instanceof InjectableContainer)) {
+                continue;
+            }
+
+            InjectableContainer<?> injectable = (InjectableContainer<?>) c;
+
             // The bean has a bean type that matches the required type.
             if (!ReflectionUtils.isAssignable(c.getObjectClass(), request.getType())) {
                 continue;
@@ -179,15 +165,15 @@ public class World implements Iterable<ClassContainer<?>> {
                         throw new DependencyLookupException("@Named qualifier must have a value");
                     }
 
-                    if (!c.getNames().contains(named.value())) {
+                    if (!injectable.getNames().contains(named.value())) {
                         continue next;
                     }
-                } else if (!c.getQualifiers().contains(qualifier)) {
+                } else if (!injectable.getQualifiers().contains(qualifier)) {
                     continue next;
                 }
             }
 
-            matched.add(c);
+            matched.add(injectable);
         }
 
         return matched;
@@ -209,54 +195,55 @@ public class World implements Iterable<ClassContainer<?>> {
         injectionPoints.removeLast();
     }
 
+    // todo: cache resolved interceptors
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
-        List<InterceptorInvoke> typeInterceptors = interceptors.getOrDefault(request.getType(), Collections.emptyList());
+        List<Interceptor> result = new ArrayList<>();
 
         List<Class<?>> interceptorClasses = request.getClasses();
-        Map<Interceptor, Integer> byClasses = new HashMap<>();
-
-        List<Interceptor> matchedByDefault = new ArrayList<>();
-
-        for (InterceptorInvoke interceptor : typeInterceptors) {
-            if (!request.getClasses().isEmpty()) {
-                for (int i = 0; i < interceptorClasses.size(); i++) {
-                    Class<?> clazz = request.getClasses().get(i);
-                    if (interceptor.getInterceptorClass().isAssignableFrom(clazz)) {
-                        byClasses.put(interceptor, i);
-                        break;
+        if (!interceptorClasses.isEmpty()) {
+            // interceptors are declared explicitly
+            for (Class<?> interceptorClass : interceptorClasses) {
+                for (Container<?> container : containers) {
+                    if (container instanceof InterceptorContainer<?>
+                            && interceptorClass == container.getObjectClass()) {
+                        Interceptor interceptor = ((InterceptorContainer<?>) container).getInterceptor(request.getType());
+                        if (interceptor != null) {
+                            result.add(interceptor);
+                        }
                     }
                 }
-            } else if (request.isMatchAll()) {
-                matchedByDefault.add(interceptor);
             }
-        }
+        } else if (request.isMatchAll()) {
+            // all of a type
+            for (Container<?> container : containers) {
+                if (!(container instanceof InterceptorContainer<?>)) {
+                    continue;
+                }
 
-        List<Interceptor> result = new ArrayList<>();
-        result.addAll(byClasses.entrySet()
-                .stream()
-                .sorted(Comparator.comparingInt(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList()));
-        result.addAll(matchedByDefault);
+                Interceptor interceptor = ((InterceptorContainer<?>) container).getInterceptor(request.getType());
+                if (interceptor != null) {
+                    result.add(interceptor);
+                }
+            }
+        } else {
+            // todo: interceptor bindings
+        }
 
         return new InterceptorChain(result);
     }
 
     /**
      * Invokes given interceptor method on the object returned by container
+     * todo: move to an 'interceptor' package
      */
-    private static class InterceptorInvoke implements Interceptor {
+    public static class InterceptorInvoke implements Interceptor {
 
-        private final ClassContainer<?> container;
+        private final Container<?> container;
         private final Method method;
 
-        public InterceptorInvoke(ClassContainer<?> container, Method method) {
+        public InterceptorInvoke(Container<?> container, Method method) {
             this.container = container;
             this.method = method;
-        }
-
-        public Class<?> getInterceptorClass() {
-            return container.getObjectClass();
         }
 
         @Override
@@ -268,7 +255,7 @@ public class World implements Iterable<ClassContainer<?>> {
     }
 
     @Override
-    public Iterator<ClassContainer<?>> iterator() {
+    public Iterator<Container<?>> iterator() {
         return Collections.unmodifiableCollection(containers).iterator();
     }
 }
