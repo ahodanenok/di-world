@@ -41,7 +41,6 @@ public class ClassCharacter<T> implements Character<T> {
     private ExecutableMetadataReader constructor;
     private List<Annotation> qualifiers;
 
-    private boolean interceptor;
     private List<Class<?>> interceptors;
     private List<Annotation> interceptorBindings;
     private Map<String, Method> interceptorMethods;
@@ -67,7 +66,6 @@ public class ClassCharacter<T> implements Character<T> {
 
         this.qualifiers = classMetadataReader.readQualifiers();
 
-        this.interceptor = classMetadataReader.readInterceptor();
         this.interceptors = classMetadataReader.readInterceptors();
         this.interceptors.forEach(this::validateInterceptor);
         this.interceptorBindings = classMetadataReader.readInterceptorBindings();
@@ -354,27 +352,6 @@ public class ClassCharacter<T> implements Character<T> {
         // lazily read interceptor, as we don't know what types
         // we are looking for until they are requested
         return interceptorMethods.computeIfAbsent(type, classMetadataReader::readInterceptorMethod);
-    }
-
-    /**
-     * Mark class as an interceptor
-     *
-     * Interceptor classes are handled differently than regular classes,
-     * i.e treatment of interceptor methods in a class
-     * todo: where to describe differences?
-     *
-     * @see javax.interceptor.Interceptor
-     */
-    public ClassCharacter<T> interceptor() {
-        this.interceptor = true;
-        return this;
-    }
-
-    /**
-     * Returns true if this class is an interceptor
-     */
-    public boolean isInterceptor() {
-        return interceptor;
     }
 
     @Override

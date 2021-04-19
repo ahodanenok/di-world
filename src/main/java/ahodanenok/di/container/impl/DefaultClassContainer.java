@@ -78,32 +78,24 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
         constructorContext.setParameters(args);
 
         try {
-            Object instance;
-            // todo: isInterceptor flag is not needed anymore, remove it from character and here
-            if (!character.isInterceptor()) {
-                InterceptorChain aroundConstructChain = world.getInterceptorChain(
-                        InterceptorRequest.of(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
-                instance = aroundConstructChain.invoke(constructorContext);
-            } else {
-                instance = constructorContext.proceed();
-            }
+            InterceptorChain aroundConstructChain = world.getInterceptorChain(
+                    InterceptorRequest.of(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
+            Object instance = aroundConstructChain.invoke(constructorContext);
 
             inject(instance);
 
-            if (!character.isInterceptor()) {
-                InterceptorChain postConstructChain = world.getInterceptorChain(
-                        InterceptorRequest.of(PostConstruct.class.getName()).withClasses(character.getInterceptors()));
+            InterceptorChain postConstructChain = world.getInterceptorChain(
+                    InterceptorRequest.of(PostConstruct.class.getName()).withClasses(character.getInterceptors()));
 
-                InvocationContext postConstructContext;
-                Method interceptorMethod = character.getInterceptorMethod(PostConstruct.class.getName());
-                if (interceptorMethod != null) {
-                    postConstructContext = new MethodInvocationContext(instance, interceptorMethod);
-                } else {
-                    postConstructContext = new ObjectInvocationContext(instance);
-                }
-
-                postConstructChain.invoke(postConstructContext);
+            InvocationContext postConstructContext;
+            Method interceptorMethod = character.getInterceptorMethod(PostConstruct.class.getName());
+            if (interceptorMethod != null) {
+                postConstructContext = new MethodInvocationContext(instance, interceptorMethod);
+            } else {
+                postConstructContext = new ObjectInvocationContext(instance);
             }
+
+            postConstructChain.invoke(postConstructContext);
 
             // todo: interceptors could swap created instance for something else, return Object?
             // @SuppressWarnings("unchecked")

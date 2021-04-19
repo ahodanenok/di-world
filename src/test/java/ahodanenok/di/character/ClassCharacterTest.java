@@ -202,24 +202,6 @@ public class ClassCharacterTest {
     }
 
     @Test
-    @DisplayName("should detect class as interceptor")
-    public void interceptor() {
-        assertThat(ClassCharacter.of(ConsumptionTracker.class).isInterceptor()).isTrue();
-    }
-
-    @Test
-    @DisplayName("should not detect class as interceptor")
-    public void notInterceptor() {
-        assertThat(ClassCharacter.of(Boiler.class).isInterceptor()).isFalse();
-    }
-
-    @Test
-    @DisplayName("should mark class as interceptor if set explicitly")
-    public void interceptorExplicitly() {
-        assertThat(ClassCharacter.of(Boiler.class).interceptor().isInterceptor()).isTrue();
-    }
-
-    @Test
     @DisplayName("should find @PreDestroy method")
     public void preDestroy() throws Exception {
         assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(PreDestroy.class.getName()))
