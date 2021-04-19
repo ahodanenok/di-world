@@ -39,7 +39,6 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
     private Class<T> objectClass;
     private Set<String> names;
     private Scope<T> scope;
-    private Constructor<?> constructor;
 
     public DefaultClassContainer(World world, ClassCharacter<T> character) {
         this.world = world;
@@ -67,9 +66,7 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
     }
 
     private T doGetObject() {
-        if (constructor == null) {
-            constructor = resolveConstructor();
-        }
+        Constructor<T> constructor = character.getConstructor();
 
         // todo: cache arguments?
         Object[] args = resolveArguments(new ExecutableMetadataReader(constructor));
@@ -105,27 +102,6 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
         } catch (Exception e) {
              throw new ObjectRetrievalException(
                     String.format("Can't get object of type '%s'", objectClass.getName()), e);
-        }
-    }
-
-    private Constructor<?> resolveConstructor() {
-        if (character.getConstructor() != null) {
-            return character.getConstructor();
-        }
-
-        Constructor<?>[] constructors = objectClass.getConstructors();
-        // If there a single public constructor, using it
-        if (constructors.length == 1) {
-            return constructors[0];
-        }
-
-        try {
-            // falling back to no-arg public constructor
-            return objectClass.getConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new CharacterMetadataException(String.format(
-                    "Couldn't resolve constructor for '%s', provide it explicitly in a character" +
-                    " or use @Inject annotation to mark which constructor to use", objectClass));
         }
     }
 

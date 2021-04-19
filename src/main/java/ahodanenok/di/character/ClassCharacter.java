@@ -1,10 +1,10 @@
 package ahodanenok.di.character;
 
 import ahodanenok.di.World;
+import ahodanenok.di.character.common.InjectableConstructor;
 import ahodanenok.di.container.impl.DefaultClassContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
-import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
@@ -16,7 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 // todo: docs
 public class ClassCharacter<T> implements Character<T> {
@@ -38,7 +37,7 @@ public class ClassCharacter<T> implements Character<T> {
     private final Class<T> objectClass;
     private Set<String> names;
     private Scope<T> scope;
-    private ExecutableMetadataReader constructor;
+    private final InjectableConstructor<T> constructor;
     private List<Annotation> qualifiers;
 
     private List<Class<?>> interceptors;
@@ -48,6 +47,7 @@ public class ClassCharacter<T> implements Character<T> {
     public ClassCharacter(Class<T> clazz) {
         this.classMetadataReader = new ClassMetadataReader<>(clazz);
         this.objectClass = clazz;
+        this.constructor = new InjectableConstructor<>(clazz);
 
         String name = classMetadataReader.readNamed();
         if (name != null) {
@@ -69,23 +69,6 @@ public class ClassCharacter<T> implements Character<T> {
         this.interceptors = classMetadataReader.readInterceptors();
         this.interceptors.forEach(this::validateInterceptor);
         this.interceptorBindings = classMetadataReader.readInterceptorBindings();
-
-        List<ExecutableMetadataReader> constructors = new ArrayList<>();
-        for (Constructor<?> constructor : objectClass.getDeclaredConstructors()) {
-            ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(constructor);
-            if (metadataReader.readInjectable()) {
-                constructors.add(metadataReader);
-            }
-        }
-
-        if (constructors.size() == 1) {
-            this.constructor = constructors.get(0);
-        } else if (constructors.size() > 1) {
-            throw new CharacterMetadataException(String.format(
-                    "Only one constructor can be injectable, injectable constructos in '%s' are: %s",
-                    objectClass,
-                    constructors.stream().map(ExecutableMetadataReader::getExecutable).collect(Collectors.toList())));
-        }
     }
 
     public Class<T> getObjectClass() {
@@ -125,30 +108,18 @@ public class ClassCharacter<T> implements Character<T> {
     }
 
     /**
-     * Use constructor to instantiate class
-     * todo: doc
+     * @see InjectableConstructor
      */
     public ClassCharacter<T> constructedBy(Constructor<?> constructor) {
-        if (constructor == null) {
-            throw new CharacterMetadataException("Constructor can't be null");
-        }
-
-        if (constructor.getDeclaringClass() != objectClass) {
-            throw new CharacterMetadataException(String.format(
-                    "Constructor doesn't belong to class '%s'", objectClass));
-        }
-
-        this.constructor = new ExecutableMetadataReader(constructor);
+        this.constructor.set(constructor);
         return this;
     }
 
-    @SuppressWarnings("unchecked") // reader will have constructor from objectClass
+    /**
+     * @see InjectableConstructor
+     */
     public Constructor<T> getConstructor() {
-        if (constructor != null) {
-            return (Constructor<T>) constructor.getExecutable();
-        } else {
-            return null;
-        }
+        return constructor.get();
     }
 
     public ClassCharacter<T> scopedBy(Scope<T> scope) {

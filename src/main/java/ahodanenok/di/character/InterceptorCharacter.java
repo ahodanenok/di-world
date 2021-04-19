@@ -1,11 +1,11 @@
 package ahodanenok.di.character;
 
 import ahodanenok.di.World;
+import ahodanenok.di.character.common.InjectableConstructor;
 import ahodanenok.di.container.impl.DefaultInterceptorContainer;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
-import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
@@ -15,11 +15,9 @@ import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 // todo: remove duplication with ClassCharacter
 public class InterceptorCharacter<T> implements Character<T> {
@@ -39,7 +37,7 @@ public class InterceptorCharacter<T> implements Character<T> {
     private final Class<T> objectClass;
     private final ClassMetadataReader<T> classMetadataReader;
     private final Scope<T> scope;
-    private ExecutableMetadataReader constructor;
+    private final InjectableConstructor<T> constructor;
 
     private List<Annotation> interceptorBindings;
     private Map<String, Method> interceptorMethods;
@@ -47,6 +45,7 @@ public class InterceptorCharacter<T> implements Character<T> {
     public InterceptorCharacter(Class<T> objectClass) {
         this.objectClass = objectClass;
         this.classMetadataReader = new ClassMetadataReader<>(objectClass);
+        this.constructor = new InjectableConstructor<>(objectClass);
 
         // todo: where to put mapping scopeName -> scope?
         String s = classMetadataReader.readScope();
@@ -57,23 +56,6 @@ public class InterceptorCharacter<T> implements Character<T> {
         }
 
         this.interceptorBindings = classMetadataReader.readInterceptorBindings();
-
-        List<ExecutableMetadataReader> constructors = new ArrayList<>();
-        for (Constructor<?> constructor : objectClass.getDeclaredConstructors()) {
-            ExecutableMetadataReader metadataReader = new ExecutableMetadataReader(constructor);
-            if (metadataReader.readInjectable()) {
-                constructors.add(metadataReader);
-            }
-        }
-
-        if (constructors.size() == 1) {
-            this.constructor = constructors.get(0);
-        } else if (constructors.size() > 1) {
-            throw new CharacterMetadataException(String.format(
-                    "Only one constructor can be injectable, injectable constructos in '%s' are: %s",
-                    objectClass,
-                    constructors.stream().map(ExecutableMetadataReader::getExecutable).collect(Collectors.toList())));
-        }
     }
 
     public Class<T> getObjectClass() {
@@ -88,13 +70,18 @@ public class InterceptorCharacter<T> implements Character<T> {
         return interceptorBindings;
     }
 
-    @SuppressWarnings("unchecked") // reader will have constructor from objectClass
+    /**
+     * @see InjectableConstructor
+     */
+    public void constructedBy(Constructor<?> constructor) {
+        this.constructor.set(constructor);
+    }
+
+    /**
+     * @see InjectableConstructor
+     */
     public Constructor<T> getConstructor() {
-        if (constructor != null) {
-            return (Constructor<T>) constructor.getExecutable();
-        } else {
-            return null;
-        }
+        return constructor.get();
     }
 
     public InterceptorCharacter<T> intercepts(String type, Method method) {

@@ -44,23 +44,13 @@ public class DefaultInterceptorContainer<T> implements InterceptorContainer<T> {
 
     @Override
     public T getObject() {
+        Constructor<T> constructor = character.getConstructor();
 
-        // todo: resolve constructor
         // todo: resolve constructor arguments
         // todo: create instance
         // todo: inject instance
 
         try {
-            // temporary implementation
-            Constructor<T> constructor = character.getConstructor();
-            if (constructor == null) {
-                try {
-                    constructor = (Constructor<T>) character.getObjectClass().getDeclaredConstructor();
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
             return ReflectionUtils.newInstance(constructor);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
