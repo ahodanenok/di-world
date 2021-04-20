@@ -2,6 +2,7 @@ package ahodanenok.di.character;
 
 import ahodanenok.di.World;
 import ahodanenok.di.character.common.InjectableConstructor;
+import ahodanenok.di.character.common.InterceptorMethods;
 import ahodanenok.di.container.impl.DefaultClassContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.metadata.ClassMetadataReader;
@@ -42,7 +43,7 @@ public class ClassCharacter<T> implements Character<T> {
 
     private List<Class<?>> interceptors;
     private List<Annotation> interceptorBindings;
-    private Map<String, Method> interceptorMethods;
+    private InterceptorMethods<T> interceptorMethods;
 
     public ClassCharacter(Class<T> clazz) {
         this.classMetadataReader = new ClassMetadataReader<>(clazz);
@@ -69,6 +70,7 @@ public class ClassCharacter<T> implements Character<T> {
         this.interceptors = classMetadataReader.readInterceptors();
         this.interceptors.forEach(this::validateInterceptor);
         this.interceptorBindings = classMetadataReader.readInterceptorBindings();
+        this.interceptorMethods = new InterceptorMethods<>(clazz);
     }
 
     public Class<T> getObjectClass() {
@@ -220,109 +222,26 @@ public class ClassCharacter<T> implements Character<T> {
     }
 
     /**
-     * Mark a method of a class as an interceptor of a type
-     *
-     * Expects given method to be declared exactly in the class
-     * and either have no parameters or InvocationContext as a single parameter
-     *
-     * @see #intercepts(String, Method)
+     * @see InterceptorMethods#intercepts(String, String)
      */
     public ClassCharacter<T> intercepts(String type, String methodName) {
-        try {
-            return intercepts(type, objectClass.getDeclaredMethod(methodName));
-        } catch (NoSuchMethodException e) {
-            // no-op
-        }
-
-        try {
-            return intercepts(type, objectClass.getDeclaredMethod(methodName, InvocationContext.class));
-        } catch (NoSuchMethodException e) {
-            // no-op
-        }
-
-        throw new CharacterMetadataException(String.format("Interceptor method '%s' not found in '%s'." +
-                " Make sure method is present and accepts either no parameters" +
-                " or InvocationContext as a single parameter", methodName, objectClass));
-    }
-
-    /**
-     * Mark a method of a class as an interceptor of a type
-     * Different types may impose different requirements for interceptor methods
-     *
-     * For the following interceptors, type is the same as annotation's FQCN:
-     * <ul>
-     * <li>javax.interceptor.AroundConstruct</li>
-     * <li>javax.interceptor.AroundInvoke</li>
-     * <li>javax.annotation.PostConstruct</li>
-     * <li>javax.annotation.PreDestroy</li>
-     * </ul>
-     *
-     * @param type type of intercepted event
-     * @param method method of a class
-     * @throws CharacterMetadataException if method doesn't belong to a class
-     * @see javax.interceptor.AroundConstruct
-     * @see javax.interceptor.AroundInvoke
-     * @see javax.annotation.PostConstruct
-     * @see javax.annotation.PreDestroy
-     */
-    public ClassCharacter<T> intercepts(String type, Method method) {
-        if (type == null) {
-            throw new CharacterMetadataException("Type can't be null");
-        }
-
-        type = type.trim();
-        if (type.isEmpty()) {
-            throw new CharacterMetadataException("Type can't be empty");
-        }
-
-        if (method == null) {
-            throw new CharacterMetadataException("Method can't be null");
-        }
-
-        if (method.getDeclaringClass() != objectClass) {
-            throw new CharacterMetadataException(
-                    String.format("Method '%s' doesn't belong to a class '%s'", method, objectClass));
-        }
-
-        // todo: validate method signature
-
-        if (interceptorMethods == null) {
-            interceptorMethods = new HashMap<>();
-        }
-
-        interceptorMethods.put(type, method);
+        interceptorMethods.intercepts(type, methodName);
         return this;
     }
 
     /**
-     * Get interceptor method of type, returns null if there is no such method in a class
-     *
-     * @see #intercepts(String, Method)
-     * @see javax.interceptor.AroundConstruct
-     * @see javax.interceptor.AroundInvoke
-     * @see javax.annotation.PostConstruct
-     * @see javax.annotation.PreDestroy
+     * @see InterceptorMethods#intercepts(String, Method)
+     */
+    public ClassCharacter<T> intercepts(String type, Method method) {
+        interceptorMethods.intercepts(type, method);
+        return this;
+    }
+
+    /**
+     * @see InterceptorMethods#get(String)
      */
     public Method getInterceptorMethod(String type) {
-        if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Provide a type");
-        }
-
-        if (interceptorMethods == null) {
-            interceptorMethods = new HashMap<>();
-        }
-
-        type = type.trim();
-
-        // if there is an entry with null method,
-        // then there is no interceptor for this type
-        if (interceptorMethods.containsKey(type)) {
-            return interceptorMethods.get(type);
-        }
-
-        // lazily read interceptor, as we don't know what types
-        // we are looking for until they are requested
-        return interceptorMethods.computeIfAbsent(type, classMetadataReader::readInterceptorMethod);
+        return interceptorMethods.get(type);
     }
 
     @Override

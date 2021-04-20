@@ -2,6 +2,7 @@ package ahodanenok.di.character;
 
 import ahodanenok.di.World;
 import ahodanenok.di.character.common.InjectableConstructor;
+import ahodanenok.di.character.common.InterceptorMethods;
 import ahodanenok.di.container.impl.DefaultInterceptorContainer;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
@@ -40,7 +41,7 @@ public class InterceptorCharacter<T> implements Character<T> {
     private final InjectableConstructor<T> constructor;
 
     private List<Annotation> interceptorBindings;
-    private Map<String, Method> interceptorMethods;
+    private final InterceptorMethods<T> interceptorMethods;
 
     public InterceptorCharacter(Class<T> objectClass) {
         this.objectClass = objectClass;
@@ -56,6 +57,7 @@ public class InterceptorCharacter<T> implements Character<T> {
         }
 
         this.interceptorBindings = classMetadataReader.readInterceptorBindings();
+        this.interceptorMethods = new InterceptorMethods<>(objectClass);
     }
 
     public Class<T> getObjectClass() {
@@ -84,55 +86,19 @@ public class InterceptorCharacter<T> implements Character<T> {
         return constructor.get();
     }
 
+    /**
+     * @see InterceptorMethods#intercepts(String, Method)
+     */
     public InterceptorCharacter<T> intercepts(String type, Method method) {
-        if (type == null) {
-            throw new CharacterMetadataException("Type can't be null");
-        }
-
-        type = type.trim();
-        if (type.isEmpty()) {
-            throw new CharacterMetadataException("Type can't be empty");
-        }
-
-        if (method == null) {
-            throw new CharacterMetadataException("Method can't be null");
-        }
-
-        if (method.getDeclaringClass() != objectClass) {
-            throw new CharacterMetadataException(
-                    String.format("Method '%s' doesn't belong to a class '%s'", method, objectClass));
-        }
-
-        // todo: validate method signature
-
-        if (interceptorMethods == null) {
-            interceptorMethods = new HashMap<>();
-        }
-
-        interceptorMethods.put(type, method);
+        interceptorMethods.intercepts(type, method);
         return this;
     }
 
+    /**
+     * @see InterceptorMethods#get(String)
+     */
     public Method getInterceptorMethod(String type) {
-        if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Provide a type");
-        }
-
-        if (interceptorMethods == null) {
-            interceptorMethods = new HashMap<>();
-        }
-
-        type = type.trim();
-
-        // if there is an entry with null method,
-        // then there is no interceptor for this type
-        if (interceptorMethods.containsKey(type)) {
-            return interceptorMethods.get(type);
-        }
-
-        // lazily read interceptor, as we don't know what types
-        // we are looking for until they are requested
-        return interceptorMethods.computeIfAbsent(type, classMetadataReader::readInterceptorMethod);
+        return interceptorMethods.get(type);
     }
 
     @Override
