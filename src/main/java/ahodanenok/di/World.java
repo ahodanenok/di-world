@@ -8,6 +8,7 @@ import ahodanenok.di.exception.DependencyLookupException;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
+import ahodanenok.di.queue.EntranceQueue;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;
