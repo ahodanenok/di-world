@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 // todo: instantiate eager objects
 // todo: destroying world + @PreDestroy
 // todo: event handlers
-
+// todo: logging
 public final class World implements Iterable<Container<?>> {
 
     private final List<Container<?>> containers = new ArrayList<>();
