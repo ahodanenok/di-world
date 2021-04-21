@@ -1,5 +1,7 @@
 package ahodanenok.di;
 
+import ahodanenok.di.augment.Augmentation;
+import ahodanenok.di.augment.CompositeAugmentation;
 import ahodanenok.di.character.Character;
 import ahodanenok.di.container.Container;
 import ahodanenok.di.container.InjectableContainer;
@@ -23,15 +25,12 @@ import java.util.stream.Collectors;
 // todo: around invoke
 // todo: event handlers
 
-public class World implements Iterable<Container<?>> {
+public final class World implements Iterable<Container<?>> {
 
-    public static void main(String[] args) {
-
-    }
-
-    private List<Container<?>> containers = new ArrayList<>();
-    private EntranceQueue queue = new EntranceQueue(this::register);
-    private LinkedList<InjectionPoint> injectionPoints = new LinkedList<>();
+    private final List<Container<?>> containers = new ArrayList<>();
+    private final EntranceQueue queue = new EntranceQueue(this::register);
+    private final LinkedList<InjectionPoint> injectionPoints = new LinkedList<>();
+    private final List<Augmentation> augmentations = new ArrayList<>();
 
     public EntranceQueue getQueue() {
         return queue;
@@ -45,19 +44,6 @@ public class World implements Iterable<Container<?>> {
             containers.add(container);
         }
     }
-
-    // todo: names are not required to be unique, but should they be checked somehow?
-//    private void register(ClassContainer<?> container) {
-//        for (ClassContainer<?> c : containers) {
-//            for (String n : c.getNames()) {
-//                if (container.getNames().contains(n)) {
-//                    throw new IllegalStateException(n);
-//                }
-//            }
-//        }
-//
-//        containers.add(container);
-//    }
 
     @SuppressWarnings("unchecked") // object matched by request will be of type T or its subtype
     public <T> T find(ObjectRequest<T> request) {
@@ -139,7 +125,8 @@ public class World implements Iterable<Container<?>> {
                 .collect(Collectors.toList());
     }
 
-    // cache resolved containers
+    // todo: lookup by name
+    // todo: cache resolved containers
     private <T> List<InjectableContainer<?>> findContainers(ObjectRequest<T> request) {
         List<InjectableContainer<?>> matched = new ArrayList<>();
 
@@ -245,6 +232,18 @@ public class World implements Iterable<Container<?>> {
         // else empty chain
 
         return new InterceptorChain(result);
+    }
+
+    public void installAugmentation(Augmentation augmentation) {
+        if (augmentation == null) {
+            throw new IllegalArgumentException("Augmentation is null");
+        }
+
+        this.augmentations.add(augmentation);
+    }
+
+    public Augmentation requestAugmentation() {
+        return new CompositeAugmentation(augmentations);
     }
 
     @Override

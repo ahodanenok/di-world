@@ -1,11 +1,11 @@
 package ahodanenok.di.container.impl;
 
 import ahodanenok.di.*;
+import ahodanenok.di.augment.Augmentation;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.container.Container;
 import ahodanenok.di.container.InjectableContainer;
 import ahodanenok.di.exception.ObjectRetrievalException;
-import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.InterceptorType;
@@ -16,8 +16,6 @@ import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.util.ReflectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.interceptor.AroundConstruct;
 import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -60,7 +58,9 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
     }
 
     private T doGetObject() {
-        Constructor<T> constructor = character.getConstructor();
+        Augmentation augmentation = world.requestAugmentation();
+
+        Constructor<?> constructor = augmentation.augmentBeforeInstantiated(character, character.getConstructor());
 
         // todo: cache arguments?
         ExecutableMetadataReader constructorMetadataReader = new ExecutableMetadataReader(constructor);
@@ -88,9 +88,11 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
                                     constructorMetadataReader.readInterceptorBindings(),
                                     character.getInterceptorBindings()))
             );
-            Object instance = aroundConstructChain.invoke(constructorContext);
+            Object instance = augmentation.augmentAfterInstantiated(
+                    character, aroundConstructChain.invoke(constructorContext));
 
             injector.inject(instance);
+            instance = augmentation.augmentAfterInjected(character, instance);
 
             InvocationContext postConstructContext;
             Method interceptorMethod = character.getInterceptorMethod(InterceptorType.POST_CONSTRUCT);
@@ -112,9 +114,9 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
 
             postConstructChain.invoke(postConstructContext);
 
-            // todo: interceptors could swap created instance for something else, return Object?
+            // todo: interceptors/augmentation could swap created instance for something else, return Object?
             // @SuppressWarnings("unchecked")
-            T castedInstance = (T) instance;
+            T castedInstance = (T) augmentation.augmentAfterConstructed(character, instance);
 
             return castedInstance;
         } catch (Exception e) {
