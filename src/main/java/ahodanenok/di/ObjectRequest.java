@@ -1,14 +1,21 @@
 package ahodanenok.di;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Request for retrieving objects from the world by type and qualifiers
+ */
 public class ObjectRequest<T> {
 
+    /**
+     * Type of objects we're interested in, could be exact type or any of its superclasses or interfaces
+     */
     public static <T> ObjectRequest<T> of(Class<T> type) {
-        ObjectRequest<T> request = new ObjectRequest<T>();
-        request.withType(type);
+        ObjectRequest<T> request = new ObjectRequest<>();
+        request.type = type;
         return request;
     }
 
@@ -22,20 +29,25 @@ public class ObjectRequest<T> {
         return type;
     }
 
-    public <C extends T> ObjectRequest<T> withType(Class<C> type) {
-        this.type = type;
-        return this;
-    }
-
+    /**
+     * @see javax.inject.Qualifier
+     */
     public ObjectRequest<T> withQualifiers(List<Annotation> qualifiers) {
-        this.qualifiers = qualifiers;
+        this.qualifiers = new ArrayList<>(qualifiers);
         return this;
     }
 
     public List<Annotation> getQualifiers() {
-        return qualifiers != null ? qualifiers : Collections.emptyList();
+        if (qualifiers != null) {
+            return Collections.unmodifiableList(qualifiers);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
+    /**
+     * Mark request as optional, meaning that if no objects are found for the request, it's ok
+     */
     public ObjectRequest<T> optional() {
         this.optional = true;
         return this;
