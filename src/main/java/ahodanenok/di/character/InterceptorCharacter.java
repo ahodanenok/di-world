@@ -17,11 +17,8 @@ import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-// todo: remove duplication with ClassCharacter
 public class InterceptorCharacter<T> implements Character<T> {
 
     public static <T> InterceptorCharacter<T> of(Class<T> clazz) {
