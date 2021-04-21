@@ -13,7 +13,6 @@ import ahodanenok.di.scope.SingletonScope;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Singleton;
-import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
