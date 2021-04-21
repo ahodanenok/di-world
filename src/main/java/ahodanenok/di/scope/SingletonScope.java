@@ -2,6 +2,9 @@ package ahodanenok.di.scope;
 
 import javax.inject.Provider;
 
+/**
+ * Instantiates object at first retrieval and returns this instance on all subsequent requests
+ */
 public class SingletonScope<T> implements Scope<T> {
 
     private T instance;
@@ -10,7 +13,9 @@ public class SingletonScope<T> implements Scope<T> {
     public T getObject(Provider<T> provider) {
         if (instance == null) {
             instance = provider.get();
-            // todo: if null again?
+            if (instance == null) {
+                throw new IllegalStateException("Provider returned null, that's not appropriate!");
+            }
         }
 
         return instance;
