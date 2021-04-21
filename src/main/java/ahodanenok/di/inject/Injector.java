@@ -30,6 +30,10 @@ public final class Injector {
 
         for (Class<?> clazz : ReflectionUtils.getInheritanceChain(instance.getClass())) {
             for (Field f : clazz.getDeclaredFields()) {
+                if (Modifier.isStatic(f.getModifiers())) {
+                    continue;
+                }
+
                 FieldMetadataReader metadataReader = new FieldMetadataReader(f);
                 if (metadataReader.readInjectable()) {
                     InjectionPoint injectionPoint = new InjectionPoint(f, metadataReader.readQualifiers());

@@ -43,9 +43,10 @@ public class InjectTckTest {
         w.getQueue().flush();
 
         StaticInjector staticInjector = new StaticInjector(w);
+        staticInjector.addClass(Convertible.class);
         staticInjector.addClass(Tire.class);
         staticInjector.addClass(SpareTire.class);
-        staticInjector.addClass(Convertible.class);
+        staticInjector.addClass(RoundThing.class);
         staticInjector.inject();
 
         Car car = w.find(ObjectRequest.of(Car.class));

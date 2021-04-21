@@ -14,7 +14,7 @@ import java.util.*;
 public class StaticInjector {
 
     private final Injector injector;
-    private Set<Class<?>> classes;
+    private final Set<Class<?>> classes;
 
     public StaticInjector(World world) {
         this.injector = new Injector(world);
@@ -42,7 +42,6 @@ public class StaticInjector {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             throw new DependencyInjectionException("Can't inject static members", e);
         }
     }
