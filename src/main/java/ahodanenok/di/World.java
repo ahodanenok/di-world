@@ -11,9 +11,7 @@ import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.util.ReflectionUtils;
 
 import javax.inject.Named;
-import javax.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -246,28 +244,6 @@ public class World implements Iterable<Container<?>> {
         // else empty chain
 
         return new InterceptorChain(result);
-    }
-
-    /**
-     * Invokes given interceptor method on the object returned by container
-     * todo: move to an 'interceptor' package
-     */
-    public static class InterceptorInvoke implements Interceptor {
-
-        private final Container<?> container;
-        private final Method method;
-
-        public InterceptorInvoke(Container<?> container, Method method) {
-            this.container = container;
-            this.method = method;
-        }
-
-        @Override
-        public Object execute(InvocationContext context) throws Exception {
-            // todo: support interceptor methods with zero parameters
-            Object instance = container.getObject();
-            return ReflectionUtils.invoke(method, instance, context);
-        }
     }
 
     @Override

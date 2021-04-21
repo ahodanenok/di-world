@@ -6,6 +6,7 @@ import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.interceptor.Interceptor;
+import ahodanenok.di.interceptor.InterceptorInvoke;
 import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.util.ReflectionUtils;
 
@@ -44,7 +45,7 @@ public class DefaultInterceptorContainer<T> implements InterceptorContainer<T> {
             return null;
         }
 
-        return new World.InterceptorInvoke(this, method);
+        return new InterceptorInvoke(this, method);
     }
 
     @Override
