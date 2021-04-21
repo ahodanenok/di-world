@@ -67,12 +67,12 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                    AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                     Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(AroundConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(1);
 
@@ -86,20 +86,20 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(AroundConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(3);
 
@@ -113,16 +113,16 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(AroundConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(2);
 
@@ -136,7 +136,7 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(A.class).interceptedBy(Interceptor_1.class));
         w.getQueue().flush();
@@ -151,11 +151,11 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(A.class).interceptedBy(Interceptor_2.class));
         w.getQueue().flush();
@@ -170,11 +170,11 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().flush();
@@ -189,11 +189,11 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(A.class)
                 .interceptedBy(Interceptor_2.class, Interceptor_1.class));
@@ -209,15 +209,15 @@ public class AroundConstructInterceptorsTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_3.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_3.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
-                        AroundConstruct.class.getName(),
+                        InterceptorType.AROUND_CONSTRUCT,
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(Dependency.class));
         w.getQueue().add(ClassCharacter.of(B.class)

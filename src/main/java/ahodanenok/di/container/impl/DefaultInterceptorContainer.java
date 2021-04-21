@@ -6,6 +6,7 @@ import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.interceptor.Interceptor;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
@@ -37,7 +38,7 @@ public class DefaultInterceptorContainer<T> implements InterceptorContainer<T> {
     }
 
     @Override
-    public Interceptor getInterceptor(String type) {
+    public Interceptor getInterceptor(InterceptorType type) {
         Method method = character.getInterceptorMethod(type);
         if (method == null) {
             return null;

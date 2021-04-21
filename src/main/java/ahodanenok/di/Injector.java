@@ -3,6 +3,7 @@ package ahodanenok.di;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.interceptor.context.InjectionPointInvocationContext;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.metadata.FieldMetadataReader;
@@ -127,7 +128,7 @@ public final class Injector {
 
             try {
                 InterceptorChain aroundInjectChain
-                        = world.getInterceptorChain(InterceptorRequest.of(AroundInject.class.getName()).matchAll());
+                        = world.getInterceptorChain(InterceptorRequest.of(InterceptorType.AROUND_INJECT).matchAll());
 
                 // looks like a hack for me to use invocation context in a such way
                 // but it's nice to use the existing interceptors mechanism

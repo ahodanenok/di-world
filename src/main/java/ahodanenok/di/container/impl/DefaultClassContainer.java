@@ -5,8 +5,10 @@ import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.container.Container;
 import ahodanenok.di.container.InjectableContainer;
 import ahodanenok.di.exception.ObjectRetrievalException;
+import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import ahodanenok.di.interceptor.context.MethodInvocationContext;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
@@ -80,7 +82,7 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
             // at class level or inherited from a superclass
 
             InterceptorChain aroundConstructChain = world.getInterceptorChain(
-                    InterceptorRequest.of(AroundConstruct.class.getName())
+                    InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT)
                             .withClasses(character.getInterceptors())
                             .withBindings(ReflectionUtils.combineAnnotations(
                                     constructorMetadataReader.readInterceptorBindings(),
@@ -91,7 +93,7 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
             injector.inject(instance);
 
             InvocationContext postConstructContext;
-            Method interceptorMethod = character.getInterceptorMethod(PostConstruct.class.getName());
+            Method interceptorMethod = character.getInterceptorMethod(InterceptorType.POST_CONSTRUCT);
             if (interceptorMethod != null) {
                 postConstructContext = new MethodInvocationContext(instance, interceptorMethod);
             } else {
@@ -99,7 +101,7 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
             }
 
             InterceptorChain postConstructChain = world.getInterceptorChain(
-                    InterceptorRequest.of(PostConstruct.class.getName())
+                    InterceptorRequest.of(InterceptorType.POST_CONSTRUCT)
                             .withClasses(character.getInterceptors())
                             .withBindings(ReflectionUtils.combineAnnotations(
                                     interceptorMethod != null

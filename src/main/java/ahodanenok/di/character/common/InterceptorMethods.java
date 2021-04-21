@@ -1,7 +1,7 @@
 package ahodanenok.di.character.common;
 
-import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.CharacterMetadataException;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.metadata.ClassMetadataReader;
 
 import javax.interceptor.InvocationContext;
@@ -13,7 +13,7 @@ public class InterceptorMethods<T> {
 
     private final Class<T> clazz;
     private final ClassMetadataReader<T> metadataReader;
-    private Map<String, Method> methods;
+    private Map<InterceptorType, Method> methods;
 
     public InterceptorMethods(Class<T> clazz) {
         this.clazz = clazz;
@@ -26,9 +26,9 @@ public class InterceptorMethods<T> {
      * Expects given method to be declared exactly in the class
      * and either have no parameters or InvocationContext as a single parameter
      *
-     * @see #intercepts(String, Method)
+     * @see #intercepts(InterceptorType, Method)
      */
-    public void intercepts(String type, String methodName) {
+    public void intercepts(InterceptorType type, String methodName) {
         try {
             intercepts(type, clazz.getDeclaredMethod(methodName));
             return;
@@ -68,14 +68,9 @@ public class InterceptorMethods<T> {
      * @see javax.annotation.PostConstruct
      * @see javax.annotation.PreDestroy
      */
-    public void intercepts(String type, Method method) {
+    public void intercepts(InterceptorType type, Method method) {
         if (type == null) {
             throw new CharacterMetadataException("Type can't be null");
-        }
-
-        type = type.trim();
-        if (type.isEmpty()) {
-            throw new CharacterMetadataException("Type can't be empty");
         }
 
         if (method == null) {
@@ -99,22 +94,16 @@ public class InterceptorMethods<T> {
     /**
      * Get interceptor method of type, returns null if there is no such method in a class
      *
-     * @see #intercepts(String, Method)
+     * @see #intercepts(InterceptorType, Method)
      * @see javax.interceptor.AroundConstruct
      * @see javax.interceptor.AroundInvoke
      * @see javax.annotation.PostConstruct
      * @see javax.annotation.PreDestroy
      */
-    public Method get(String type) {
-        if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Provide a type");
-        }
-
+    public Method get(InterceptorType type) {
         if (methods == null) {
             methods = new HashMap<>();
         }
-
-        type = type.trim();
 
         // if there is an entry with null method,
         // then there is no interceptor for this type

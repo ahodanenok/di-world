@@ -76,12 +76,12 @@ public class PostConstructInterceptorTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(PostConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(InterceptorType.POST_CONSTRUCT).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(1);
 
@@ -95,20 +95,20 @@ public class PostConstructInterceptorTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().flush();
 
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(PostConstruct.class.getName()).matchAll());
+                InterceptorRequest.of(InterceptorType.POST_CONSTRUCT).matchAll());
         assertThat(chain).isNotNull();
         assertThat(chain.getInterceptors()).hasSize(3);
 
@@ -122,7 +122,7 @@ public class PostConstructInterceptorTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(A.class).interceptedBy(Interceptor_1.class));
         w.getQueue().flush();
@@ -137,7 +137,7 @@ public class PostConstructInterceptorTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(C.class).interceptedBy(Interceptor_1.class));
         w.getQueue().flush();
@@ -152,11 +152,11 @@ public class PostConstructInterceptorTest {
         World w = new World();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_1.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class)
                 .intercepts(
-                        PostConstruct.class.getName(),
+                        InterceptorType.POST_CONSTRUCT,
                         Interceptor_2.class.getDeclaredMethod("interceptor", InvocationContext.class)));
         w.getQueue().add(ClassCharacter.of(A.class)
                 .interceptedBy(Interceptor_2.class, Interceptor_1.class));

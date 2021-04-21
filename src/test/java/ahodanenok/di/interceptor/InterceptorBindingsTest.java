@@ -127,7 +127,7 @@ public class InterceptorBindingsTest {
                 .getDeclaredMethod("shouldGetInterceptorChainSingleBinding")
                 .getDeclaredAnnotation(Binding_1.class);
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(AroundConstruct.class.getName()).withBindings(Collections.singletonList(b)));
+                InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT).withBindings(Collections.singletonList(b)));
 
         assertThat(chain.getInterceptors()).hasSize(1);
 
@@ -153,7 +153,7 @@ public class InterceptorBindingsTest {
                 .getDeclaredMethod("shouldGetInterceptorChainMultipleBindings")
                 .getDeclaredAnnotation(Binding_2.class);
         InterceptorChain chain = w.getInterceptorChain(
-                InterceptorRequest.of(AroundConstruct.class.getName()).withBindings(Arrays.asList(b1, b2)));
+                InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT).withBindings(Arrays.asList(b1, b2)));
 
         assertThat(chain.getInterceptors()).hasSize(1);
 

@@ -3,6 +3,7 @@ package ahodanenok.di.character;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.character.classes.*;
 import ahodanenok.di.inject.classes.Coffee;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
 import ahodanenok.di.scope.SingletonScope;
@@ -204,43 +205,43 @@ public class ClassCharacterTest {
     @Test
     @DisplayName("should find @PreDestroy method")
     public void preDestroy() throws Exception {
-        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(PreDestroy.class.getName()))
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(InterceptorType.PRE_DESTROY))
                 .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("preDestroy", InvocationContext.class));
     }
 
     @Test
     @DisplayName("should find @PostConstruct method")
     public void postConstruct() throws Exception {
-        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(PostConstruct.class.getName()))
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(InterceptorType.POST_CONSTRUCT))
                 .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("postConstruct"));
     }
 
     @Test
     @DisplayName("should find @AroundConstruct method")
     public void aroundConstruct() throws Exception {
-        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(AroundConstruct.class.getName()))
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(InterceptorType.AROUND_CONSTRUCT))
                 .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("aroundConstruct"));
     }
 
     @Test
     @DisplayName("should find @AroundInvoke method")
     public void aroundInvoke() throws Exception {
-        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(AroundInvoke.class.getName()))
+        assertThat(ClassCharacter.of(ConsumptionTracker.class).getInterceptorMethod(InterceptorType.AROUND_INVOKE))
                 .isEqualTo(ConsumptionTracker.class.getDeclaredMethod("aroundInvoke", InvocationContext.class));
     }
 
     @Test
     @DisplayName("should not find interceptor method if it is not defined")
     public void noInterceptorMethod() throws Exception {
-        assertThat(ClassCharacter.of(Boiler.class).getInterceptorMethod(PostConstruct.class.getName())).isNull();
+        assertThat(ClassCharacter.of(Boiler.class).getInterceptorMethod(InterceptorType.POST_CONSTRUCT)).isNull();
     }
 
     @Test
     @DisplayName("should set interceptor method explicitly")
     public void interceptorMethodExplicitly() throws Exception {
         assertThat(ClassCharacter.of(Boiler.class)
-                    .intercepts(PostConstruct.class.getName(), "healthCheck")
-                    .getInterceptorMethod(PostConstruct.class.getName()))
+                    .intercepts(InterceptorType.POST_CONSTRUCT, "healthCheck")
+                    .getInterceptorMethod(InterceptorType.POST_CONSTRUCT))
                 .isEqualTo(Boiler.class.getDeclaredMethod("healthCheck"));
     }
 

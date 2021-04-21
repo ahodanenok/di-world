@@ -6,6 +6,7 @@ import ahodanenok.di.character.common.InterceptorMethods;
 import ahodanenok.di.container.impl.DefaultInterceptorContainer;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.CharacterMetadataException;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.metadata.ClassMetadataReader;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.Scope;
@@ -88,17 +89,17 @@ public class InterceptorCharacter<T> implements Character<T> {
     }
 
     /**
-     * @see InterceptorMethods#intercepts(String, Method)
+     * @see InterceptorMethods#intercepts(InterceptorType, Method)
      */
-    public InterceptorCharacter<T> intercepts(String type, Method method) {
+    public InterceptorCharacter<T> intercepts(InterceptorType type, Method method) {
         interceptorMethods.intercepts(type, method);
         return this;
     }
 
     /**
-     * @see InterceptorMethods#get(String)
+     * @see InterceptorMethods#get(InterceptorType)
      */
-    public Method getInterceptorMethod(String type) {
+    public Method getInterceptorMethod(InterceptorType type) {
         return interceptorMethods.get(type);
     }
 

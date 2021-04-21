@@ -1,6 +1,7 @@
 package ahodanenok.di.metadata;
 
 import ahodanenok.di.exception.CharacterMetadataException;
+import ahodanenok.di.interceptor.InterceptorType;
 import ahodanenok.di.util.NamedQualifier;
 import ahodanenok.di.util.ReflectionUtils;
 
@@ -128,11 +129,11 @@ public class ClassMetadataReader<T> {
         }
     }
 
-    public Method readInterceptorMethod(String type) {
+    public Method readInterceptorMethod(InterceptorType type) {
         List<Method> methods = new ArrayList<>();
         for (Method method : ReflectionUtils.getInstanceMethods(clazz)) {
             for (Annotation a : method.getAnnotations()) {
-                if (a.annotationType().getName().equals(type)) {
+                if (type.matches(a)) {
                     methods.add(method);
                 }
             }

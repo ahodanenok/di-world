@@ -14,11 +14,11 @@ public final class InterceptorRequest {
     /**
      * Request for interceptor chain of given type
      */
-    public static InterceptorRequest of(String type) {
+    public static InterceptorRequest of(InterceptorType type) {
         return new InterceptorRequest(type);
     }
 
-    private final String type;
+    private final InterceptorType type;
     private List<Class<?>> classes;
     private List<Annotation> bindings;
     private boolean matchAll;
@@ -26,7 +26,7 @@ public final class InterceptorRequest {
     /**
      * Type of intercepted event
      */
-    private InterceptorRequest(String type) {
+    private InterceptorRequest(InterceptorType type) {
         this.type = type;
     }
 
@@ -41,7 +41,7 @@ public final class InterceptorRequest {
     /**
      * Type of intercepted event
      */
-    public String getType() {
+    public InterceptorType getType() {
         return type;
     }
 

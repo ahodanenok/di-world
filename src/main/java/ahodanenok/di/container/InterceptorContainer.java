@@ -1,6 +1,7 @@
 package ahodanenok.di.container;
 
 import ahodanenok.di.interceptor.Interceptor;
+import ahodanenok.di.interceptor.InterceptorType;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -25,7 +26,6 @@ public interface InterceptorContainer<T> extends Container<T> {
      * @see javax.interceptor.AroundInvoke
      * @see javax.annotation.PreDestroy
      * @see javax.annotation.PostConstruct
-     * todo: add abstraction over a string, it's not clear how to pass i.e AroundConstruct or other type here
      */
-    Interceptor getInterceptor(String type);
+    Interceptor getInterceptor(InterceptorType type);
 }
