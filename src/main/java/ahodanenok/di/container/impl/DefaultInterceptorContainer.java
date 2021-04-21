@@ -1,25 +1,29 @@
 package ahodanenok.di.container.impl;
 
+import ahodanenok.di.Injector;
 import ahodanenok.di.World;
 import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.container.InterceptorContainer;
+import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 public class DefaultInterceptorContainer<T> implements InterceptorContainer<T> {
 
+    // todo: reference to a world is not needed?
     private final World world;
     private final InterceptorCharacter<T> character;
+    private final Injector injector;
 
     public DefaultInterceptorContainer(World world, InterceptorCharacter<T> character) {
         this.world = world;
         this.character = character;
+        this.injector = new Injector(world);
     }
 
     @Override
@@ -45,15 +49,17 @@ public class DefaultInterceptorContainer<T> implements InterceptorContainer<T> {
     @Override
     public T getObject() {
         Constructor<T> constructor = character.getConstructor();
-
-        // todo: resolve constructor arguments
-        // todo: create instance
-        // todo: inject instance
+        Object[] args = injector.resolveArguments(constructor);
 
         try {
-            return ReflectionUtils.newInstance(constructor);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
+            T instance = ReflectionUtils.newInstance(constructor, args);
+
+            injector.inject(instance);
+
+            return instance;
+        } catch (Exception e) {
+            throw new ObjectRetrievalException(
+                    String.format("Can't get interceptor of type '%s'", getObjectClass().getName()), e);
         }
     }
 }
