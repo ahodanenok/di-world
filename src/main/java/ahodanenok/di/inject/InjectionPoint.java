@@ -1,4 +1,4 @@
-package ahodanenok.di;
+package ahodanenok.di.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;

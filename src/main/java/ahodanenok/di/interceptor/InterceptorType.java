@@ -1,6 +1,6 @@
 package ahodanenok.di.interceptor;
 
-import ahodanenok.di.AroundInject;
+import ahodanenok.di.inject.AroundInject;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

@@ -6,6 +6,7 @@ import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.container.Container;
 import ahodanenok.di.container.InjectableContainer;
 import ahodanenok.di.exception.ObjectRetrievalException;
+import ahodanenok.di.inject.Injector;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.InterceptorType;

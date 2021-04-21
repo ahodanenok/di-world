@@ -1,6 +1,6 @@
 package ahodanenok.di.container.impl;
 
-import ahodanenok.di.Injector;
+import ahodanenok.di.inject.Injector;
 import ahodanenok.di.World;
 import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.container.InterceptorContainer;

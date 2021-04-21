@@ -7,6 +7,7 @@ import ahodanenok.di.container.Container;
 import ahodanenok.di.container.InjectableContainer;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.DependencyLookupException;
+import ahodanenok.di.inject.InjectionPoint;
 import ahodanenok.di.interceptor.Interceptor;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
@@ -18,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// todo: inject static methods (StaticCharacter?)
 // todo: container for user-instantiated objects
 // todo: instantiate eager objects
 // todo: destroying world + @PreDestroy

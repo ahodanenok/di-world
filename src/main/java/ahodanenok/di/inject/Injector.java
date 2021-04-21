@@ -1,5 +1,7 @@
-package ahodanenok.di;
+package ahodanenok.di.inject;
 
+import ahodanenok.di.ObjectRequest;
+import ahodanenok.di.World;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
@@ -61,7 +63,7 @@ public final class Injector {
         return args;
     }
 
-    private Object resolveDependency(InjectionPoint injectionPoint) {
+    public Object resolveDependency(InjectionPoint injectionPoint) {
         return resolveDependency(injectionPoint, injectionPoint.getGenericType(), false, false);
     }
 

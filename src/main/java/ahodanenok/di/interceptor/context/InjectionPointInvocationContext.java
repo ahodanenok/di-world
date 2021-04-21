@@ -1,6 +1,6 @@
 package ahodanenok.di.interceptor.context;
 
-import ahodanenok.di.InjectionPoint;
+import ahodanenok.di.inject.InjectionPoint;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Constructor;

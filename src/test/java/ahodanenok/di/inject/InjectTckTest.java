@@ -42,6 +42,17 @@ public class InjectTckTest {
         w.getQueue().add(ClassCharacter.of(SpareTire.class));
         w.getQueue().flush();
 
-        return Tck.testsFor(w.find(ObjectRequest.of(Car.class)), false, true);
+        StaticInjector staticInjector = new StaticInjector(w);
+        staticInjector.addClass(Tire.class);
+        staticInjector.addClass(SpareTire.class);
+        staticInjector.addClass(Convertible.class);
+        staticInjector.inject();
+
+        Car car = w.find(ObjectRequest.of(Car.class));
+        if (car == null) {
+            throw new IllegalStateException("Car is null!");
+        }
+
+        return Tck.testsFor(car, true, true);
     }
 }

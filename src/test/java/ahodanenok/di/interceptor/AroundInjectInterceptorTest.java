@@ -1,6 +1,6 @@
 package ahodanenok.di.interceptor;
 
-import ahodanenok.di.AroundInject;
+import ahodanenok.di.inject.AroundInject;
 import ahodanenok.di.ObjectRequest;
 import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
