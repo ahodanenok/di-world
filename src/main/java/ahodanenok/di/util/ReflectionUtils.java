@@ -294,4 +294,15 @@ public class ReflectionUtils {
             e.printStackTrace();
         }
     }
+
+    public static List<Annotation> combineAnnotations(List<Annotation> listA, List<Annotation> listB) {
+        List<Annotation> result = new ArrayList<>(listA);
+        for (Annotation b : listB) {
+            if (!result.contains(b)) {
+                result.add(b);
+            }
+        }
+
+        return result;
+    }
 }

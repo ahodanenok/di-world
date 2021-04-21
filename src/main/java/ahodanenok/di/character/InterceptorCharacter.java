@@ -48,6 +48,7 @@ public class InterceptorCharacter<T> implements Character<T> {
         this.classMetadataReader = new ClassMetadataReader<>(objectClass);
         this.constructor = new InjectableConstructor<>(objectClass);
 
+        // todo: remove duplication with ClassCharacter in determining scope
         // todo: where to put mapping scopeName -> scope?
         String s = classMetadataReader.readScope();
         if (Singleton.class.getName().equals(s)) {

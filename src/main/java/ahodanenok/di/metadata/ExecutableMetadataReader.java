@@ -33,6 +33,10 @@ public class ExecutableMetadataReader {
      * Find all @InterceptorBinding annotations of an executable
      */
     public List<Annotation> readInterceptorBindings() {
+        // JSR-318 (Interceptors 1.2), 3.1.1
+        // Interceptor bindings are transitive—an interceptor binding declared
+        // by an interceptor binding type is inherited by all components and other
+        // interceptor binding types that declare that interceptor binding type.
         return ReflectionUtils.getAnnotations(executable, ReflectionUtils.INTERCEPTOR_BINDING_PREDICATE);
     }
 

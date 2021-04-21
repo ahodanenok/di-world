@@ -10,7 +10,9 @@ import ahodanenok.di.interceptor.InterceptorRequest;
 import ahodanenok.di.interceptor.context.ConstructorInvocationContext;
 import ahodanenok.di.interceptor.context.MethodInvocationContext;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
+import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.scope.Scope;
+import ahodanenok.di.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.interceptor.AroundConstruct;
@@ -19,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
-// todo: think of possible name alternatives
 public class DefaultClassContainer<T> implements Container<T>, InjectableContainer<T> {
 
     private World world;
@@ -60,20 +61,34 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
         Constructor<T> constructor = character.getConstructor();
 
         // todo: cache arguments?
-        Object[] args = injector.resolveArguments(constructor);
+        ExecutableMetadataReader constructorMetadataReader = new ExecutableMetadataReader(constructor);
+        Object[] args = injector.resolveArguments(constructorMetadataReader);
 
         ConstructorInvocationContext constructorContext = new ConstructorInvocationContext(constructor);
         constructorContext.setParameters(args);
 
         try {
+
+            // JSR-318 (Interceptors 1.2), 3.3
+            // The set of interceptor bindings for a method or constructor
+            // are those applied to the target class combined with those
+            // applied at method level or constructor level.
+
+            // JSR-318 (Interceptors 1.2), 3.3
+            // An interceptor binding declared on a method or constructor
+            // replaces an interceptor binding of the same type declared
+            // at class level or inherited from a superclass
+
             InterceptorChain aroundConstructChain = world.getInterceptorChain(
-                    InterceptorRequest.of(AroundConstruct.class.getName()).withClasses(character.getInterceptors()));
+                    InterceptorRequest.of(AroundConstruct.class.getName())
+                            .withClasses(character.getInterceptors())
+                            .withBindings(ReflectionUtils.combineAnnotations(
+                                    constructorMetadataReader.readInterceptorBindings(),
+                                    character.getInterceptorBindings()))
+            );
             Object instance = aroundConstructChain.invoke(constructorContext);
 
             injector.inject(instance);
-
-            InterceptorChain postConstructChain = world.getInterceptorChain(
-                    InterceptorRequest.of(PostConstruct.class.getName()).withClasses(character.getInterceptors()));
 
             InvocationContext postConstructContext;
             Method interceptorMethod = character.getInterceptorMethod(PostConstruct.class.getName());
@@ -82,6 +97,16 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
             } else {
                 postConstructContext = new ObjectInvocationContext(instance);
             }
+
+            InterceptorChain postConstructChain = world.getInterceptorChain(
+                    InterceptorRequest.of(PostConstruct.class.getName())
+                            .withClasses(character.getInterceptors())
+                            .withBindings(ReflectionUtils.combineAnnotations(
+                                    interceptorMethod != null
+                                            ? new ExecutableMetadataReader(interceptorMethod).readInterceptorBindings()
+                                            : Collections.emptyList(),
+                                    character.getInterceptorBindings()))
+            );
 
             postConstructChain.invoke(postConstructContext);
 

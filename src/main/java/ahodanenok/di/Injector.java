@@ -47,7 +47,7 @@ public final class Injector {
         return resolveArguments(new ExecutableMetadataReader(executable));
     }
 
-    private Object[] resolveArguments(ExecutableMetadataReader metadataReader) {
+    public Object[] resolveArguments(ExecutableMetadataReader metadataReader) {
 
         Object[] args = new Object[metadataReader.getExecutable().getParameterCount()];
         for (int i = 0; i < args.length; i++) {
@@ -126,8 +126,8 @@ public final class Injector {
             }
 
             try {
-                InterceptorChain aroundInjectChain = world.getInterceptorChain(
-                        InterceptorRequest.of(AroundInject.class.getName()).matchAll());
+                InterceptorChain aroundInjectChain
+                        = world.getInterceptorChain(InterceptorRequest.of(AroundInject.class.getName()).matchAll());
 
                 // looks like a hack for me to use invocation context in a such way
                 // but it's nice to use the existing interceptors mechanism

@@ -151,7 +151,17 @@ public class ClassMetadataReader<T> {
     }
 
     public List<Annotation> readInterceptorBindings() {
+        // JSR-318 (Interceptors 1.2), 3.1.1
+        // Interceptor bindings are transitive—an interceptor binding declared
+        // by an interceptor binding type is inherited by all components and other
+        // interceptor binding types that declare that interceptor binding type.
+
         // todo: interceptor bindings from stereotypes
+        // https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#binding_interceptor_to_bean
+        // The set of interceptor bindings for a method declared at class level
+        // includes those declared on stereotypes. An interceptor binding declared
+        // on a bean class replaces an interceptor binding of the same type declared
+        // by a stereotype that is applied to the bean class.
         return ReflectionUtils.getAnnotations(clazz, ReflectionUtils.INTERCEPTOR_BINDING_PREDICATE, true);
     }
 

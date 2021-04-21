@@ -5,6 +5,7 @@ package ahodanenok.di.container;
  *
  * @param <T> {@link #getObjectClass()}
  */
+// todo: think of possible name alternatives
 public interface Container<T> {
 
     /**

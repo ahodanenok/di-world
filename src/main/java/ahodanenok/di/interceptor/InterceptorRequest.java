@@ -1,5 +1,6 @@
 package ahodanenok.di.interceptor;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +20,7 @@ public final class InterceptorRequest {
 
     private final String type;
     private List<Class<?>> classes;
+    private List<Annotation> bindings;
     private boolean matchAll;
 
     /**
@@ -47,7 +49,24 @@ public final class InterceptorRequest {
      * Interceptors to look for interceptor methods
      */
     public List<Class<?>> getClasses() {
-        return classes != null ? classes : Collections.emptyList();
+        if (classes != null) {
+            return Collections.unmodifiableList(classes);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public InterceptorRequest withBindings(List<Annotation> bindings) {
+        this.bindings = new ArrayList<>(bindings);
+        return this;
+    }
+
+    public List<Annotation> getBindings() {
+        if (bindings != null) {
+            return Collections.unmodifiableList(bindings);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -59,9 +78,6 @@ public final class InterceptorRequest {
         return this;
     }
 
-    /**
-     * Match all interceptors of type
-     */
     public boolean isMatchAll() {
         return matchAll;
     }

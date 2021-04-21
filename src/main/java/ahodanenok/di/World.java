@@ -199,10 +199,9 @@ public class World implements Iterable<Container<?>> {
     public InterceptorChain getInterceptorChain(InterceptorRequest request) {
         List<Interceptor> result = new ArrayList<>();
 
-        List<Class<?>> interceptorClasses = request.getClasses();
-        if (!interceptorClasses.isEmpty()) {
+        if (!request.getClasses().isEmpty()) {
             // interceptors are declared explicitly
-            for (Class<?> interceptorClass : interceptorClasses) {
+            for (Class<?> interceptorClass : request.getClasses()) {
                 for (Container<?> container : containers) {
                     if (container instanceof InterceptorContainer<?>
                             && interceptorClass == container.getObjectClass()) {
@@ -213,6 +212,24 @@ public class World implements Iterable<Container<?>> {
                     }
                 }
             }
+        } else if (!request.getBindings().isEmpty()) {
+           for (Container<?> container : containers) {
+               if (container instanceof InterceptorContainer<?>) {
+                   InterceptorContainer<?> interceptorContainer = (InterceptorContainer<?>) container;
+
+                   // JSR-318 (Interceptors 1.2), 3.4
+                   // An interceptor is bound to a method or constructor if:
+                   // - The method or constructor has all the interceptor bindings of the interceptor.
+                   if (interceptorContainer.getInterceptorBindings().size() == request.getBindings().size()
+                           && interceptorContainer.getInterceptorBindings().containsAll(request.getBindings())) {
+                       Interceptor interceptor = ((InterceptorContainer<?>) container).getInterceptor(request.getType());
+                       // - The interceptor intercepts the given kind of lifecycle event or method
+                       if (interceptor != null) {
+                           result.add(interceptor);
+                       }
+                   }
+               }
+           }
         } else if (request.isMatchAll()) {
             // all of a type
             for (Container<?> container : containers) {
@@ -225,9 +242,8 @@ public class World implements Iterable<Container<?>> {
                     result.add(interceptor);
                 }
             }
-        } else {
-            // todo: interceptor bindings
         }
+        // else empty chain
 
         return new InterceptorChain(result);
     }
