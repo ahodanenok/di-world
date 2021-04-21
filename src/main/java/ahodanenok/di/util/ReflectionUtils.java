@@ -9,7 +9,9 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class ReflectionUtils {
+public final class ReflectionUtils {
+
+    private ReflectionUtils() { }
 
     public static final Predicate<Annotation> QUALIFIER_PREDICATE =
             (a) -> a.annotationType().isAnnotationPresent(Qualifier.class) && !(a instanceof Named);
