@@ -9,11 +9,19 @@ import java.lang.reflect.Constructor;
  */
 public interface Augmentation {
 
-    Constructor<?> augmentBeforeInstantiated(Character<?> character, Constructor<?> constructor);
+    default Constructor<?> augmentBeforeInstantiated(Character<?> character, Constructor<?> constructor) {
+        return constructor;
+    }
 
-    Object augmentAfterInstantiated(Character<?> character, Object instance);
+    default Object augmentAfterInstantiated(Character<?> character, Object instance) {
+        return instance;
+    }
 
-    Object augmentAfterInjected(Character<?> character, Object instance);
+    default Object augmentAfterInjected(Character<?> character, Object instance) {
+        return instance;
+    }
 
-    Object augmentAfterConstructed(Character<?> character, Object instance);
+    default Object augmentAfterConstructed(Character<?> character, Object instance) {
+        return instance;
+    }
 }

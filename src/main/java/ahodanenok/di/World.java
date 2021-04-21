@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 // todo: container for user-instantiated objects
 // todo: instantiate eager objects
 // todo: destroying world + @PreDestroy
-// todo: around invoke
 // todo: event handlers
 
 public final class World implements Iterable<Container<?>> {
@@ -31,6 +30,10 @@ public final class World implements Iterable<Container<?>> {
     private final EntranceQueue queue = new EntranceQueue(this::register);
     private final LinkedList<InjectionPoint> injectionPoints = new LinkedList<>();
     private final List<Augmentation> augmentations = new ArrayList<>();
+
+    public World() {
+        this.augmentations.add(new ObjectsAugmentation());
+    }
 
     public EntranceQueue getQueue() {
         return queue;
@@ -249,5 +252,13 @@ public final class World implements Iterable<Container<?>> {
     @Override
     public Iterator<Container<?>> iterator() {
         return Collections.unmodifiableCollection(containers).iterator();
+    }
+
+    private class ObjectsAugmentation implements Augmentation {
+        @Override
+        public Object augmentAfterConstructed(Character<?> character, Object instance) {
+            // todo: proxy for around invoke
+            return instance;
+        }
     }
 }
