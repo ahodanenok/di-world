@@ -17,4 +17,6 @@ public interface World extends Iterable<Container<?>> {
     void installAugmentation(Augmentation augmentation);
 
     void fireEvent(Object event);
+
+    void destroy();
 }

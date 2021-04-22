@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 // todo: container for user-instantiated objects
 // todo: instantiate eager objects
-// todo: destroying world + @PreDestroy
 // todo: logging
 public final class DefaultWorld implements WorldInternals, World {
 
@@ -278,6 +277,20 @@ public final class DefaultWorld implements WorldInternals, World {
         // todo: sort by priority?
         for (EventHandler h : handlers) {
             h.invoke(event);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        // todo: destroy order?
+        for (Container<?> container : containers) {
+            try {
+                container.destroy();
+            } catch (Exception e) {
+                // todo: log error
+                e.printStackTrace();
+                // allow other containers to be destroyed
+            }
         }
     }
 

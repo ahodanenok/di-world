@@ -22,4 +22,8 @@ public interface Container<T> {
      * @throws ahodanenok.di.exception.ObjectRetrievalException
      */
     T getObject();
+
+    default void destroy() {
+        // no-op
+    }
 }

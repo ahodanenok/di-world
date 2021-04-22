@@ -83,13 +83,7 @@ public class DefaultClassContainer<T> implements InjectableContainer<T>, EventHa
             // replaces an interceptor binding of the same type declared
             // at class level or inherited from a superclass
 
-            InterceptorChain aroundConstructChain = world.getInterceptorChain(
-                    InterceptorRequest.of(InterceptorType.AROUND_CONSTRUCT)
-                            .withClasses(character.getInterceptors())
-                            .withBindings(ReflectionUtils.combineAnnotations(
-                                    constructorMetadataReader.readInterceptorBindings(),
-                                    character.getInterceptorBindings()))
-            );
+            InterceptorChain aroundConstructChain = getInterceptorChain(InterceptorType.AROUND_CONSTRUCT, constructor);
             Object instance = augmentation.augmentAfterInstantiated(
                     character, aroundConstructChain.invoke(constructorContext));
 
@@ -97,23 +91,15 @@ public class DefaultClassContainer<T> implements InjectableContainer<T>, EventHa
             instance = augmentation.augmentAfterInjected(character, instance);
 
             InvocationContext postConstructContext;
-            Method interceptorMethod = character.getInterceptorMethod(InterceptorType.POST_CONSTRUCT);
-            if (interceptorMethod != null) {
-                postConstructContext = new MethodInvocationContext(instance, interceptorMethod);
+            Method postConstructMethod = character.getInterceptorMethod(InterceptorType.POST_CONSTRUCT);
+            if (postConstructMethod != null) {
+                postConstructContext = new MethodInvocationContext(instance, postConstructMethod);
             } else {
                 postConstructContext = new ObjectInvocationContext(instance);
             }
 
-            InterceptorChain postConstructChain = world.getInterceptorChain(
-                    InterceptorRequest.of(InterceptorType.POST_CONSTRUCT)
-                            .withClasses(character.getInterceptors())
-                            .withBindings(ReflectionUtils.combineAnnotations(
-                                    interceptorMethod != null
-                                            ? new ExecutableMetadataReader(interceptorMethod).readInterceptorBindings()
-                                            : Collections.emptyList(),
-                                    character.getInterceptorBindings()))
-            );
-
+            InterceptorChain postConstructChain
+                    = getInterceptorChain(InterceptorType.POST_CONSTRUCT, postConstructMethod);
             postConstructChain.invoke(postConstructContext);
 
             // todo: interceptors/augmentation could swap created instance for something else, return Object?
@@ -131,5 +117,40 @@ public class DefaultClassContainer<T> implements InjectableContainer<T>, EventHa
     public List<EventHandler> getEventHandlers() {
         // todo: retrieve event handlers from class
         return Collections.emptyList();
+    }
+
+    @Override
+    public void destroy() {
+        Method preDestroyMethod = character.getInterceptorMethod(InterceptorType.PRE_DESTROY);
+        InterceptorChain preDestroyChain = getInterceptorChain(InterceptorType.PRE_DESTROY, preDestroyMethod);
+        if (!preDestroyChain.getInterceptors().isEmpty()) {
+            InvocationContext preDestroyContext;
+            Method interceptorMethod = character.getInterceptorMethod(InterceptorType.POST_CONSTRUCT);
+            if (interceptorMethod != null) {
+                preDestroyContext = new MethodInvocationContext(getObject(), interceptorMethod);
+            } else {
+                preDestroyContext = new ObjectInvocationContext(getObject());
+            }
+
+            try {
+                preDestroyChain.invoke(preDestroyContext);
+            } catch (Exception e) {
+                // todo: exception+message
+                throw new RuntimeException(e);
+            }
+        }
+
+        scope.destroy();
+    }
+
+    private InterceptorChain getInterceptorChain(InterceptorType type, Executable method) {
+        return world.getInterceptorChain(
+                InterceptorRequest.of(type)
+                        .withClasses(character.getInterceptors())
+                        .withBindings(ReflectionUtils.combineAnnotations(
+                                method != null
+                                        ? new ExecutableMetadataReader(method).readInterceptorBindings()
+                                        : Collections.emptyList(),
+                                character.getInterceptorBindings())));
     }
 }
