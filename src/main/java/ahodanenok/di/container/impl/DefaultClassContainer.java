@@ -3,8 +3,9 @@ package ahodanenok.di.container.impl;
 import ahodanenok.di.*;
 import ahodanenok.di.augment.Augmentation;
 import ahodanenok.di.character.ClassCharacter;
-import ahodanenok.di.container.Container;
+import ahodanenok.di.container.EventHandlerContainer;
 import ahodanenok.di.container.InjectableContainer;
+import ahodanenok.di.event.EventHandler;
 import ahodanenok.di.exception.ObjectRetrievalException;
 import ahodanenok.di.inject.Injector;
 import ahodanenok.di.interceptor.InterceptorChain;
@@ -22,7 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
-public class DefaultClassContainer<T> implements Container<T>, InjectableContainer<T> {
+public class DefaultClassContainer<T> implements InjectableContainer<T>, EventHandlerContainer<T> {
 
     private WorldInternals world;
     private ClassCharacter<T> character;
@@ -124,5 +125,11 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
              throw new ObjectRetrievalException(
                     String.format("Can't get object of type '%s'", objectClass.getName()), e);
         }
+    }
+
+    @Override
+    public List<EventHandler> getEventHandlers() {
+        // todo: retrieve event handlers from class
+        return Collections.emptyList();
     }
 }

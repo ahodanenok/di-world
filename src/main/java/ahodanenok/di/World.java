@@ -15,4 +15,6 @@ public interface World extends Iterable<Container<?>> {
     <T> List<T> findAll(ObjectRequest<T> request);
 
     void installAugmentation(Augmentation augmentation);
+
+    void fireEvent(Object event);
 }

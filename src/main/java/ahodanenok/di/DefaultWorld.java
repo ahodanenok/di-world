@@ -4,8 +4,10 @@ import ahodanenok.di.augment.Augmentation;
 import ahodanenok.di.augment.CompositeAugmentation;
 import ahodanenok.di.character.Character;
 import ahodanenok.di.container.Container;
+import ahodanenok.di.container.EventHandlerContainer;
 import ahodanenok.di.container.InjectableContainer;
 import ahodanenok.di.container.InterceptorContainer;
+import ahodanenok.di.event.EventHandler;
 import ahodanenok.di.exception.DependencyLookupException;
 import ahodanenok.di.inject.InjectionPoint;
 import ahodanenok.di.interceptor.Interceptor;
@@ -22,7 +24,6 @@ import java.util.stream.Collectors;
 // todo: container for user-instantiated objects
 // todo: instantiate eager objects
 // todo: destroying world + @PreDestroy
-// todo: event handlers
 // todo: logging
 public final class DefaultWorld implements WorldInternals, World {
 
@@ -255,6 +256,29 @@ public final class DefaultWorld implements WorldInternals, World {
     @Override
     public Iterator<Container<?>> iterator() {
         return Collections.unmodifiableCollection(containers).iterator();
+    }
+
+    @Override
+    public void fireEvent(Object event) {
+        List<EventHandler> handlers = new ArrayList<>();
+        for (Container<?> container : containers) {
+            if (!(container instanceof EventHandlerContainer<?>)) {
+                continue;
+            }
+
+            EventHandlerContainer<?> ehc = (EventHandlerContainer<?>) container;
+            // todo: retrieve event handlers during registration to avoid iterating over all containers
+            for (EventHandler h : ehc.getEventHandlers()) {
+                if (h.handles(event)) {
+                    handlers.add(h);
+                }
+            }
+        }
+
+        // todo: sort by priority?
+        for (EventHandler h : handlers) {
+            h.invoke(event);
+        }
     }
 
     private class ObjectsAugmentation implements Augmentation {
