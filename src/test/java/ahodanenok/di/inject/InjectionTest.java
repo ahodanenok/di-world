@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.DependencyLookupException;
 import ahodanenok.di.inject.classes.*;
@@ -16,7 +16,7 @@ public class InjectionTest {
     @Test
     @DisplayName("should inject members")
     public void injectMembers() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(FoodContainer.class));
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().add(ClassCharacter.of(Butter.class));
@@ -34,7 +34,7 @@ public class InjectionTest {
     @Test
     @DisplayName("should throw error if no dependencies match")
     public void errorNoDependencies() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
 
         assertThatThrownBy(() -> w.find(ObjectRequest.of(Drinkable.class)))
                 .isExactlyInstanceOf(DependencyLookupException.class)
@@ -44,7 +44,7 @@ public class InjectionTest {
     @Test
     @DisplayName("should throw error if multiple dependencies match")
     public void errorNoQualifier() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Coffee.class));
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().flush();
@@ -57,7 +57,7 @@ public class InjectionTest {
     @Test
     @DisplayName("should inject dependency using single qualifier")
     public void singleQualifier() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Coffee.class));
         w.getQueue().add(ClassCharacter.of(Cup.class));
         w.getQueue().add(ClassCharacter.of(Water.class));
@@ -71,7 +71,7 @@ public class InjectionTest {
     @Test
     @DisplayName("should inject dependency using multiple qualifier")
     public void multipleQualifiers() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Coffee.class));
         w.getQueue().add(ClassCharacter.of(Morning.class));
         w.getQueue().add(ClassCharacter.of(Tea.class));

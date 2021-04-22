@@ -1,7 +1,7 @@
 package ahodanenok.di.container.impl;
 
+import ahodanenok.di.WorldInternals;
 import ahodanenok.di.inject.Injector;
-import ahodanenok.di.World;
 import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.container.InterceptorContainer;
 import ahodanenok.di.exception.ObjectRetrievalException;
@@ -18,11 +18,11 @@ import java.util.List;
 public class DefaultInterceptorContainer<T> implements InterceptorContainer<T> {
 
     // todo: reference to a world is not needed?
-    private final World world;
+    private final WorldInternals world;
     private final InterceptorCharacter<T> character;
     private final Injector injector;
 
-    public DefaultInterceptorContainer(World world, InterceptorCharacter<T> character) {
+    public DefaultInterceptorContainer(WorldInternals world, InterceptorCharacter<T> character) {
         this.world = world;
         this.character = character;
         this.injector = new Injector(world);

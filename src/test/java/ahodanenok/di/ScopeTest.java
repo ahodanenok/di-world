@@ -1,7 +1,5 @@
 package ahodanenok.di;
 
-import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.scope.AlwaysNewScope;
 import ahodanenok.di.scope.SingletonScope;
@@ -15,7 +13,7 @@ public class ScopeTest {
 
     @Test
     public void shouldUseAlwaysNewScopeIfNoneProvided() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().flush();
 
@@ -30,7 +28,7 @@ public class ScopeTest {
 
     @Test
     public void shouldReturnNewInstanceOnEveryRequest() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(A.class).scopedBy(AlwaysNewScope.getInstance()));
         w.getQueue().flush();
 
@@ -45,7 +43,7 @@ public class ScopeTest {
 
     @Test
     public void shouldReturnTheSameInstanceOnEveryRequest() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(A.class).scopedBy(new SingletonScope<>()));
         w.getQueue().flush();
 

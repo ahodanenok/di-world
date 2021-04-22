@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
+import ahodanenok.di.WorldInternals;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 
 public final class Injector {
 
-    private final World world;
+    private final WorldInternals world;
 
-    public Injector(World world) {
+    public Injector(WorldInternals world) {
         this.world = world;
     }
 

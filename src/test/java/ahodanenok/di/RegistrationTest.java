@@ -15,7 +15,7 @@ public class RegistrationTest {
     public void shouldRegisterContainerAfterFlush() {
         ClassCharacter<A> config = ClassCharacter.of(A.class);
 
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         assertThat(w).hasSize(0);
 
         w.getQueue().add(config);
@@ -29,7 +29,7 @@ public class RegistrationTest {
     public void shouldRegisterContainerWithTypeFromConfiguration() {
         ClassCharacter<A> config = ClassCharacter.of(A.class);
 
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(config);
         w.getQueue().flush();
 
@@ -40,7 +40,7 @@ public class RegistrationTest {
     public void shouldRegisterContainerWithNamesFromConfiguration() {
         ClassCharacter<A> config = ClassCharacter.of(A.class).knownAs("a", "b", "a", "c");
 
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(config);
         w.getQueue().flush();
 

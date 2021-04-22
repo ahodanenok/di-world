@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.DependencyLookupException;
@@ -47,7 +47,7 @@ public class InjectionPointTest {
     @Test
     @DisplayName("should inject InjectionPoint into a constructor")
     public void injectInjectionPointIntoConstructor() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Filler.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointConstructorHolder.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointConstructor.class));
@@ -90,7 +90,7 @@ public class InjectionPointTest {
     @Test
     @DisplayName("should inject InjectionPoint into a method")
     public void injectInjectionPointIntoMethod() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Filler.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointMethod.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointMethodHolder.class));
@@ -126,7 +126,7 @@ public class InjectionPointTest {
     @Test
     @DisplayName("should inject InjectionPoint into a method")
     public void injectInjectionPointIntoField() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(InjectionPointField.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointFieldHolder.class));
         w.getQueue().add(ClassCharacter.of(Filler.class));
@@ -159,7 +159,7 @@ public class InjectionPointTest {
     @Test
     @DisplayName("should throw error when retrieving InjectionPoint from provider")
     public void injectInjectionPointProvider() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(InjectionPointProvider.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointProviderHolder.class));
         w.getQueue().flush();
@@ -193,7 +193,7 @@ public class InjectionPointTest {
     @Test
     @DisplayName("should inject optional with InjectionPoint")
     public void injectInjectionPointOptional() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(InjectionPointOptional.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointOptionalHolder.class));
         w.getQueue().flush();
@@ -228,7 +228,7 @@ public class InjectionPointTest {
     @Test
     @DisplayName("should inject collection with a single item of InjectionPoint")
     public void injectInjectionPointCollection() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(InjectionPointCollectionHolder.class));
         w.getQueue().add(ClassCharacter.of(InjectionPointCollection.class));
         w.getQueue().flush();

@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.inject.classes.*;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,7 @@ public class OptionalTest {
     @Test
     @DisplayName("should inject not empty optional")
     public void injectNotEmptyOptional() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(OptionalCup.class));
         w.getQueue().flush();
@@ -45,7 +45,7 @@ public class OptionalTest {
     @Test
     @DisplayName("should inject empty optional")
     public void injectEmptyProvider() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Cheese.class));
         w.getQueue().add(ClassCharacter.of(OptionalCup.class));
         w.getQueue().flush();
@@ -70,7 +70,7 @@ public class OptionalTest {
     @Test
     @DisplayName("should inject not empty optional with provider")
     public void injectOptionalNotEmptyProvider() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Butter.class));
         w.getQueue().add(ClassCharacter.of(OptionalProviderCup.class));
@@ -85,7 +85,7 @@ public class OptionalTest {
     @Test
     @DisplayName("should inject not empty optional with empty provider")
     public void injectOptionalEmptyProvider() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Cheese.class));
         w.getQueue().add(ClassCharacter.of(OptionalProviderCup.class));
         w.getQueue().flush();
@@ -111,7 +111,7 @@ public class OptionalTest {
     @Test
     @DisplayName("should inject optional with provider with not empty collection")
     public void injectOptionalProviderNotEmptyCollection() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Coffee.class));
         w.getQueue().add(ClassCharacter.of(OptionalProviderCollectionCup.class));
@@ -128,7 +128,7 @@ public class OptionalTest {
     @Test
     @DisplayName("should inject optional with provider with empty collection")
     public void injectOptionalProviderEmptyCollection() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().add(ClassCharacter.of(OptionalProviderCollectionCup.class));
         w.getQueue().flush();

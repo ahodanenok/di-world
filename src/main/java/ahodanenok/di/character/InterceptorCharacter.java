@@ -1,6 +1,6 @@
 package ahodanenok.di.character;
 
-import ahodanenok.di.World;
+import ahodanenok.di.WorldInternals;
 import ahodanenok.di.character.common.InjectableConstructor;
 import ahodanenok.di.character.common.InterceptorMethods;
 import ahodanenok.di.container.impl.DefaultInterceptorContainer;
@@ -101,7 +101,7 @@ public class InterceptorCharacter<T> implements Character<T> {
     }
 
     @Override
-    public InterceptorContainer<T> build(World world) {
+    public InterceptorContainer<T> build(WorldInternals world) {
         // todo: make implementation selection customizable?
         return new DefaultInterceptorContainer<>(world, this);
     }

@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.CharacterMetadataException;
 import ahodanenok.di.inject.classes.*;
@@ -15,7 +15,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should instantiate class using public no-arg constructor")
     public void instantiate() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
 
@@ -25,7 +25,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should instantiate class using public multiple args constructor without @Inject annotation")
     public void injectWithoutInject() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Sandwich.class));
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().add(ClassCharacter.of(Butter.class));
@@ -40,7 +40,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should throw error if there is no @Inject constructor and class doesn't have a single public constructor")
     public void instantiateNoConstructor() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Cheese.class));
         w.getQueue().flush();
 
@@ -52,7 +52,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should instantiate class using public constructor with @Inject annotation")
     public void injectPublicConstructor() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Breakfast.class));
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
@@ -65,7 +65,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should instantiate class using protected constructor with @Inject annotation")
     public void injectProtectedConstructor() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().add(ClassCharacter.of(Lunch.class));
         w.getQueue().flush();
@@ -78,7 +78,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should instantiate class using package-private constructor with @Inject annotation")
     public void injectPackagePrivateConstructor() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Dinner.class));
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
@@ -91,7 +91,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should instantiate class using private constructor with @Inject annotation")
     public void injectPrivateConstructor() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Supper.class));
         w.getQueue().add(ClassCharacter.of(Bread.class));
         w.getQueue().flush();
@@ -104,7 +104,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should throw error if class is an interface")
     public void instantiateInterface() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         assertThatThrownBy(() -> w.getQueue().add(ClassCharacter.of(Drinkable.class)))
                 .isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessage("Class 'ahodanenok.di.inject.classes.Drinkable' is not instantiatable");
@@ -113,7 +113,7 @@ public class ConstructorTest {
     @Test
     @DisplayName("should throw error if class is an abstract class")
     public void abstractClass() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         assertThatThrownBy(() -> w.getQueue().add(ClassCharacter.of(Drink.class)))
                 .isExactlyInstanceOf(CharacterMetadataException.class)
                 .hasMessage("Class 'ahodanenok.di.inject.classes.Drink' is not instantiatable");

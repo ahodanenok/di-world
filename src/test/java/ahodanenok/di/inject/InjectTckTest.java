@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -27,7 +27,7 @@ public class InjectTckTest {
             return new TestSuite();
         }
 
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Convertible.class));
         w.getQueue().add(ClassCharacter.of(DriversSeat.class)
                 .qualifiedAs(Collections.singletonList(InjectTckTest.class.getAnnotation(Drivers.class))));

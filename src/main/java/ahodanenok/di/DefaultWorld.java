@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 // todo: destroying world + @PreDestroy
 // todo: event handlers
 // todo: logging
-public final class World implements Iterable<Container<?>> {
+public final class DefaultWorld implements WorldInternals, WorldTmp {
 
     private final List<Container<?>> containers = new ArrayList<>();
     private final EntranceQueue queue = new EntranceQueue(this::register);
     private final LinkedList<InjectionPoint> injectionPoints = new LinkedList<>();
     private final List<Augmentation> augmentations = new ArrayList<>();
 
-    public World() {
+    public DefaultWorld() {
         this.augmentations.add(new ObjectsAugmentation());
     }
 
@@ -48,6 +48,7 @@ public final class World implements Iterable<Container<?>> {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked") // object matched by request will be of type T or its subtype
     public <T> T find(ObjectRequest<T> request) {
         if (request.getType() == InjectionPoint.class) {
@@ -113,6 +114,7 @@ public final class World implements Iterable<Container<?>> {
                 containers.stream().map(c -> c.getObjectClass().getName()).collect(Collectors.toList())));
     }
 
+    @Override
     @SuppressWarnings("unchecked") // all objects matched by request will be of type T or its subtype
     public <T> List<T> findAll(ObjectRequest<T> request) {
         if (request.getType() == InjectionPoint.class) {
@@ -237,6 +239,7 @@ public final class World implements Iterable<Container<?>> {
         return new InterceptorChain(result);
     }
 
+    @Override
     public void installAugmentation(Augmentation augmentation) {
         if (augmentation == null) {
             throw new IllegalArgumentException("Augmentation is null");

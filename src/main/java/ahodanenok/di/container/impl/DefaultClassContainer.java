@@ -24,7 +24,7 @@ import java.util.*;
 
 public class DefaultClassContainer<T> implements Container<T>, InjectableContainer<T> {
 
-    private World world;
+    private WorldInternals world;
     private ClassCharacter<T> character;
     private Injector injector;
 
@@ -32,7 +32,7 @@ public class DefaultClassContainer<T> implements Container<T>, InjectableContain
     private Set<String> names;
     private Scope<T> scope;
 
-    public DefaultClassContainer(World world, ClassCharacter<T> character) {
+    public DefaultClassContainer(WorldInternals world, ClassCharacter<T> character) {
         this.world = world;
         this.character = character;
         this.injector = new Injector(world);

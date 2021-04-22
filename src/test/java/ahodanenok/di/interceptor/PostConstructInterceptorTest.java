@@ -1,7 +1,7 @@
 package ahodanenok.di.interceptor;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.interceptor.context.MethodInvocationContext;
@@ -73,7 +73,7 @@ public class PostConstructInterceptorTest {
 
     @Test
     public void shouldInvokePostConstructInterceptorChain() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.POST_CONSTRUCT,
@@ -92,7 +92,7 @@ public class PostConstructInterceptorTest {
 
     @Test
     public void shouldRegisterSameMultipleInterceptors() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.POST_CONSTRUCT,
@@ -119,7 +119,7 @@ public class PostConstructInterceptorTest {
 
     @Test
     public void shouldInvokeInterceptor() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.POST_CONSTRUCT,
@@ -134,7 +134,7 @@ public class PostConstructInterceptorTest {
 
     @Test
     public void shouldInvokeInterceptorWithoutMethodInClass() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.POST_CONSTRUCT,
@@ -149,7 +149,7 @@ public class PostConstructInterceptorTest {
 
     @Test
     public void shouldInvokeDeclaredInterceptorsInOrder() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.POST_CONSTRUCT,

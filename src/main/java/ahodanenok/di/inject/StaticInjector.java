@@ -1,6 +1,6 @@
 package ahodanenok.di.inject;
 
-import ahodanenok.di.World;
+import ahodanenok.di.WorldInternals;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.metadata.ExecutableMetadataReader;
 import ahodanenok.di.metadata.FieldMetadataReader;
@@ -16,7 +16,7 @@ public class StaticInjector {
     private final Injector injector;
     private final Set<Class<?>> classes;
 
-    public StaticInjector(World world) {
+    public StaticInjector(WorldInternals world) {
         this.injector = new Injector(world);
         this.classes = new HashSet<>();
     }

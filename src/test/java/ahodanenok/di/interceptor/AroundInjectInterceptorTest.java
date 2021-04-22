@@ -1,8 +1,8 @@
 package ahodanenok.di.interceptor;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.inject.AroundInject;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.character.InterceptorCharacter;
 import org.junit.jupiter.api.DisplayName;
@@ -78,7 +78,7 @@ public class AroundInjectInterceptorTest {
     @Test
     @DisplayName("should call AroundInject interceptors")
     public void interceptors() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(A.class));
         w.getQueue().add(ClassCharacter.of(B.class));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class));

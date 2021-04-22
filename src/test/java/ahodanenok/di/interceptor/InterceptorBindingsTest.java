@@ -1,7 +1,7 @@
 package ahodanenok.di.interceptor;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
@@ -118,7 +118,7 @@ public class InterceptorBindingsTest {
     @DisplayName("should return interceptor chain with interceptor with single binding")
     @Binding_1
     public void shouldGetInterceptorChainSingleBinding() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class));
         w.getQueue().flush();
@@ -141,7 +141,7 @@ public class InterceptorBindingsTest {
     @Binding_1
     @Binding_2
     public void shouldGetInterceptorChainMultipleBindings() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class));
         w.getQueue().flush();
@@ -166,7 +166,7 @@ public class InterceptorBindingsTest {
     @DisplayName("should call interceptors bound by bindings")
     @Binding_1
     public void shouldInterceptByBindings() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_2.class));
         w.getQueue().add(InterceptorCharacter.of(Interceptor_3.class));

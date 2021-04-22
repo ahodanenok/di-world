@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.exception.DependencyInjectionException;
 import ahodanenok.di.exception.ObjectRetrievalException;
@@ -35,7 +35,7 @@ public class CollectionTest {
     @Test
     @DisplayName("should throw error on injecting collection of providers")
     public void injectCollection() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().add(ClassCharacter.of(CollectionCup.class));
@@ -62,7 +62,7 @@ public class CollectionTest {
     @Test
     @DisplayName("should throw error on injecting collection of providers")
     public void injectCollectionProviders() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().add(ClassCharacter.of(CollectionProviderCup.class));
@@ -90,7 +90,7 @@ public class CollectionTest {
     @Test
     @DisplayName("should throw error on injecting collection of optionals")
     public void injectCollectionOptionals() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().add(ClassCharacter.of(CollectionOptionalCup.class));

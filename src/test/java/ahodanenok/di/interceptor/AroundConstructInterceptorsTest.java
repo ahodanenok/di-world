@@ -1,7 +1,7 @@
 package ahodanenok.di.interceptor;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.character.InterceptorCharacter;
 import ahodanenok.di.interceptor.context.ObjectInvocationContext;
@@ -64,7 +64,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldRegisterInterceptor() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -83,7 +83,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldRegisterSameMultipleInterceptors() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -110,7 +110,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldRegisterMultipleInterceptors() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -133,7 +133,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldInvokeInterceptor() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -148,7 +148,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldInvokeOnlyDeclaredInterceptor() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -167,7 +167,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldNotInvokeInterceptorIfNotDefined() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -186,7 +186,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldInvokeDeclaredInterceptorsInOrder() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,
@@ -206,7 +206,7 @@ public class AroundConstructInterceptorsTest {
 
     @Test
     public void shouldChangeConstructorParameterInInterceptor() throws Exception {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(InterceptorCharacter.of(Interceptor_1.class)
                 .intercepts(
                         InterceptorType.AROUND_CONSTRUCT,

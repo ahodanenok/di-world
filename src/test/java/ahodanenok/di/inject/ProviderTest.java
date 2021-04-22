@@ -1,7 +1,7 @@
 package ahodanenok.di.inject;
 
+import ahodanenok.di.DefaultWorld;
 import ahodanenok.di.ObjectRequest;
-import ahodanenok.di.World;
 import ahodanenok.di.character.ClassCharacter;
 import ahodanenok.di.inject.classes.*;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +32,7 @@ public class ProviderTest {
     @Test
     @DisplayName("should inject provider")
     public void injectProvider() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Cheese.class));
         w.getQueue().add(ClassCharacter.of(ProviderCup.class));
@@ -58,7 +58,7 @@ public class ProviderTest {
     @Test
     @DisplayName("should inject provider in provider in provider")
     public void injectProviderProviderProvider() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Butter.class));
         w.getQueue().add(ClassCharacter.of(ProviderProviderProviderCup.class));
@@ -84,7 +84,7 @@ public class ProviderTest {
     @Test
     @DisplayName("should inject provider with collection of all matched objects")
     public void providerCollection() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(Water.class));
         w.getQueue().add(ClassCharacter.of(Tea.class));
         w.getQueue().add(ClassCharacter.of(Bread.class));
@@ -114,7 +114,7 @@ public class ProviderTest {
     @Test
     @DisplayName("should inject provider with optional dependency")
     public void providerOptional() {
-        World w = new World();
+        DefaultWorld w = new DefaultWorld();
         w.getQueue().add(ClassCharacter.of(ProviderOptionalCup.class));
         w.getQueue().flush();
 
