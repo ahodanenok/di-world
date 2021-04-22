@@ -5,7 +5,7 @@ import ahodanenok.di.inject.InjectionPoint;
 import ahodanenok.di.interceptor.InterceptorChain;
 import ahodanenok.di.interceptor.InterceptorRequest;
 
-public interface WorldInternals extends WorldTmp {
+public interface WorldInternals extends World {
 
     void pushInjectionPoint(InjectionPoint injectionPoint);
 

@@ -6,7 +6,7 @@ import ahodanenok.di.queue.EntranceQueue;
 
 import java.util.List;
 
-public interface WorldTmp extends Iterable<Container<?>> {
+public interface World extends Iterable<Container<?>> {
 
     EntranceQueue getQueue();
 

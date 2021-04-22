@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 // todo: destroying world + @PreDestroy
 // todo: event handlers
 // todo: logging
-public final class DefaultWorld implements WorldInternals, WorldTmp {
+public final class DefaultWorld implements WorldInternals, World {
 
     private final List<Container<?>> containers = new ArrayList<>();
     private final EntranceQueue queue = new EntranceQueue(this::register);
